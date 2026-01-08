@@ -1,0 +1,262 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
+                <div>
+                    <h1
+                        class="text-4xl font-extrabold text-white flex items-center gap-4 tracking-tight drop-shadow-md">
+                        <i class="bi bi-people text-indigo-400"></i>
+                        User Directory
+                    </h1>
+                    <p class="mt-2 text-indigo-100 font-medium">Provision and manage organizational accounts and access
+                        levels.</p>
+                </div>
+                <button onclick="openModal()"
+                    class="inline-flex items-center gap-3 py-4 px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg shadow-indigo-600/30">
+                    <i class="bi bi-plus-circle text-xl"></i>
+                    Create New User
+                </button>
+            </div>
+
+            <!-- Alerts -->
+            <% if (typeof success !=='undefined' && success) { %>
+                <div
+                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                    <div class="flex items-center gap-3">
+                        <i class="bi bi-check-circle-fill text-emerald-500 text-xl"></i>
+                        <p class="font-bold">
+                            <%= success %>
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-400">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <% } %>
+
+                    <% if (typeof error !=='undefined' && error) { %>
+                        <div
+                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                            <div class="flex items-center gap-3">
+                                <i class="bi bi-exclamation-triangle-fill text-red-500 text-xl"></i>
+                                <p class="font-bold">
+                                    <%= error %>
+                                </p>
+                            </div>
+                            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <% } %>
+
+                            <!-- Users Table Card -->
+                            <div
+                                class="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-indigo-600 text-white">
+                                                <th class="px-8 py-5 text-sm font-bold uppercase tracking-wider">User
+                                                    Profile</th>
+                                                <th class="px-6 py-5 text-sm font-bold uppercase tracking-wider">
+                                                    Organizational Info</th>
+                                                <th
+                                                    class="px-6 py-5 text-sm font-bold uppercase tracking-wider text-center">
+                                                    Security Status</th>
+                                                <th class="px-6 py-5 text-sm font-bold uppercase tracking-wider">Join
+                                                    Date</th>
+                                                <th
+                                                    class="px-8 py-5 text-sm font-bold uppercase tracking-wider text-right">
+                                                    Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100">
+                                            <% users.forEach(function(u) { %>
+                                                <tr class="hover:bg-gray-50/50 transition-colors group">
+                                                    <td class="px-8 py-6">
+                                                        <div class="flex items-center gap-4">
+                                                            <div
+                                                                class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-xl">
+                                                                <%= u.fullName.charAt(0) %>
+                                                            </div>
+                                                            <div>
+                                                                <div
+                                                                    class="text-lg font-bold text-gray-900 leading-tight">
+                                                                    <%= u.fullName %>
+                                                                </div>
+                                                                <div class="text-sm font-medium text-gray-400">
+                                                                    <%= u.email %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-6">
+                                                        <div class="space-y-1">
+                                                            <div
+                                                                class="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-black uppercase tracking-widest rounded-lg">
+                                                                <%= u.role.replace('_', ' ' ) %>
+                                                            </div>
+                                                            <div
+                                                                class="text-sm font-bold text-gray-500 flex items-center gap-2">
+                                                                <i class="bi bi-geo-alt text-indigo-400"></i>
+                                                                <%= u.region %>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-6 text-center">
+                                                        <% if (u.activeStatus) { %>
+                                                            <span
+                                                                class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-black uppercase tracking-widest rounded-full">
+                                                                <span
+                                                                    class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                                Active
+                                                            </span>
+                                                            <% } else { %>
+                                                                <span
+                                                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-red-100 text-red-700 text-xs font-black uppercase tracking-widest rounded-full">
+                                                                    <span
+                                                                        class="w-2 h-2 rounded-full bg-red-500"></span>
+                                                                    Inactive
+                                                                </span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td class="px-6 py-6 font-bold text-gray-400 tabular-nums">
+                                                        <%= new Date(u.createdAt).toLocaleDateString('en-IN', {
+                                                            day: '2-digit' , month: 'short' , year: 'numeric' }) %>
+                                                    </td>
+                                                    <td class="px-8 py-6 text-right">
+                                                        <button onclick="toggleStatus('<%= u._id %>')"
+                                                            class="p-3 rounded-2xl <%= u.activeStatus ? 'text-red-500 hover:bg-red-50' : 'text-emerald-500 hover:bg-emerald-50' %> transition-all border border-transparent hover:border-current transform active:scale-90">
+                                                            <i
+                                                                class="bi <%= u.activeStatus ? 'bi-person-x-fill text-2xl' : 'bi-person-check-fill text-2xl' %>"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+        </div>
+
+        <!-- Custom Tailwind Modal -->
+        <div id="createUserModal" class="fixed inset-0 z-[2000] hidden items-center justify-center p-4">
+            <div onclick="closeModal()" class="absolute inset-0 bg-gray-900/80 backdrop-blur-md"></div>
+            <div
+                class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300">
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6 flex items-center justify-between">
+                    <h2 class="text-2xl font-black text-white flex items-center gap-3 tracking-tight">
+                        <i class="bi bi-person-plus text-3xl"></i>
+                        Register New User
+                    </h2>
+                    <button onclick="closeModal()" class="text-white/80 hover:text-white transition-colors">
+                        <i class="bi bi-x-lg text-2xl"></i>
+                    </button>
+                </div>
+
+                <form action="/sysadmin/users/create" method="POST" class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Full
+                                Identity Name</label>
+                            <input type="text" name="fullName" required
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-500 transition-all outline-none font-bold text-gray-900"
+                                placeholder="Johnathan Doe">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Operational
+                                Region</label>
+                            <input type="text" name="region" required
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-500 transition-all outline-none font-bold text-gray-900"
+                                placeholder="North India">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Contact
+                                Frequency</label>
+                            <input type="text" name="contactNo" required
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-500 transition-all outline-none font-bold text-gray-900"
+                                placeholder="+91 9876543210">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Enterprise
+                                Email</label>
+                            <input type="email" name="email" required
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-500 transition-all outline-none font-bold text-gray-900"
+                                placeholder="j.doe@company.com">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Access Key
+                                (Password)</label>
+                            <input type="password" name="password" minlength="6" required
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-500 transition-all outline-none font-bold text-gray-900"
+                                placeholder="••••••••">
+                        </div>
+                        <div class="space-y-2">
+                            <label
+                                class="block text-xs font-black text-gray-500 uppercase tracking-widest">Organizational
+                                Role</label>
+                            <select name="role" required
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-indigo-500 transition-all outline-none font-bold text-gray-900 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25em] bg-[right_1rem_center] bg-no-repeat">
+                                <option value="">Choose Privilege Level</option>
+                                <option value="sysadmin">System Admin (Full Access)</option>
+                                <option value="sales_head">Sales Head (Audit Access)</option>
+                                <option value="owner">Owner (Report Access)</option>
+                                <option value="salesperson">Salesperson (Order Access)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-4 border-t border-gray-100 pt-8">
+                        <button type="button" onclick="closeModal()"
+                            class="px-8 py-4 text-gray-500 font-bold hover:text-gray-900 transition-colors">Cancel</button>
+                        <button type="submit"
+                            class="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/20 transition-all transform active:scale-95 leading-none">
+                            Confirm & Provision User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    function openModal() {
+                        const modal = document.getElementById('createUserModal');
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                        document.body.style.overflow = 'hidden';
+                    }
+
+                    function closeModal() {
+                        const modal = document.getElementById('createUserModal');
+                        modal.classList.remove('flex');
+                        modal.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    }
+
+                    function toggleStatus(userId) {
+                        if (!confirm('Are you sure you want to toggle this user\'s status?')) return;
+
+                        fetch(`/sysadmin/users/${userId}/toggle-status`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Failed to toggle status');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred');
+                            });
+                    }
+                </script>

@@ -1,0 +1,101 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="mb-12">
+                <h1 class="text-4xl font-extrabold text-white flex items-center gap-4 tracking-tight drop-shadow-md">
+                    <i class="bi bi-shield-check text-indigo-400"></i>
+                    System Administrator Dashboard
+                </h1>
+                <p class="mt-3 text-lg text-indigo-100 font-medium">Manage users, products, and system settings across
+                    the organization.</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div
+                    class="bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-xl transition-all hover:shadow-indigo-500/20 hover:-translate-y-1 group">
+                    <div class="flex flex-col items-center">
+                        <div class="p-4 bg-indigo-50 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-people-fill text-5xl text-indigo-600"></i>
+                        </div>
+                        <h3 class="text-4xl font-black text-gray-900 mb-1 tracking-tight">
+                            <%= stats.totalUsers %>
+                        </h3>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Total Users</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-xl transition-all hover:shadow-emerald-500/20 hover:-translate-y-1 group border-b-4 border-emerald-500">
+                    <div class="flex flex-col items-center">
+                        <div class="p-4 bg-emerald-50 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-person-check-fill text-5xl text-emerald-600"></i>
+                        </div>
+                        <h3 class="text-4xl font-black text-gray-900 mb-1 tracking-tight">
+                            <%= stats.activeUsers %>
+                        </h3>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Active Users</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-xl transition-all hover:shadow-purple-500/20 hover:-translate-y-1 group">
+                    <div class="flex flex-col items-center">
+                        <div class="p-4 bg-purple-50 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="bi bi-box-seam-fill text-5xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-4xl font-black text-gray-900 mb-1 tracking-tight">
+                            <%= stats.totalProducts %>
+                        </h3>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Total Products</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white/95 rounded-3xl overflow-hidden shadow-xl border border-white/20">
+                    <div
+                        class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white px-8 py-5 flex items-center justify-between">
+                        <h2 class="text-xl font-bold flex items-center gap-3">
+                            <i class="bi bi-person-plus text-2xl"></i>
+                            User Management
+                        </h2>
+                        <i class="bi bi-gear-fill opacity-20 text-3xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <p class="text-gray-600 font-medium mb-8 leading-relaxed">System-wide user control. Provision
+                            accounts, assign organizational roles, and monitor authentication status.</p>
+                        <a href="/sysadmin/users"
+                            class="inline-flex items-center gap-3 py-4 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg hover:shadow-indigo-600/30">
+                            <i class="bi bi-arrow-right-circle text-lg"></i>
+                            Manage User Directory
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white/95 rounded-3xl overflow-hidden shadow-xl border border-white/20">
+                    <div
+                        class="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-8 py-5 flex items-center justify-between">
+                        <h2 class="text-xl font-bold flex items-center gap-3">
+                            <i class="bi bi-box-seam text-2xl"></i>
+                            Product Management
+                        </h2>
+                        <i class="bi bi-database-fill-gear opacity-20 text-3xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <p class="text-gray-600 font-medium mb-8 leading-relaxed">Catalog administration. Define product
+                            characteristics, update packaging specs, and manage the official sales inventory.</p>
+                        <a href="/sysadmin/products"
+                            class="inline-flex items-center gap-3 py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg hover:shadow-purple-600/30">
+                            <i class="bi bi-arrow-right-circle text-lg"></i>
+                            Manage Product Catalog
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>

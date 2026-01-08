@@ -1,0 +1,85 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="mb-12">
+                <h1 class="text-4xl font-extrabold text-white flex items-center gap-4 tracking-tight drop-shadow-md">
+                    <i class="bi bi-graph-up-arrow text-indigo-400"></i>
+                    Business Analytics
+                </h1>
+                <p class="mt-2 text-indigo-100 font-medium tracking-wide">Real-time insights and growth metrics across
+                    all sales channels.</p>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Total Orders Chart -->
+                <div
+                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                            <i class="bi bi-pie-chart-fill text-indigo-500"></i>
+                            Order Distribution
+                        </h3>
+                    </div>
+                    <div class="p-8">
+                        <div class="relative h-80">
+                            <canvas id="totalOrdersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Sales Chart -->
+                <div
+                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                            <i class="bi bi-bar-chart-fill text-purple-500"></i>
+                            Revenue Volume
+                        </h3>
+                    </div>
+                    <div class="p-8">
+                        <div class="relative h-80">
+                            <canvas id="totalSalesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salesperson Sales Chart -->
+                <div
+                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                            <i class="bi bi-people-fill text-emerald-500"></i>
+                            Personnel Performance
+                        </h3>
+                    </div>
+                    <div class="p-8">
+                        <div class="relative h-80">
+                            <canvas id="salespersonSalesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date-wise Trends Chart -->
+                <div
+                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                            <i class="bi bi-activity text-red-500"></i>
+                            Temporal Trends
+                        </h3>
+                    </div>
+                    <div class="p-8">
+                        <div class="relative h-80">
+                            <canvas id="dateWiseSalesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script src="/js/charts.js"></script>
