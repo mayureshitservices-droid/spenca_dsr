@@ -3,9 +3,15 @@ const Order = require('../models/Order');
 // GET /owner/dashboard
 const getDashboard = async (req, res) => {
     try {
+        const recentOrders = await Order.find({ approvalStatus: 'approved' })
+            .populate('salespersonId', 'fullName')
+            .sort({ createdAt: -1 })
+            .limit(5);
+
         res.render('owner/dashboard', {
             user: { name: req.session.userName },
-            userRole: req.session.userRole
+            userRole: req.session.userRole,
+            orders: recentOrders
         });
     } catch (error) {
         console.error('Dashboard error:', error);

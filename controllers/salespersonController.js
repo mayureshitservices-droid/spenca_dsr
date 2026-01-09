@@ -10,20 +10,10 @@ const getDashboard = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(10);
 
-        const totalOrders = await Order.countDocuments({ salespersonId: req.session.userId });
-        const pendingOrders = await Order.countDocuments({
-            salespersonId: req.session.userId,
-            approvalStatus: 'pending'
-        });
-
         res.render('salesperson/dashboard', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            orders: myOrders,
-            stats: {
-                totalOrders,
-                pendingOrders
-            }
+            orders: myOrders
         });
     } catch (error) {
         console.error('Dashboard error:', error);
@@ -32,13 +22,34 @@ const getDashboard = async (req, res) => {
 };
 
 // GET /salesperson/create-order
-const getCreateOrder = (req, res) => {
-    res.render('salesperson/create-order', {
-        user: { name: req.session.userName },
-        userRole: req.session.userRole,
-        success: req.query.success,
-        error: req.query.error
-    });
+const getCreateOrder = async (req, res) => {
+    try {
+        let prefillData = null;
+        if (req.query.prefillId) {
+            const order = await Order.findById(req.query.prefillId);
+            if (order && order.salespersonId.toString() === req.session.userId.toString()) {
+                prefillData = {
+                    customerId: order.customerId,
+                    customerName: order.customerName,
+                    address: order.address,
+                    mobileNo: order.mobileNo,
+                    gstNo: order.gstNo,
+                    category: order.category
+                };
+            }
+        }
+
+        res.render('salesperson/create-order', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            success: req.query.success,
+            error: req.query.error,
+            prefill: prefillData
+        });
+    } catch (error) {
+        console.error('Create order view error:', error);
+        res.status(500).send('Server error');
+    }
 };
 
 // GET /api/customers/search
@@ -106,6 +117,7 @@ const createOrder = async (req, res) => {
             orderStatus,
             products,
             remark,
+            tentativeRepeatDate,
             latitude,
             longitude,
             accuracy
@@ -158,6 +170,7 @@ const createOrder = async (req, res) => {
             orderStatus,
             products: productList,
             remark,
+            tentativeRepeatDate,
             salespersonId: req.session.userId,
             gpsLocation: {
                 latitude: parseFloat(latitude),
@@ -194,6 +207,48 @@ const getOrders = async (req, res) => {
     }
 };
 
+// GET /salesperson/reminders
+const getReminders = async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const reminders = await Order.find({
+            salespersonId: req.session.userId,
+            tentativeRepeatDate: {
+                $gte: today,
+                $lt: tomorrow
+            }
+        }).sort({ createdAt: -1 });
+
+        res.render('salesperson/reminders', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            reminders
+        });
+    } catch (error) {
+        console.error('Get reminders error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+// POST /salesperson/reminders/reschedule
+const rescheduleReminder = async (req, res) => {
+    try {
+        const { orderId, newDate } = req.body;
+        await Order.findOneAndUpdate(
+            { _id: orderId, salespersonId: req.session.userId },
+            { tentativeRepeatDate: new Date(newDate) }
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Reschedule reminder error:', error);
+        res.status(500).json({ success: false, error: 'Failed to reschedule' });
+    }
+};
+
 module.exports = {
     getDashboard,
     getCreateOrder,
@@ -201,5 +256,7 @@ module.exports = {
     getCustomer,
     searchProducts,
     createOrder,
-    getOrders
+    getOrders,
+    getReminders,
+    rescheduleReminder
 };

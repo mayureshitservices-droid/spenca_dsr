@@ -1,0 +1,143 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="mb-12">
+                <h1 class="text-4xl font-extrabold text-black flex items-center gap-4 tracking-tight drop-shadow-md">
+                    <i data-lucide="bell" class="w-8 h-8 text-amber-400"></i>
+                    Today's Reminders
+                </h1>
+                <p class="mt-2 text-indigo-100 font-medium">Follow up with customers scheduled for a repeat order today.
+                </p>
+            </div>
+
+            <% if (reminders.length===0) { %>
+                <div
+                    class="bg-white/10 backdrop-blur-sm rounded-3xl p-20 text-center border-2 border-dashed border-white/20">
+                    <i data-lucide="calendar-check" class="w-12 h-12 text-white/30 mb-4 block mx-auto"></i>
+                    <p class="text-indigo-100 text-xl font-bold">No reminders for today. Great job staying ahead!</p>
+                </div>
+                <% } else { %>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <% reminders.forEach(function(reminder) { %>
+                            <div
+                                class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 flex flex-col h-full group transition-all hover:shadow-2xl">
+                                <div class="p-8 flex flex-col h-full">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div
+                                            class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 font-black text-xl">
+                                            <%= reminder.customerName.charAt(0) %>
+                                        </div>
+                                        <span
+                                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">
+                                            Today
+                                        </span>
+                                    </div>
+
+                                    <h3
+                                        class="text-xl font-black text-gray-900 leading-tight mb-2 uppercase tracking-tight">
+                                        <%= reminder.customerName %>
+                                    </h3>
+
+                                    <% if (reminder.mobileNo) { %>
+                                        <p class="text-sm font-bold text-gray-500 flex items-center gap-2 mb-4">
+                                            <i data-lucide="phone" class="w-4 h-4 text-indigo-500"></i>
+                                            <%= reminder.mobileNo %>
+                                        </p>
+                                        <% } %>
+
+                                            <div
+                                                class="mb-6 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                                                <span
+                                                    class="block text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-1">Last
+                                                    Remark</span>
+                                                <p class="text-xs font-medium text-gray-600 italic">"<%= reminder.remark
+                                                        || 'No previous remarks' %>"</p>
+                                            </div>
+
+                                            <div
+                                                class="mt-auto flex flex-col sm:flex-row gap-4 relative z-[100] pointer-events-auto">
+                                                <button onclick="openRescheduleModal('<%= reminder._id %>')"
+                                                    class="flex-1 flex items-center justify-center gap-2 py-4 bg-gray-50 hover:bg-amber-50 text-amber-600 rounded-2xl transition-all border border-transparent hover:border-amber-100 font-black text-[10px] uppercase tracking-widest cursor-pointer">
+                                                    <i data-lucide="calendar-plus" class="w-4 h-4 text-amber-600"></i>
+                                                    Reschedule
+                                                </button>
+                                                <a href="/salesperson/create-order?prefillId=<%= reminder._id %>"
+                                                    class="flex-1 flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl transition-all shadow-lg shadow-indigo-500/20 font-black text-[10px] uppercase tracking-widest cursor-pointer no-underline block pointer-events-auto">
+                                                    <i data-lucide="shopping-cart" class="w-4 h-4 text-white"></i> New
+                                                    Order
+                                                </a>
+                                            </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } %>
+        </div>
+
+        <!-- Reschedule Modal -->
+        <div id="rescheduleModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center px-4">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeRescheduleModal()"></div>
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-[2001] overflow-hidden">
+                <div class="bg-amber-500 px-8 py-5 text-white">
+                    <h3 class="text-lg font-black uppercase tracking-widest">Reschedule Follow-up</h3>
+                </div>
+                <div class="p-8">
+                    <input type="hidden" id="rescheduleOrderId">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">New
+                                Tentative Date</label>
+                            <input type="date" id="newReminderDate"
+                                class="w-full px-5 py-3.5 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-amber-500 transition-all outline-none font-bold text-gray-900 outline-none appearance-none">
+                        </div>
+                        <button onclick="submitReschedule()"
+                            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95">
+                            Update Reminder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    function openRescheduleModal(orderId) {
+                        document.getElementById('rescheduleOrderId').value = orderId;
+                        document.getElementById('rescheduleModal').classList.remove('hidden');
+                    }
+
+                    function closeRescheduleModal() {
+                        document.getElementById('rescheduleModal').classList.add('hidden');
+                    }
+
+                    function submitReschedule() {
+                        const orderId = document.getElementById('rescheduleOrderId').value;
+                        const newDate = document.getElementById('newReminderDate').value;
+
+                        if (!newDate) {
+                            alert('Please select a new date');
+                            return;
+                        }
+
+                        fetch('/salesperson/reminders/reschedule', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId, newDate })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Failed to update reminder');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred');
+                            });
+                    }
+                </script>

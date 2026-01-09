@@ -32,18 +32,9 @@ const upload = multer({
 // GET /sysadmin/dashboard
 const getDashboard = async (req, res) => {
     try {
-        const totalUsers = await User.countDocuments();
-        const totalProducts = await Product.countDocuments();
-        const activeUsers = await User.countDocuments({ activeStatus: true });
-
         res.render('sysadmin/dashboard', {
             user: { name: req.session.userName },
-            userRole: req.session.userRole,
-            stats: {
-                totalUsers,
-                totalProducts,
-                activeUsers
-            }
+            userRole: req.session.userRole
         });
     } catch (error) {
         console.error('Dashboard error:', error);

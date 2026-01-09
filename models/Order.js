@@ -54,6 +54,9 @@ const orderSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    tentativeRepeatDate: {
+        type: Date
+    },
 
     // Tracking information
     salespersonId: {

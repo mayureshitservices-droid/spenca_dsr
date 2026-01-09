@@ -18,4 +18,8 @@ router.post('/orders/create', salespersonController.createOrder);
 // View orders
 router.get('/orders', salespersonController.getOrders);
 
+// Reminders
+router.get('/reminders', salespersonController.getReminders);
+router.post('/reminders/reschedule', salespersonController.rescheduleReminder);
+
 module.exports = router;

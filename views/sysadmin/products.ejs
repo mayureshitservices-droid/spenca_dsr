@@ -3,18 +3,9 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
-                <div>
-                    <h1
-                        class="text-4xl font-extrabold text-white flex items-center gap-4 tracking-tight drop-shadow-md">
-                        <i class="bi bi-box-seam text-indigo-400"></i>
-                        Product Catalog
-                    </h1>
-                    <p class="mt-2 text-indigo-100 font-medium">Manage and monitor the official sales inventory and
-                        specifications.</p>
-                </div>
                 <button onclick="openModal()"
                     class="inline-flex items-center gap-3 py-4 px-8 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg shadow-indigo-600/30">
-                    <i class="bi bi-plus-circle text-xl"></i>
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
                     Add New Product
                 </button>
             </div>
@@ -24,13 +15,13 @@
                 <div
                     class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
                     <div class="flex items-center gap-3">
-                        <i class="bi bi-check-circle-fill text-emerald-500 text-xl"></i>
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
                         <p class="font-bold">
                             <%= success %>
                         </p>
                     </div>
                     <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-400">
-                        <i class="bi bi-x-lg"></i>
+                        <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
                 <% } %>
@@ -39,13 +30,13 @@
                         <div
                             class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
                             <div class="flex items-center gap-3">
-                                <i class="bi bi-exclamation-triangle-fill text-red-500 text-xl"></i>
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
                                 <p class="font-bold">
                                     <%= error %>
                                 </p>
                             </div>
                             <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400">
-                                <i class="bi bi-x-lg"></i>
+                                <i data-lucide="x" class="w-4 h-4"></i>
                             </button>
                         </div>
                         <% } %>
@@ -54,7 +45,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                                 <% products.forEach(function(p) { %>
                                     <div
-                                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full">
+                                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full">
                                         <div class="relative h-56 overflow-hidden">
                                             <% if (p.photo) { %>
                                                 <img src="<%= p.photo %>"
@@ -63,7 +54,7 @@
                                                 <% } else { %>
                                                     <div
                                                         class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300">
-                                                        <i class="bi bi-image text-5xl"></i>
+                                                        <i data-lucide="image" class="w-12 h-12 text-gray-300"></i>
                                                     </div>
                                                     <% } %>
                                                         <div
@@ -80,7 +71,7 @@
                                             <% if (p.packaging) { %>
                                                 <div
                                                     class="flex items-center gap-2 text-sm font-bold text-gray-500 mb-4">
-                                                    <i class="bi bi-box2 text-indigo-500"></i>
+                                                    <i data-lucide="package" class="w-4 h-4 text-indigo-500"></i>
                                                     <%= p.packaging %>
                                                 </div>
                                                 <% } %>
@@ -95,7 +86,7 @@
                                                                 class="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
                                                                 <button onclick="deleteProduct('<%= p._id %>')"
                                                                     class="inline-flex items-center gap-2 text-sm font-black text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest px-2 py-1 hover:bg-red-50 rounded-lg">
-                                                                    <i class="bi bi-trash3-fill"></i>
+                                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                                                     Delete
                                                                 </button>
                                                             </div>
@@ -109,14 +100,14 @@
         <div id="createProductModal" class="fixed inset-0 z-[2000] hidden items-center justify-center p-4">
             <div onclick="closeModal()" class="absolute inset-0 bg-gray-900/80 backdrop-blur-md"></div>
             <div
-                class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300">
+                class="relative w-full max-w-2xl bg-white rounded-3xl shadow-around-lg overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300">
                 <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-6 flex items-center justify-between">
                     <h2 class="text-2xl font-black text-white flex items-center gap-3 tracking-tight">
-                        <i class="bi bi-box-seam text-3xl"></i>
+                        <i data-lucide="package" class="w-8 h-8"></i>
                         Catalog New Item
                     </h2>
                     <button onclick="closeModal()" class="text-white/80 hover:text-white transition-colors">
-                        <i class="bi bi-x-lg text-2xl"></i>
+                        <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
 

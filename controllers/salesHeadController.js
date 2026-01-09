@@ -9,19 +9,10 @@ const getDashboard = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(20);
 
-        const totalPending = await Order.countDocuments({ approvalStatus: 'pending' });
-        const totalApproved = await Order.countDocuments({ approvalStatus: 'approved' });
-        const totalRejected = await Order.countDocuments({ approvalStatus: 'rejected' });
-
         res.render('salesHead/dashboard', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            orders: pendingOrders,
-            stats: {
-                totalPending,
-                totalApproved,
-                totalRejected
-            }
+            orders: pendingOrders
         });
     } catch (error) {
         console.error('Dashboard error:', error);

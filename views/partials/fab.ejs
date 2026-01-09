@@ -12,60 +12,65 @@
                 <a href="/sysadmin/users"
                     class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                     <span class="text-sm">Users</span>
-                    <i class="bi bi-person-plus text-xl"></i>
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
                 </a>
                 <a href="/sysadmin/products"
                     class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                     <span class="text-sm">Products</span>
-                    <i class="bi bi-box-seam text-xl"></i>
+                    <i data-lucide="package" class="w-5 h-5"></i>
                 </a>
                 <a href="/sysadmin/dashboard"
                     class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                     <span class="text-sm">Dashboard</span>
-                    <i class="bi bi-speedometer2 text-xl"></i>
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 </a>
                 <% } else if (userRole==='salesperson' ) { %>
+                    <a href="/salesperson/reminders"
+                        class="flex items-center gap-3 bg-white hover:bg-amber-500 text-amber-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                        <span class="text-sm">Reminders</span>
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </a>
                     <a href="/salesperson/create-order"
                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                         <span class="text-sm">New Order</span>
-                        <i class="bi bi-plus-circle text-xl"></i>
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
                     </a>
                     <a href="/salesperson/orders"
                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                         <span class="text-sm">My Orders</span>
-                        <i class="bi bi-list-ul text-xl"></i>
+                        <i data-lucide="list" class="w-5 h-5"></i>
                     </a>
                     <a href="/salesperson/dashboard"
                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                         <span class="text-sm">Dashboard</span>
-                        <i class="bi bi-speedometer2 text-xl"></i>
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                     </a>
                     <% } else if (userRole==='sales_head' ) { %>
                         <a href="/sales-head/pending-orders"
                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                             <span class="text-sm">Pending</span>
-                            <i class="bi bi-clock-history text-xl"></i>
+                            <i data-lucide="history" class="w-5 h-5"></i>
                         </a>
                         <a href="/sales-head/all-orders"
                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                             <span class="text-sm">All Orders</span>
-                            <i class="bi bi-list-check text-xl"></i>
+                            <i data-lucide="list-checks" class="w-5 h-5"></i>
                         </a>
                         <a href="/sales-head/dashboard"
                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                             <span class="text-sm">Dashboard</span>
-                            <i class="bi bi-speedometer2 text-xl"></i>
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                         </a>
                         <% } else if (userRole==='owner' ) { %>
                             <a href="/owner/reports"
                                 class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                 <span class="text-sm">Reports</span>
-                                <i class="bi bi-file-earmark-bar-graph text-xl"></i>
+                                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
                             </a>
                             <a href="/owner/dashboard"
                                 class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                 <span class="text-sm">Dashboard</span>
-                                <i class="bi bi-speedometer2 text-xl"></i>
+                                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                             </a>
                             <% } %>
         </div>
@@ -74,7 +79,7 @@
         <button
             class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 active:scale-95 z-[1001]"
             id="fabMain">
-            <i class="bi bi-plus-lg transition-transform duration-300" id="fabIcon"></i>
+            <i data-lucide="plus" class="transition-transform duration-300 w-8 h-8" id="fabIcon"></i>
         </button>
     </div>
     <% } %>
