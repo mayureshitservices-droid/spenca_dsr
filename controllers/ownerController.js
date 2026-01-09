@@ -3,15 +3,51 @@ const Order = require('../models/Order');
 // GET /owner/dashboard
 const getDashboard = async (req, res) => {
     try {
-        const recentOrders = await Order.find({ approvalStatus: 'approved' })
+        const salespersonStats = await Order.aggregate([
+            { $match: { approvalStatus: 'approved' } },
+            {
+                $group: {
+                    _id: '$salespersonId',
+                    totalVisits: { $sum: 1 },
+                    totalOrders: {
+                        $sum: { $cond: [{ $eq: ['$orderStatus', 'Ordered'] }, 1, 0] }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'salesperson'
+                }
+            },
+            { $unwind: '$salesperson' },
+            {
+                $project: {
+                    name: '$salesperson.fullName',
+                    contactNo: '$salesperson.contactNo',
+                    region: '$salesperson.region',
+                    totalVisits: 1,
+                    totalOrders: 1
+                }
+            },
+            { $sort: { totalVisits: -1 } }
+        ]);
+
+        const allOrders = await Order.find({ approvalStatus: 'approved' })
+            .select('customerName createdAt orderStatus products tentativeRepeatDate remark salespersonId')
             .populate('salespersonId', 'fullName')
             .sort({ createdAt: -1 })
-            .limit(5);
+            .lean();
 
+        // Filter out orders where salesperson population failed (e.g. deleted user)
+        const validOrders = allOrders.filter(o => o.salespersonId);
         res.render('owner/dashboard', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            orders: recentOrders
+            salespersonStats,
+            allOrders: validOrders
         });
     } catch (error) {
         console.error('Dashboard error:', error);

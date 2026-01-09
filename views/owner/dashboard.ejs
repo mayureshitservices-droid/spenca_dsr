@@ -3,110 +3,164 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
+            <!-- Toggleable Sections -->
+            <div id="activitySection" class="transition-all duration-500">
+                <!-- Summary View -->
+                <div id="salespersonSummary" class="mb-12">
+                    <h3 class="text-xl font-black text-black mb-6 flex items-center gap-3">
+                        <i data-lucide="users" class="w-6 h-6 text-indigo-400"></i>
+                        Field Force Overview
+                    </h3>
 
-            <!-- Recent Activity Section -->
-            <div class="mb-12">
-                <h3 class="text-xl font-black text-white mb-6 flex items-center gap-3">
-                    <i data-lucide="history" class="w-6 h-6 text-amber-400"></i>
-                    Recent System Activity
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <% orders.forEach(function(order) { %>
-                        <div
-                            class="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-around-lg border border-white/20 group transition-all hover:shadow-2xl">
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex flex-col">
-                                    <h4 class="text-lg font-black text-gray-900 leading-tight">
-                                        <%= order.customerName %>
-                                    </h4>
-                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                                        <%= order.salespersonId.fullName %>
-                                    </span>
-                                </div>
-                                <span
-                                    class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[9px] font-black uppercase tracking-widest rounded">
-                                    <%= order.orderStatus %>
-                                </span>
-                            </div>
+                    <% if (locals.salespersonStats && locals.salespersonStats.length> 0) { %>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <% locals.salespersonStats.forEach(function(stat) { %>
+                                <div onclick="showSalespersonDetails('<%= stat._id %>', '<%= stat.name %>')"
+                                    class="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-around-lg border border-white/20 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div
+                                            class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-xl">
+                                            <%= stat.name ? stat.name.charAt(0) : '?' %>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-lg font-black text-gray-900 leading-tight">
+                                                <%= stat.name %>
+                                            </h4>
+                                        </div>
+                                    </div>
 
-                            <% if (order.tentativeRepeatDate) { %>
-                                <div
-                                    class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center justify-between">
-                                    <span class="text-[10px] font-black text-amber-700 uppercase tracking-widest">Repeat
-                                        Order</span>
-                                    <span class="text-xs font-bold text-amber-900">
-                                        <%= new Date(order.tentativeRepeatDate).toLocaleDateString('en-IN', {
-                                            day: '2-digit' , month: 'short' }) %>
-                                    </span>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div
+                                            class="p-4 bg-gray-50 rounded-2xl border border-gray-100 group-hover:bg-white transition-colors">
+                                            <span
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total
+                                                Visits</span>
+                                            <span class="text-2xl font-black text-gray-900">
+                                                <%= stat.totalVisits %>
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 group-hover:bg-white transition-colors">
+                                            <span
+                                                class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Orders</span>
+                                            <span class="text-2xl font-black text-emerald-700">
+                                                <%= stat.totalOrders %>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="mt-6 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-indigo-500 group-hover:text-indigo-700 transition-colors">
+                                        <span>View Detailed History</span>
+                                        <i data-lucide="chevron-right"
+                                            class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
+                                    </div>
                                 </div>
-                                <% } %>
+                                <% }); %>
                         </div>
-                        <% }); %>
+                        <% } else { %>
+                            <div
+                                class="bg-white/95 backdrop-blur-md rounded-3xl p-12 text-center shadow-around-lg border border-white/20">
+                                <i data-lucide="user-minus" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                                <h4 class="text-lg font-black text-gray-900">No Activity Found</h4>
+                                <p class="text-sm font-medium text-gray-400 mt-2">There is no approved activity for any
+                                    salesperson yet.</p>
+                            </div>
+                            <% } %>
+                </div>
+
+                <!-- Detail View (Hidden Initially) -->
+                <div id="salespersonDetails" class="hidden">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center gap-4">
+                            <button onclick="hideSalespersonDetails()"
+                                class="p-3 bg-white hover:bg-gray-50 rounded-2xl shadow-sm border border-gray-100 transition-all active:scale-95 group">
+                                <i data-lucide="arrow-left"
+                                    class="w-6 h-6 text-gray-600 group-hover:text-indigo-600"></i>
+                            </button>
+                            <div>
+                                <h3 id="detailTitle" class="text-2xl font-black text-gray-900">Salesperson Activity</h3>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Detailed
+                                    Customer
+                                    Engagement Log</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="detailGrid">
+                        <!-- Details will be injected here via JS -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Total Orders Chart -->
-                <div
-                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
-                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                            <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-500"></i>
-                            Order Distribution
-                        </h3>
-                    </div>
-                    <div class="p-8">
-                        <div class="relative h-80">
-                            <canvas id="totalOrdersChart"></canvas>
+            <div id="chartsSection" class="hidden transition-all duration-500">
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <!-- Total Orders Chart -->
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h3
+                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-500"></i>
+                                Order Distribution
+                            </h3>
+                        </div>
+                        <div class="p-8">
+                            <div class="relative h-80">
+                                <canvas id="totalOrdersChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Total Sales Chart -->
-                <div
-                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
-                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                            <i data-lucide="bar-chart-3" class="w-4 h-4 text-purple-500"></i>
-                            Revenue Volume
-                        </h3>
-                    </div>
-                    <div class="p-8">
-                        <div class="relative h-80">
-                            <canvas id="totalSalesChart"></canvas>
+                    <!-- Total Sales Chart -->
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h3
+                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="bar-chart-3" class="w-4 h-4 text-purple-500"></i>
+                                Revenue Volume
+                            </h3>
+                        </div>
+                        <div class="p-8">
+                            <div class="relative h-80">
+                                <canvas id="totalSalesChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Salesperson Sales Chart -->
-                <div
-                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
-                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                            <i data-lucide="users" class="w-4 h-4 text-emerald-500"></i>
-                            Personnel Performance
-                        </h3>
-                    </div>
-                    <div class="p-8">
-                        <div class="relative h-80">
-                            <canvas id="salespersonSalesChart"></canvas>
+                    <!-- Salesperson Sales Chart -->
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h3
+                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-emerald-500"></i>
+                                Personnel Performance
+                            </h3>
+                        </div>
+                        <div class="p-8">
+                            <div class="relative h-80">
+                                <canvas id="salespersonSalesChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Date-wise Trends Chart -->
-                <div
-                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
-                    <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                            <i data-lucide="activity" class="w-4 h-4 text-red-500"></i>
-                            Temporal Trends
-                        </h3>
-                    </div>
-                    <div class="p-8">
-                        <div class="relative h-80">
-                            <canvas id="dateWiseSalesChart"></canvas>
+                    <!-- Date-wise Trends Chart -->
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                        <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <h3
+                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="activity" class="w-4 h-4 text-red-500"></i>
+                                Temporal Trends
+                            </h3>
+                        </div>
+                        <div class="p-8">
+                            <div class="relative h-80">
+                                <canvas id="dateWiseSalesChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -117,3 +171,115 @@
             <%- include('../partials/footer') %>
 
                 <script src="/js/charts.js"></script>
+                <script>
+                    // Data passed from server
+                    const allOrders = JSON.parse('<%- JSON.stringify(locals.allOrders || []) %>');
+
+                    window.switchDashboardView = function (view) {
+                        const activity = document.getElementById('activitySection');
+                        const charts = document.getElementById('chartsSection');
+
+                        if (!activity || !charts) return;
+
+                        if (view === 'activity') {
+                            activity.classList.remove('hidden');
+                            charts.classList.add('hidden');
+                        } else {
+                            activity.classList.add('hidden');
+                            charts.classList.remove('hidden');
+                            // Ensure charts are laid out correctly after being revealed
+                            window.dispatchEvent(new Event('resize'));
+                        }
+
+                        // Close FAB menu if it's open
+                        const fabIcon = document.getElementById('fabIcon');
+                        if (fabIcon && fabIcon.classList.contains('rotate-45')) {
+                            const fabMain = document.getElementById('fabMain');
+                            if (fabMain) fabMain.click();
+                        }
+                    };
+
+                    window.showSalespersonDetails = function (userId, userName) {
+                        const summary = document.getElementById('salespersonSummary');
+                        const details = document.getElementById('salespersonDetails');
+                        const detailTitle = document.getElementById('detailTitle');
+                        const detailGrid = document.getElementById('detailGrid');
+
+                        if (!summary || !details || !detailGrid) return;
+
+                        detailTitle.innerText = userName || 'Salesperson Activity';
+
+                        // Filter orders with robust ID checking
+                        const filteredOrders = (allOrders || []).filter(o =>
+                            o.salespersonId && (o.salespersonId._id === userId || o.salespersonId === userId || o.salespersonId.toString() === userId)
+                        );
+
+                        // Render details
+                        if (filteredOrders.length === 0) {
+                            detailGrid.innerHTML = `
+                        <div class="col-span-full p-12 text-center">
+                            <p class="text-gray-400 font-medium">No detail records found for this person.</p>
+                        </div>
+                    `;
+                        } else {
+                            detailGrid.innerHTML = filteredOrders.map(order => `
+                        <div class="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-around-lg border border-white/20 group transition-all hover:shadow-2xl">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="text-lg font-black text-gray-900 leading-tight">${order.customerName}</h4>
+                                    <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">
+                                        ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                    </p>
+                                </div>
+                                <span class="px-2 py-0.5 ${order.orderStatus === 'Ordered' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'} text-[9px] font-black uppercase tracking-widest rounded shadow-sm">
+                                    ${order.orderStatus || 'Visited'}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex flex-wrap gap-2">
+                                    ${(order.products || []).map(p => `
+                                        <div class="px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-1.5">
+                                            <span class="text-[10px] font-black text-gray-700">${p.productName}</span>
+                                            <span class="text-[9px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">x${p.quantity}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            ${order.tentativeRepeatDate ? `
+                                <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center justify-between">
+                                    <span class="text-[10px] font-black text-amber-700 uppercase tracking-widest">Repeat Order</span>
+                                    <span class="text-xs font-bold text-amber-900">
+                                        ${new Date(order.tentativeRepeatDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                    </span>
+                                </div>
+                            ` : ''}
+
+                            ${order.remark ? `
+                                <div class="mt-4 p-4 bg-gray-50 rounded-2xl border-l-4 border-indigo-400">
+                                    <span class="block text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Notes</span>
+                                    <p class="text-xs font-medium text-gray-700 italic">"${order.remark}"</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                        }
+
+                        summary.classList.add('hidden');
+                        details.classList.remove('hidden');
+
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                        // Re-initialize any icons if needed
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    };
+
+                    window.hideSalespersonDetails = function () {
+                        document.getElementById('salespersonSummary').classList.remove('hidden');
+                        document.getElementById('salespersonDetails').classList.add('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
+                </script>
