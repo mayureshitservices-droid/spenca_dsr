@@ -187,7 +187,7 @@ function addProductRow() {
     row.id = `productRow_${productRows}`;
     row.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-            <div class="md:col-span-7 space-y-2">
+            <div class="md:col-span-5 space-y-2">
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Catalog Search</label>
                 <div class="relative">
                     <input type="text" id="productName_${productRows}" placeholder="Search product line..." autocomplete="off"
@@ -197,14 +197,20 @@ function addProductRow() {
                 </div>
             </div>
             <div class="md:col-span-3 space-y-2">
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Rate</label>
+                <input type="number" id="rate_${productRows}" min="0" step="0.01" placeholder="0.00"
+                    class="w-full px-5 py-3 bg-white border-2 border-transparent rounded-2xl focus:border-purple-500 transition-all outline-none font-black text-gray-900 shadow-sm text-center">
+            </div>
+            <div class="md:col-span-3 space-y-2">
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantity</label>
                 <input type="number" id="quantity_${productRows}" min="1" value="1"
                     class="w-full px-5 py-3 bg-white border-2 border-transparent rounded-2xl focus:border-purple-500 transition-all outline-none font-black text-gray-900 shadow-sm text-center">
             </div>
-            <div class="md:col-span-2">
+            <div class="md:col-span-1">
                 <button type="button" onclick="removeProductRow(${productRows})" 
                     class="w-full p-3.5 text-red-500 hover:bg-red-50 rounded-2xl transition-all border-2 border-transparent active:scale-90">
                     <i class="bi bi-trash3-fill text-xl"></i>
+                    <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
                 </button>
             </div>
         </div>
@@ -263,12 +269,14 @@ function collectProducts() {
         const productId = document.getElementById(`productId_${rowId}`).value;
         const productName = document.getElementById(`productName_${rowId}`).value;
         const quantity = document.getElementById(`quantity_${rowId}`).value;
+        const rate = document.getElementById(`rate_${rowId}`).value;
 
-        if (productName && quantity) {
+        if (productName && quantity && rate) {
             products.push({
                 productId: productId || null,
                 productName,
-                quantity: parseInt(quantity)
+                quantity: parseInt(quantity),
+                rate: parseFloat(rate)
             });
         }
     });

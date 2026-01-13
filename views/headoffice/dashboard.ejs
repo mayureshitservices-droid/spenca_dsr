@@ -1,0 +1,308 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <!-- Toggleable Sections -->
+            <div id="activitySection" class="transition-all duration-500">
+                <!-- Summary View -->
+                <div id="salespersonSummary" class="mb-12">
+                    <h3 class="text-xl font-black text-black mb-6 flex items-center gap-3">
+                        <i data-lucide="users" class="w-6 h-6 text-black"></i>
+                        Field Force Overview
+                    </h3>
+
+                    <% if (locals.salespersonStats && locals.salespersonStats.length> 0) { %>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                            <% locals.salespersonStats.forEach(function(stat) { %>
+                                <div onclick="showSalespersonDetails('<%= stat._id %>', '<%= stat.name %>')"
+                                    class="glass-card p-6 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-xl">
+                                            <%= stat.name ? stat.name.charAt(0) : '?' %>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-lg font-black text-gray-900 leading-tight">
+                                                <%= stat.name %>
+                                            </h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div
+                                            class="p-3 bg-gray-50 rounded-2xl border border-gray-100 group-hover:bg-white transition-colors">
+                                            <span
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total
+                                                Visits</span>
+                                            <span class="text-2xl font-black text-black">
+                                                <%= stat.totalVisits %>
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="p-3 bg-primary-50 rounded-2xl border border-primary-100 group-hover:bg-white transition-colors">
+                                            <span
+                                                class="block text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Orders</span>
+                                            <span class="text-2xl font-black text-primary-700">
+                                                <%= stat.totalOrders %>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-6 flex items-center justify-center">
+                                        <a href="/headoffice/download-report?salespersonId=<%= stat._id %>"
+                                            class="w-full text-center py-2 bg-gray-50 hover:bg-black hover:text-white text-black text-xs font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2">
+                                            <i data-lucide="download" class="w-3 h-3"></i>
+                                            Download DSR
+                                        </a>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+
+
+
+                        <% } else { %>
+                            <div
+                                class="bg-white/95 backdrop-blur-md rounded-3xl p-12 text-center shadow-around-lg border border-white/20">
+                                <i data-lucide="user-minus" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                                <h4 class="text-lg font-black text-gray-900">No Activity Found</h4>
+                                <p class="text-sm font-medium text-gray-400 mt-2">There is no approved activity for any
+                                    salesperson yet.</p>
+                            </div>
+                            <% } %>
+                </div>
+
+                <!-- Detail View (Hidden Initially) -->
+                <div id="salespersonDetails" class="hidden">
+                    <div class="flex flex-col gap-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <button onclick="hideSalespersonDetails()"
+                                    class="p-3 bg-white hover:bg-gray-50 rounded-full shadow-lg border border-gray-100 transition-all active:scale-95 group">
+                                    <i data-lucide="arrow-left"
+                                        class="w-6 h-6 text-black group-hover:text-primary-500"></i>
+                                </button>
+                                <div>
+                                    <h3 id="detailTitle" class="text-2xl font-black text-gray-900">Salesperson Activity
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="relative w-full">
+                            <input type="text" id="searchInput" placeholder="Search customer, mobile, or product..."
+                                class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <div class="glass-card overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-100">
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Date</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Salesperson</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Customer</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Mobile</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Products</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                            Total</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
+                                            Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailTableBody" class="divide-y divide-gray-100">
+                                    <!-- Rows injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <span class="text-xs font-bold text-gray-500" id="showingText">
+                                Showing 0-0 of 0
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changePage(-1)" id="prevBtn" disabled
+                                    class="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                </button>
+                                <span class="text-sm font-black text-gray-900" id="pageIndicator">1</span>
+                                <button onclick="changePage(1)" id="nextBtn" disabled
+                                    class="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    // Data passed from server
+                    const allOrders = JSON.parse('<%- JSON.stringify(locals.allOrders || []) %>');
+
+                    // State
+                    let currentUserId = null;
+                    let currentUserName = null;
+                    let currentPage = 1;
+                    let itemsPerPage = 10;
+                    let filteredData = [];
+
+                    function showSalespersonDetails(userId, userName) {
+                        const summary = document.getElementById('salespersonSummary');
+                        const details = document.getElementById('salespersonDetails');
+                        const detailTitle = document.getElementById('detailTitle');
+
+                        if (!summary || !details) return;
+
+                        currentUserId = userId;
+                        currentUserName = userName;
+                        detailTitle.innerText = userName || 'Salesperson Activity';
+
+                        // Close FAB menu if it's open
+                        const fabIcon = document.getElementById('fabIcon');
+                        if (fabIcon && fabIcon.classList.contains('rotate-45')) {
+                            document.getElementById('fabMain').click();
+                        }
+
+                        // Initial Filter
+                        filterAndRender();
+
+                        summary.classList.add('hidden');
+                        details.classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+
+                    function hideSalespersonDetails() {
+                        document.getElementById('salespersonSummary').classList.remove('hidden');
+                        document.getElementById('salespersonDetails').classList.add('hidden');
+
+                        // Reset Search
+                        document.getElementById('searchInput').value = '';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+
+                    // Search Listener
+                    document.getElementById('searchInput').addEventListener('input', (e) => {
+                        currentPage = 1;
+                        filterAndRender(e.target.value);
+                    });
+
+                    function filterAndRender(query = '') {
+                        // 1. Filter by User (if specific user selected)
+                        let baseData = allOrders;
+
+                        if (currentUserId) {
+                            baseData = baseData.filter(o =>
+                                o.salespersonId && (o.salespersonId._id === currentUserId || o.salespersonId === currentUserId || o.salespersonId.toString() === currentUserId)
+                            );
+                        }
+
+                        // 2. Filter by Search Query
+                        if (query) {
+                            const q = query.toLowerCase();
+                            baseData = baseData.filter(o =>
+                                o.customerName.toLowerCase().includes(q) ||
+                                (o.mobileNo && o.mobileNo.includes(q)) ||
+                                (o.products && o.products.some(p => p.productName.toLowerCase().includes(q)))
+                            );
+                        }
+
+                        filteredData = baseData;
+                        renderTable();
+                    }
+
+                    function renderTable() {
+                        const tbody = document.getElementById('detailTableBody');
+                        const showingText = document.getElementById('showingText');
+                        const prevBtn = document.getElementById('prevBtn');
+                        const nextBtn = document.getElementById('nextBtn');
+                        const pageIndicator = document.getElementById('pageIndicator');
+
+                        const start = (currentPage - 1) * itemsPerPage;
+                        const end = start + itemsPerPage;
+                        const pageData = filteredData.slice(start, end);
+
+                        if (filteredData.length === 0) {
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-400 font-medium">
+                                        No records found.
+                                    </td>
+                                </tr>
+                            `;
+                            showingText.innerText = 'Showing 0 results';
+                            prevBtn.disabled = true;
+                            nextBtn.disabled = true;
+                            pageIndicator.innerText = '1';
+                            return;
+                        }
+
+                        tbody.innerHTML = pageData.map(order => {
+                            const date = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                            const productsHtml = (order.products || []).map(p => `
+                                <div class="text-xs mb-1 last:mb-0">
+                                    <span class="font-bold text-gray-700">${p.productName}</span>
+                                    <span class="text-gray-400">x${p.quantity}</span>
+                                </div>
+                            `).join('') || '<span class="text-gray-400 italic">No Products</span>';
+
+                            const totalAmount = (order.products || []).reduce((sum, p) => sum + ((p.quantity || 0) * (p.rate || 0)), 0);
+
+                            return `
+                                <tr class="hover:bg-gray-50/80 transition-colors">
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">${date}</td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                                        ${order.salespersonId ? order.salespersonId.fullName : 'Unknown'}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                                        ${order.customerName}
+                                        ${order.category ? `<div class="text-[10px] text-gray-400 uppercase font-bold">${order.category}</div>` : ''}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">${order.mobileNo || '-'}</td>
+                                    <td class="px-6 py-4">${productsHtml}</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-emerald-600 text-right tabular-nums">Rs. ${totalAmount.toLocaleString()}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.orderStatus === 'Ordered' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">
+                                            ${order.orderStatus || 'Visited'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        // Update Pagination Controls
+                        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+                        showingText.innerText = `Showing ${start + 1}-${Math.min(end, filteredData.length)} of ${filteredData.length}`;
+                        prevBtn.disabled = currentPage === 1;
+                        nextBtn.disabled = currentPage === totalPages;
+                        pageIndicator.innerText = currentPage;
+
+                        // Icon Refresh
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+
+                    function changePage(delta) {
+                        currentPage += delta;
+                        renderTable();
+                    }
+                </script>

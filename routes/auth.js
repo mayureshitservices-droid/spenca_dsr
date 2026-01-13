@@ -16,7 +16,8 @@ router.get('/', (req, res) => {
             'sysadmin': '/sysadmin/dashboard',
             'sales_head': '/sales-head/dashboard',
             'owner': '/owner/dashboard',
-            'salesperson': '/salesperson/dashboard'
+            'salesperson': '/salesperson/dashboard',
+            'headoffice': '/headoffice/dashboard'
         };
         return res.redirect(routes[req.session.userRole] || '/login');
     }

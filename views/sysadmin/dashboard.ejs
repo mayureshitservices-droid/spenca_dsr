@@ -8,42 +8,26 @@
 
 
             <!-- Quick Actions -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white/95 rounded-3xl overflow-hidden shadow-around-lg border border-white/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <a href="/sysadmin/users"
+                    class="glass-card aspect-square flex flex-col items-center justify-center p-8 group hover:bg-gray-50 transition-all hover:-translate-y-1 hover:shadow-2xl text-center">
                     <div
-                        class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white px-8 py-5 flex items-center justify-between">
-                        <h2 class="text-xl font-bold flex items-center gap-3">
-                            <i data-lucide="user-plus" class="w-6 h-6"></i>
-                            User Management
-                        </h2>
-                        <i data-lucide="settings" class="opacity-20 w-8 h-8"></i>
+                        class="w-20 h-20 rounded-full bg-gray-50 group-hover:bg-white flex items-center justify-center mb-6 shadow-sm border border-gray-100 transition-colors">
+                        <i data-lucide="users" class="w-10 h-10 text-gray-900"></i>
                     </div>
-                    <div class="p-8">
-                        <a href="/sysadmin/users"
-                            class="inline-flex items-center gap-3 py-4 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg hover:shadow-indigo-600/30">
-                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                            Manage User Directory
-                        </a>
-                    </div>
-                </div>
+                    <h2 class="text-2xl font-black text-gray-900 mb-2">User Directory</h2>
+                    <p class="text-sm font-bold text-gray-400">Manage system access and roles</p>
+                </a>
 
-                <div class="bg-white/95 rounded-3xl overflow-hidden shadow-around-lg border border-white/20">
+                <a href="/sysadmin/products"
+                    class="glass-card aspect-square flex flex-col items-center justify-center p-8 group hover:bg-gray-50 transition-all hover:-translate-y-1 hover:shadow-2xl text-center">
                     <div
-                        class="bg-gradient-to-r from-purple-600 to-purple-800 text-white px-8 py-5 flex items-center justify-between">
-                        <h2 class="text-xl font-bold flex items-center gap-3">
-                            <i data-lucide="package" class="w-6 h-6"></i>
-                            Product Management
-                        </h2>
-                        <i data-lucide="database" class="opacity-20 w-8 h-8"></i>
+                        class="w-20 h-20 rounded-full bg-gray-50 group-hover:bg-white flex items-center justify-center mb-6 shadow-sm border border-gray-100 transition-colors">
+                        <i data-lucide="package" class="w-10 h-10 text-gray-900"></i>
                     </div>
-                    <div class="p-8">
-                        <a href="/sysadmin/products"
-                            class="inline-flex items-center gap-3 py-4 px-8 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg hover:shadow-purple-600/30">
-                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                            Manage Product Catalog
-                        </a>
-                    </div>
-                </div>
+                    <h2 class="text-2xl font-black text-gray-900 mb-2">Product Catalog</h2>
+                    <p class="text-sm font-bold text-gray-400">Manage inventory and pricing</p>
+                </a>
             </div>
         </div>
 

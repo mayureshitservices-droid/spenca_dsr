@@ -40,16 +40,18 @@ app.use(session({
 const authRoutes = require('./routes/auth');
 const sysadminRoutes = require('./routes/sysadmin');
 const salespersonRoutes = require('./routes/salesperson');
-const salesHeadRoutes = require('./routes/salesHead');
+
 const ownerRoutes = require('./routes/owner');
+const headofficeRoutes = require('./routes/headoffice');
 const apiRoutes = require('./routes/api');
 
 // Mount routes
 app.use('/', authRoutes);
 app.use('/sysadmin', sysadminRoutes);
 app.use('/salesperson', salespersonRoutes);
-app.use('/sales-head', salesHeadRoutes);
+
 app.use('/owner', ownerRoutes);
+app.use('/headoffice', headofficeRoutes);
 app.use('/api', apiRoutes);
 
 // 404 handler

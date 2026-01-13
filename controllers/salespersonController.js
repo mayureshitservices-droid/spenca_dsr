@@ -117,11 +117,22 @@ const createOrder = async (req, res) => {
             orderStatus,
             products,
             remark,
-            tentativeRepeatDate,
+            tentativeRepeatDate, // This now comes as "days" (number)
             latitude,
             longitude,
             accuracy
         } = req.body;
+
+        // Calculate actual date from days
+        let calculatedRepeatDate = null;
+        if (tentativeRepeatDate) {
+            const days = parseInt(tentativeRepeatDate);
+            if (!isNaN(days)) {
+                const date = new Date();
+                date.setDate(date.getDate() + days);
+                calculatedRepeatDate = date;
+            }
+        }
 
         // Validate GPS
         const gpsValidation = validateGPS(
@@ -170,14 +181,15 @@ const createOrder = async (req, res) => {
             orderStatus,
             products: productList,
             remark,
-            tentativeRepeatDate,
+            remark,
+            tentativeRepeatDate: calculatedRepeatDate,
             salespersonId: req.session.userId,
             gpsLocation: {
                 latitude: parseFloat(latitude),
                 longitude: parseFloat(longitude),
                 accuracy: parseFloat(accuracy)
             },
-            approvalStatus: 'pending'
+            approvalStatus: 'approved'
         });
 
         await newOrder.save();

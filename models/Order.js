@@ -48,6 +48,11 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             required: true,
             min: 1
+        },
+        rate: {
+            type: Number,
+            required: true,
+            min: 0
         }
     }],
     remark: {

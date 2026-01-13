@@ -8,7 +8,7 @@
                 <!-- Summary View -->
                 <div id="salespersonSummary" class="mb-12">
                     <h3 class="text-xl font-black text-black mb-6 flex items-center gap-3">
-                        <i data-lucide="users" class="w-6 h-6 text-indigo-400"></i>
+                        <i data-lucide="users" class="w-6 h-6 text-black"></i>
                         Field Force Overview
                     </h3>
 
@@ -16,10 +16,10 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <% locals.salespersonStats.forEach(function(stat) { %>
                                 <div onclick="showSalespersonDetails('<%= stat._id %>', '<%= stat.name %>')"
-                                    class="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-around-lg border border-white/20 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
+                                    class="glass-card p-6 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
                                     <div class="flex items-center gap-4 mb-6">
                                         <div
-                                            class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-xl">
+                                            class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-xl">
                                             <%= stat.name ? stat.name.charAt(0) : '?' %>
                                         </div>
                                         <div>
@@ -35,22 +35,22 @@
                                             <span
                                                 class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total
                                                 Visits</span>
-                                            <span class="text-2xl font-black text-gray-900">
+                                            <span class="text-2xl font-black text-black">
                                                 <%= stat.totalVisits %>
                                             </span>
                                         </div>
                                         <div
-                                            class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 group-hover:bg-white transition-colors">
+                                            class="p-4 bg-primary-50 rounded-2xl border border-primary-100 group-hover:bg-white transition-colors">
                                             <span
-                                                class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Orders</span>
-                                            <span class="text-2xl font-black text-emerald-700">
+                                                class="block text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Orders</span>
+                                            <span class="text-2xl font-black text-primary-700">
                                                 <%= stat.totalOrders %>
                                             </span>
                                         </div>
                                     </div>
 
                                     <div
-                                        class="mt-6 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-indigo-500 group-hover:text-indigo-700 transition-colors">
+                                        class="mt-6 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-primary-600 group-hover:text-primary-700 transition-colors">
                                         <span>View Detailed History</span>
                                         <i data-lucide="chevron-right"
                                             class="w-4 h-4 transform group-hover:translate-x-1 transition-transform"></i>
@@ -74,9 +74,8 @@
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex items-center gap-4">
                             <button onclick="hideSalespersonDetails()"
-                                class="p-3 bg-white hover:bg-gray-50 rounded-2xl shadow-sm border border-gray-100 transition-all active:scale-95 group">
-                                <i data-lucide="arrow-left"
-                                    class="w-6 h-6 text-gray-600 group-hover:text-indigo-600"></i>
+                                class="p-3 bg-white hover:bg-gray-50 rounded-full shadow-lg border border-gray-100 transition-all active:scale-95 group">
+                                <i data-lucide="arrow-left" class="w-6 h-6 text-black group-hover:text-primary-500"></i>
                             </button>
                             <div>
                                 <h3 id="detailTitle" class="text-2xl font-black text-gray-900">Salesperson Activity</h3>
@@ -97,12 +96,10 @@
                 <!-- Charts Grid -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     <!-- Total Orders Chart -->
-                    <div
-                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="glass-card overflow-hidden transition-all hover:shadow-2xl">
                         <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                            <h3
-                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                                <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-500"></i>
+                            <h3 class="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-primary-500"></i>
                                 Order Distribution
                             </h3>
                         </div>
@@ -114,12 +111,10 @@
                     </div>
 
                     <!-- Total Sales Chart -->
-                    <div
-                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="glass-card overflow-hidden transition-all hover:shadow-2xl">
                         <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                            <h3
-                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                                <i data-lucide="bar-chart-3" class="w-4 h-4 text-purple-500"></i>
+                            <h3 class="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="bar-chart-3" class="w-4 h-4 text-black"></i>
                                 Revenue Volume
                             </h3>
                         </div>
@@ -131,12 +126,10 @@
                     </div>
 
                     <!-- Salesperson Sales Chart -->
-                    <div
-                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="glass-card overflow-hidden transition-all hover:shadow-2xl">
                         <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                            <h3
-                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
-                                <i data-lucide="users" class="w-4 h-4 text-emerald-500"></i>
+                            <h3 class="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-primary-500"></i>
                                 Personnel Performance
                             </h3>
                         </div>
@@ -148,11 +141,9 @@
                     </div>
 
                     <!-- Date-wise Trends Chart -->
-                    <div
-                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden transition-all hover:shadow-2xl">
+                    <div class="glass-card overflow-hidden transition-all hover:shadow-2xl">
                         <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                            <h3
-                                class="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                            <h3 class="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="activity" class="w-4 h-4 text-red-500"></i>
                                 Temporal Trends
                             </h3>
@@ -231,9 +222,7 @@
                                         ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     </p>
                                 </div>
-                                <span class="px-2 py-0.5 ${order.orderStatus === 'Ordered' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'} text-[9px] font-black uppercase tracking-widest rounded shadow-sm">
-                                    ${order.orderStatus || 'Visited'}
-                                </span>
+
                             </div>
                             
                             <div class="mb-4">
@@ -242,6 +231,7 @@
                                         <div class="px-2 py-1 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-1.5">
                                             <span class="text-[10px] font-black text-gray-700">${p.productName}</span>
                                             <span class="text-[9px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">x${p.quantity}</span>
+                                            ${p.rate ? `<span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">@ Rs. ${p.rate}</span>` : ''}
                                         </div>
                                     `).join('')}
                                 </div>
