@@ -70,11 +70,10 @@ function selectCustomer(customerId) {
             document.getElementById('customerId').value = customer._id;
             document.getElementById('address').value = customer.address || '';
             document.getElementById('mobileNo').value = customer.mobileNo || '';
-            document.getElementById('gstNo').value = customer.gstNo || '';
             document.getElementById('category').value = customer.category || '';
 
             // Freeze fields
-            const fields = ['address', 'mobileNo', 'gstNo', 'category'];
+            const fields = ['address', 'mobileNo', 'category'];
             fields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el.tagName === 'SELECT') {
@@ -99,7 +98,7 @@ function clearCustomerSelection() {
     document.getElementById('customerId').value = '';
 
     // Unfreeze fields
-    const fields = ['address', 'mobileNo', 'gstNo', 'category'];
+    const fields = ['address', 'mobileNo', 'category'];
     fields.forEach(id => {
         const el = document.getElementById(id);
         if (el.tagName === 'SELECT') {

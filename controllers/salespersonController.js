@@ -33,7 +33,7 @@ const getCreateOrder = async (req, res) => {
                     customerName: order.customerName,
                     address: order.address,
                     mobileNo: order.mobileNo,
-                    gstNo: order.gstNo,
+
                     category: order.category
                 };
             }
@@ -112,7 +112,7 @@ const createOrder = async (req, res) => {
             customerName,
             address,
             mobileNo,
-            gstNo,
+
             category,
             orderStatus,
             products,
@@ -163,7 +163,7 @@ const createOrder = async (req, res) => {
                     customerName,
                     address,
                     mobileNo,
-                    gstNo,
+
                     category
                 });
                 await customer.save();
@@ -176,7 +176,7 @@ const createOrder = async (req, res) => {
             customerName,
             address,
             mobileNo,
-            gstNo,
+
             category,
             orderStatus,
             products: productList,

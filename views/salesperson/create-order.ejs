@@ -88,16 +88,7 @@
                                                     placeholder="Street, Landmark, City..."><%= typeof prefill !== 'undefined' && prefill ? prefill.address : '' %></textarea>
                                             </div>
 
-                                            <div class="space-y-2">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest">Tax
-                                                    Identification (GST)</label>
-                                                <input type="text" id="gstNo" name="gstNo"
-                                                    value="<%= typeof prefill !== 'undefined' && prefill ? prefill.gstNo : '' %>"
-                                                    class="input-field <%= typeof prefill !== 'undefined' && prefill ? 'bg-gray-100 text-gray-500' : '' %>"
-                                                    <%=typeof prefill !=='undefined' && prefill ? 'readonly' : '' %>
-                                                placeholder="22AAAAA0000A1Z5">
-                                            </div>
+
 
 
                                         </div>
@@ -121,7 +112,7 @@
                                                 class="w-full max-w-sm input-field">
                                                 <option value="">Select current state...</option>
                                                 <option value="Ordered">✅ Confirmed Order</option>
-                                                <option value="Not Ordered">⏳ Follow-up Required</option>
+                                                <option value="Not Ordered">⏳ Visited</option>
                                             </select>
                                         </div>
 
@@ -182,8 +173,7 @@
                                         <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
                                             <div class="space-y-1">
                                                 <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest text-left">Executive
-                                                    Notes / Remarks</label>
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest text-left">Remarks</label>
                                                 <textarea id="remark" name="remark" rows="2" class="input-field"
                                                     placeholder="Add any specific branding requests or client preferences..."></textarea>
                                             </div>

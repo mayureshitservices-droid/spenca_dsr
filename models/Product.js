@@ -10,11 +10,7 @@ const productSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    gstPercent: {
-        type: Number,
-        min: 0,
-        max: 100
-    },
+
     photo: {
         type: String, // File path
         default: null

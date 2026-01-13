@@ -129,12 +129,11 @@ const getProducts = async (req, res) => {
 // POST /sysadmin/products/create
 const createProduct = async (req, res) => {
     try {
-        const { productName, packaging, gstPercent, remarks } = req.body;
+        const { productName, packaging, remarks } = req.body;
 
         const newProduct = new Product({
             productName,
             packaging,
-            gstPercent: gstPercent ? parseFloat(gstPercent) : undefined,
             photo: req.file ? '/uploads/' + req.file.filename : null,
             remarks
         });

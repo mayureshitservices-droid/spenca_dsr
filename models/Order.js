@@ -19,10 +19,7 @@ const orderSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    gstNo: {
-        type: String,
-        trim: true
-    },
+
     category: {
         type: String,
         enum: ['Hotel', 'Gym', 'Resort', 'Water Park'],
