@@ -67,6 +67,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
+app.set('trust proxy', 1);
 app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════╗
