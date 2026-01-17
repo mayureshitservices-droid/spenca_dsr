@@ -21,7 +21,7 @@
     }
 
     .input-field {
-        @apply w-full py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-gray-900 font-medium placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100;
+        @apply w-full py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 appearance-none min-h-[56px];
     }
 
     .card-header-primary {

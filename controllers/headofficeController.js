@@ -56,21 +56,46 @@ const getDashboard = async (req, res) => {
 // GET /headoffice/download-report
 const downloadDailyReport = async (req, res) => {
     try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        const { startDate, endDate, salespersonId } = req.query;
 
         // Build query
-        const query = {
-            createdAt: { $gte: startOfDay, $lte: endOfDay },
-            orderStatus: { $in: ['Ordered', 'Visited'] } // Include both for full report
-        };
+        const query = {};
+
+        let reportName = 'Daily_Sales_Report';
+
+        // Check if dates are valid non-empty strings and not "undefined"
+        const hasValidDates = startDate && endDate && startDate !== 'undefined' && endDate !== 'undefined';
+
+        if (hasValidDates) {
+            const [sYear, sMonth, sDay] = startDate.split('-').map(Number);
+            const [eYear, eMonth, eDay] = endDate.split('-').map(Number);
+
+            // Explicitly set to local time boundaries
+            const start = new Date(sYear, sMonth - 1, sDay, 0, 0, 0, 0);
+            const end = new Date(eYear, eMonth - 1, eDay, 23, 59, 59, 999);
+
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                query.createdAt = { $gte: start, $lte: end };
+                reportName = `DSR_${startDate}_to_${endDate}`;
+            } else {
+                const startOfDay = new Date();
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date();
+                endOfDay.setHours(23, 59, 59, 999);
+                query.createdAt = { $gte: startOfDay, $lte: endOfDay };
+            }
+        } else {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999);
+            query.createdAt = { $gte: startOfDay, $lte: endOfDay };
+            reportName = `DSR_${new Date().toISOString().split('T')[0]}`;
+        }
 
         // If salespersonId is provided, filter by it
-        if (req.query.salespersonId) {
-            query.salespersonId = req.query.salespersonId;
+        if (salespersonId) {
+            query.salespersonId = salespersonId;
         }
 
         const orders = await Order.find(query).populate('salespersonId', 'fullName');
@@ -99,7 +124,11 @@ const downloadDailyReport = async (req, res) => {
         };
 
         orders.forEach(order => {
-            const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
+            const d = new Date(order.createdAt);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            const orderDate = `${day}/${month}/${year}`;
 
             if (order.products && order.products.length > 0) {
                 // One row per product
@@ -131,7 +160,7 @@ const downloadDailyReport = async (req, res) => {
         });
 
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=' + `Daily_Sales_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+        res.setHeader('Content-Disposition', `attachment; filename=${reportName}.xlsx`);
 
         await workbook.xlsx.write(res);
         res.end();

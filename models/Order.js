@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema({
     // Order details
     orderStatus: {
         type: String,
-        enum: ['Ordered', 'Not Ordered'],
+        enum: ['Ordered', 'Visited', 'Not Ordered'],
         required: [true, 'Order status is required']
     },
     products: [{

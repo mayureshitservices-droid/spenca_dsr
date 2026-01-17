@@ -17,6 +17,11 @@ function captureGPS() {
         return;
     }
 
+    // iOS Safari requires HTTPS for Geolocation (unless localhost)
+    if (!window.isSecureContext && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        alert('SECURITY ALERT: iPhone requires an HTTPS connection (SSL) to capture GPS. Please use a secure link or contact admin.');
+    }
+
     // Show loading state
     gpsBtn.disabled = true;
     gpsBtn.innerHTML = `
@@ -83,17 +88,17 @@ function captureGPS() {
 
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    errorMessage = 'Satellite link denied. Please check location permissions.';
+                    errorMessage = 'Satellite link denied. Please check location permissions in iPhone Settings.';
                     break;
                 case error.POSITION_UNAVAILABLE:
                     errorMessage = 'Coordinate signal lost. Please move to an open area.';
                     break;
                 case error.TIMEOUT:
-                    errorMessage = 'Authentication timed out. Retrying recommended.';
+                    errorMessage = 'Authentication timed out. Retrying recommended (Try moving near a window).';
                     break;
             }
 
-            gpsStatus.innerHTML = `<i class="bi bi-exclamation-octagon-fill text-xl block mb-2"></i> ${errorMessage}`;
+            gpsStatus.innerHTML = `<i class="bi bi-exclamation-octagon-fill text-xl block mb-2"></i> ${errorMessage}<br><span class="text-[10px] opacity-50">Error Code: ${error.code}</span>`;
             gpsStatus.className = 'p-6 bg-red-50 border-2 border-red-100 rounded-3xl text-red-700 font-black text-center active:scale-95 cursor-pointer';
 
             gpsBtn.disabled = false;
@@ -101,8 +106,8 @@ function captureGPS() {
         },
         {
             enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0
+            timeout: 30000,
+            maximumAge: 30000
         }
     );
 }

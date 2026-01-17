@@ -76,24 +76,39 @@
                 <!-- Detail View (Hidden Initially) -->
                 <div id="salespersonDetails" class="hidden">
                     <div class="flex flex-col gap-6 mb-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
+                        <div class="flex flex-col md:flex-row md:items-center gap-6">
+                            <div class="flex items-center gap-4 flex-grow">
                                 <button onclick="hideSalespersonDetails()"
-                                    class="p-3 bg-white hover:bg-gray-50 rounded-full shadow-lg border border-gray-100 transition-all active:scale-95 group">
+                                    class="w-fit p-3 bg-white hover:bg-gray-50 rounded-full shadow-lg border border-gray-100 transition-all active:scale-95 group">
                                     <i data-lucide="arrow-left"
                                         class="w-6 h-6 text-black group-hover:text-primary-500"></i>
                                 </button>
-                                <div>
-                                    <h3 id="detailTitle" class="text-2xl font-black text-gray-900">Salesperson Activity
-                                    </h3>
+                                <h3 id="detailTitle"
+                                    class="text-2xl font-black text-gray-900 leading-tight hidden sm:block">Activity
+                                </h3>
+                            </div>
+
+                            <div
+                                class="md:ml-auto flex flex-col sm:flex-row items-center gap-4 bg-primary-50 px-6 py-3 rounded-3xl border border-primary-100 shadow-sm w-full md:w-auto">
+                                <div class="flex items-center gap-2">
+                                    <input type="date" id="rangeStartDate"
+                                        class="px-3 py-1.5 bg-white border border-primary-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 font-bold text-base uppercase">
+                                    <span class="text-primary-300 font-black">/</span>
+                                    <input type="date" id="rangeEndDate"
+                                        class="px-3 py-1.5 bg-white border border-primary-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 font-bold text-base uppercase">
                                 </div>
+                                <button onclick="downloadRangeDSR()"
+                                    class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap">
+                                    <i data-lucide="download-cloud" class="w-3 h-3"></i>
+                                    Download DSR
+                                </button>
                             </div>
                         </div>
 
                         <!-- Search Bar -->
                         <div class="relative w-full">
                             <input type="text" id="searchInput" placeholder="Search customer, mobile, or product..."
-                                class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all shadow-sm">
+                                class="w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all shadow-around-sm text-base">
                         </div>
                     </div>
 
@@ -120,6 +135,9 @@
                                         <th
                                             class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
                                             Total</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
+                                            Location</th>
                                         <th
                                             class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
                                             Status</th>
@@ -258,7 +276,11 @@
                         }
 
                         tbody.innerHTML = pageData.map(order => {
-                            const date = new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                            const d = new Date(order.createdAt);
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            const date = `${day}/${month}/${year}`;
                             const productsHtml = (order.products || []).map(p => `
                                 <div class="text-xs mb-1 last:mb-0">
                                     <span class="font-bold text-gray-700">${p.productName}</span>
@@ -281,6 +303,18 @@
                                     <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">${order.mobileNo || '-'}</td>
                                     <td class="px-6 py-4">${productsHtml}</td>
                                     <td class="px-6 py-4 text-sm font-bold text-emerald-600 text-right tabular-nums">Rs. ${totalAmount.toLocaleString()}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        ${order.gpsLocation && order.gpsLocation.latitude ? `
+                                            <a href="https://www.google.com/maps?q=${order.gpsLocation.latitude},${order.gpsLocation.longitude}" 
+                                               target="_blank" 
+                                               class="inline-flex items-center gap-1 text-[10px] font-black text-primary-600 hover:text-primary-700 uppercase tracking-widest bg-primary-50 px-2 py-1 rounded-lg transition-colors">
+                                                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                                Map
+                                            </a>
+                                        ` : `
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase">No GPS</span>
+                                        `}
+                                    </td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.orderStatus === 'Ordered' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">
                                             ${order.orderStatus || 'Visited'}
@@ -305,4 +339,30 @@
                         currentPage += delta;
                         renderTable();
                     }
+
+                    function downloadRangeDSR() {
+                        const start = document.getElementById('rangeStartDate').value;
+                        const end = document.getElementById('rangeEndDate').value;
+
+                        if (!start || !end) {
+                            alert('Action Required: Please select both start and end dates to generate the report.');
+                            return;
+                        }
+
+                        let url = `/headoffice/download-report?startDate=${start}&endDate=${end}`;
+                        if (currentUserId) {
+                            url += `&salespersonId=${currentUserId}`;
+                        }
+
+                        window.location.href = url;
+                    }
+
+                    // Set default dates to today
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const today = new Date().toISOString().split('T')[0];
+                        const startEl = document.getElementById('rangeStartDate');
+                        const endEl = document.getElementById('rangeEndDate');
+                        if (startEl) startEl.value = today;
+                        if (endEl) endEl.value = today;
+                    });
                 </script>
