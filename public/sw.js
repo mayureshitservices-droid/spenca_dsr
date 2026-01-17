@@ -1,6 +1,7 @@
 const CACHE_NAME = 'spenca-dsr-v1';
 const ASSETS_TO_CACHE = [
   '/',
+  '/login',
   '/css/style.css',
   '/css/input.css',
   '/js/charts.js',
