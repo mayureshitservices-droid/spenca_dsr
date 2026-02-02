@@ -172,6 +172,7 @@
                         // Find and update device in local data
                         const device = devices.find(d => d.id === deviceId);
                         if (device) {
+                            const originalName = device.telecaller;
                             device.telecaller = newName;
 
                             // Show success feedback
@@ -190,12 +191,27 @@
                                 if (typeof lucide !== 'undefined') lucide.createIcons();
                             }, 2000);
 
-                            // TODO: When backend is ready, send update to server
-                            // fetch(`/api/telecrm/device/${deviceId}`, {
-                            //     method: 'PATCH',
-                            //     headers: { 'Content-Type': 'application/json' },
-                            //     body: JSON.stringify({ telecaller: newName })
-                            // });
+                            // Send update to server
+                            fetch(`/api/telecrm/device/${deviceId}`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ telecaller: newName })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // Success feedback already shown above
+                                        console.log('Telecaller name updated successfully');
+                                    } else {
+                                        throw new Error(data.error || 'Failed to update');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Update error:', error);
+                                    alert('Error saving telecaller name: ' + error.message);
+                                    // Revert local change on failure
+                                    device.telecaller = originalName;
+                                });
                         }
                     }
 

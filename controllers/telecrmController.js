@@ -115,18 +115,27 @@ const updateTelecaller = async (req, res) => {
         const { deviceId } = req.params;
         const { token, telecaller } = req.body;
 
-        if (!token) {
-            return res.status(400).json({ error: 'Token is required' });
-        }
-
         if (!telecaller) {
             return res.status(400).json({ error: 'Telecaller name is required' });
         }
 
-        const device = await Device.findByIdAndToken(deviceId, token);
+        let device;
+
+        // Check if this is a Head Office/SysAdmin update from the dashboard (session-based)
+        if (req.session && (req.session.userRole === 'headoffice' || req.session.userRole === 'sysadmin')) {
+            device = await Device.findOne({ deviceId });
+        } else {
+            // Otherwise, it must be a device self-update (token-based)
+            if (!token) {
+                return res.status(400).json({ error: 'Token is required for device self-update' });
+            }
+            device = await Device.findByIdAndToken(deviceId, token);
+        }
 
         if (!device) {
-            return res.status(401).json({ error: 'Invalid device ID or token' });
+            return res.status(req.session && req.session.userId ? 404 : 401).json({
+                error: req.session && req.session.userId ? 'Device not found' : 'Invalid device ID or token'
+            });
         }
 
         device.telecaller = telecaller;
