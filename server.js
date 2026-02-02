@@ -53,8 +53,8 @@ app.use('/salesperson', salespersonRoutes);
 
 app.use('/owner', ownerRoutes);
 app.use('/headoffice', headofficeRoutes);
-app.use('/api', apiRoutes);
 app.use('/api/telecrm', telecrmRoutes);
+app.use('/api', apiRoutes);
 
 // 404 handler
 app.use((req, res) => {
