@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
 const deviceSchema = new mongoose.Schema({
@@ -7,7 +6,7 @@ const deviceSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        default: () => uuidv4()
+        default: () => crypto.randomUUID()
     },
     deviceName: {
         type: String,
@@ -20,7 +19,8 @@ const deviceSchema = new mongoose.Schema({
     token: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        default: () => crypto.randomBytes(32).toString('hex')
     },
     status: {
         type: String,
@@ -33,14 +33,6 @@ const deviceSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true
-});
-
-// Generate secure token before saving
-deviceSchema.pre('save', function (next) {
-    if (!this.token) {
-        this.token = crypto.randomBytes(32).toString('hex');
-    }
-    next();
 });
 
 // Method to validate token
