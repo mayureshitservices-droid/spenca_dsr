@@ -171,7 +171,43 @@ const downloadDailyReport = async (req, res) => {
     }
 };
 
+// GET /headoffice/telecrm
+const getTeleCRM = async (req, res) => {
+    try {
+        const telecrmController = require('./telecrmController');
+
+        // Use the getDevices function to fetch real device data
+        const mockRes = {
+            json: (data) => data,
+            status: () => mockRes
+        };
+
+        const devices = await new Promise((resolve, reject) => {
+            telecrmController.getDevices({ query: {} }, {
+                json: resolve,
+                status: (code) => ({
+                    json: (error) => reject(error)
+                })
+            });
+        });
+
+        res.render('headoffice/telecrm', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            devices
+        });
+    } catch (error) {
+        console.error('TeleCRM error:', error);
+        res.render('headoffice/telecrm', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            devices: []
+        });
+    }
+};
+
 module.exports = {
     getDashboard,
-    downloadDailyReport
+    downloadDailyReport,
+    getTeleCRM
 };

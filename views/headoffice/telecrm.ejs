@@ -1,0 +1,207 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <!-- Device List View -->
+            <div id="deviceList">
+                <h2 class="text-2xl font-bold text-black mb-6 flex items-center gap-3">
+                    <i data-lucide="smartphone" class="w-6 h-6 text-black"></i>
+                    TeleCRM Devices
+                </h2>
+
+                <% if (devices.length===0) { %>
+                    <div class="glass-card p-12 text-center border border-dashed border-gray-300">
+                        <i data-lucide="smartphone" class="w-12 h-12 text-gray-300 mb-4 block mx-auto"></i>
+                        <p class="text-gray-500 text-lg font-medium">No devices connected yet.</p>
+                    </div>
+                    <% } else { %>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <% devices.forEach(function(device) { %>
+                                <div onclick="showDeviceDetails('<%= device.id %>')"
+                                    class="glass-card p-6 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-xl">
+                                                <i data-lucide="smartphone" class="w-6 h-6"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-lg font-black text-gray-900 leading-tight">
+                                                    <%= device.name %>
+                                                </h4>
+                                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                                    <%= device.id %>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= device.status === 'online' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500' %>">
+                                            <%= device.status %>
+                                        </span>
+                                    </div>
+
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-center gap-2 text-gray-600">
+                                            <i data-lucide="user" class="w-4 h-4"></i>
+                                            <span class="font-bold">
+                                                <%= device.telecaller %>
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-gray-600">
+                                            <i data-lucide="phone" class="w-4 h-4"></i>
+                                            <span class="font-bold">Today: <%= device.callStats.todayCalls %>
+                                                    calls</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- Device Detail View (Hidden Initially) -->
+            <div id="deviceDetails" class="hidden">
+                <div class="flex items-center gap-4 mb-6">
+                    <button onclick="hideDeviceDetails()"
+                        class="w-fit p-3 bg-white hover:bg-gray-50 rounded-full shadow-lg border border-gray-100 transition-all active:scale-95 group">
+                        <i data-lucide="arrow-left" class="w-6 h-6 text-black group-hover:text-primary-500"></i>
+                    </button>
+                    <h3 id="detailTitle" class="text-2xl font-black text-gray-900 leading-tight">Device Details</h3>
+                </div>
+
+                <div class="glass-card p-8">
+                    <div id="detailContent" class="space-y-6">
+                        <!-- Content will be injected via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    // Data passed from server
+                    const devices = JSON.parse('<%- JSON.stringify(devices) %>');
+
+                    function showDeviceDetails(deviceId) {
+                        const device = devices.find(d => d.id === deviceId);
+                        if (!device) return;
+
+                        const listView = document.getElementById('deviceList');
+                        const detailView = document.getElementById('deviceDetails');
+                        const detailTitle = document.getElementById('detailTitle');
+                        const detailContent = document.getElementById('detailContent');
+
+                        detailTitle.innerText = device.name;
+
+                        detailContent.innerHTML = `
+                                <div>
+                                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Device ID</p>
+                                    <p class="text-lg font-bold text-gray-900">${device.id}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Telecaller</p>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="telecallerName_${device.id}" value="${device.telecaller}" 
+                                            class="text-lg font-bold text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 focus:border-primary-500 focus:outline-none transition-all">
+                                        <button onclick="saveTelecallerName('${device.id}')" 
+                                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all active:scale-95 flex items-center gap-2">
+                                            <i data-lucide="save" class="w-4 h-4"></i>
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Status</p>
+                                    <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest ${device.status === 'online' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}">
+                                        ${device.status}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Last Active</p>
+                                    <p class="text-lg font-bold text-gray-900">${new Date(device.lastActive).toLocaleString('en-IN')}</p>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-gray-100 pt-6">
+                                <h4 class="text-xl font-black text-gray-900 mb-4">Call Statistics</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div class="p-4 bg-primary-50 rounded-2xl border border-primary-100">
+                                        <p class="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Total Calls</p>
+                                        <p class="text-2xl font-black text-primary-700">${device.callStats.totalCalls}</p>
+                                    </div>
+                                    <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Answered</p>
+                                        <p class="text-2xl font-black text-emerald-700">${device.callStats.answeredCalls}</p>
+                                    </div>
+                                    <div class="p-4 bg-red-50 rounded-2xl border border-red-100">
+                                        <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Missed</p>
+                                        <p class="text-2xl font-black text-red-700">${device.callStats.missedCalls}</p>
+                                    </div>
+                                    <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                                        <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Today's Calls</p>
+                                        <p class="text-2xl font-black text-amber-700">${device.callStats.todayCalls}</p>
+                                    </div>
+                                    <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 md:col-span-2">
+                                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">Avg Duration</p>
+                                        <p class="text-2xl font-black text-purple-700">${device.callStats.avgCallDuration}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        listView.classList.add('hidden');
+                        detailView.classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                        // Refresh icons
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+
+                    function saveTelecallerName(deviceId) {
+                        const input = document.getElementById(`telecallerName_${deviceId}`);
+                        const newName = input.value.trim();
+
+                        if (!newName) {
+                            alert('Telecaller name cannot be empty');
+                            return;
+                        }
+
+                        // Find and update device in local data
+                        const device = devices.find(d => d.id === deviceId);
+                        if (device) {
+                            device.telecaller = newName;
+
+                            // Show success feedback
+                            const saveBtn = event.target.closest('button');
+                            const originalHTML = saveBtn.innerHTML;
+                            saveBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Saved!';
+                            saveBtn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
+                            saveBtn.classList.add('bg-emerald-600');
+
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                            setTimeout(() => {
+                                saveBtn.innerHTML = originalHTML;
+                                saveBtn.classList.remove('bg-emerald-600');
+                                saveBtn.classList.add('bg-primary-600', 'hover:bg-primary-700');
+                                if (typeof lucide !== 'undefined') lucide.createIcons();
+                            }, 2000);
+
+                            // TODO: When backend is ready, send update to server
+                            // fetch(`/api/telecrm/device/${deviceId}`, {
+                            //     method: 'PATCH',
+                            //     headers: { 'Content-Type': 'application/json' },
+                            //     body: JSON.stringify({ telecaller: newName })
+                            // });
+                        }
+                    }
+
+                    function hideDeviceDetails() {
+                        document.getElementById('deviceList').classList.remove('hidden');
+                        document.getElementById('deviceDetails').classList.add('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                </script>

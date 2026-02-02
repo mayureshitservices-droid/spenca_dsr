@@ -15,5 +15,6 @@ router.use(isHeadOffice);
 
 router.get('/dashboard', headofficeController.getDashboard);
 router.get('/download-report', headofficeController.downloadDailyReport);
+router.get('/telecrm', headofficeController.getTeleCRM);
 
 module.exports = router;

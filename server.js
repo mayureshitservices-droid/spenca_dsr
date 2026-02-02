@@ -44,6 +44,7 @@ const salespersonRoutes = require('./routes/salesperson');
 const ownerRoutes = require('./routes/owner');
 const headofficeRoutes = require('./routes/headoffice');
 const apiRoutes = require('./routes/api');
+const telecrmRoutes = require('./routes/telecrm');
 
 // Mount routes
 app.use('/', authRoutes);
@@ -53,6 +54,7 @@ app.use('/salesperson', salespersonRoutes);
 app.use('/owner', ownerRoutes);
 app.use('/headoffice', headofficeRoutes);
 app.use('/api', apiRoutes);
+app.use('/api/telecrm', telecrmRoutes);
 
 // 404 handler
 app.use((req, res) => {
