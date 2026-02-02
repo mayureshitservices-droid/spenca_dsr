@@ -6,14 +6,45 @@ const { validateGPS } = require('../utils/validators');
 // GET /salesperson/dashboard
 const getDashboard = async (req, res) => {
     try {
-        const myOrders = await Order.find({ salespersonId: req.session.userId })
+        const salespersonId = req.session.userId;
+
+        // Current Dates
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+        // Helper function for stats
+        const getStats = async (startDate, endDate = new Date()) => {
+            const query = {
+                salespersonId,
+                createdAt: { $gte: startDate, $lte: endDate }
+            };
+            const totalVisits = await Order.countDocuments(query);
+            const ordersCount = await Order.countDocuments({ ...query, orderStatus: 'Ordered' });
+            return { totalVisits, ordersCount };
+        };
+
+        const [todayStats, monthStats, lastMonthStats] = await Promise.all([
+            getStats(startOfToday),
+            getStats(startOfMonth),
+            getStats(startOfLastMonth, endOfLastMonth)
+        ]);
+
+        const myOrders = await Order.find({ salespersonId })
             .sort({ createdAt: -1 })
             .limit(10);
 
         res.render('salesperson/dashboard', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            orders: myOrders
+            orders: myOrders,
+            stats: {
+                today: todayStats,
+                month: monthStats,
+                lastMonth: lastMonthStats
+            }
         });
     } catch (error) {
         console.error('Dashboard error:', error);
