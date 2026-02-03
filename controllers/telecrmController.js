@@ -153,6 +153,7 @@ const updateTelecaller = async (req, res) => {
 
 // Helper to format duration
 const formatDuration = (totalSeconds) => {
+    if (!totalSeconds || totalSeconds < 0) return '0s';
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
@@ -167,45 +168,53 @@ const fetchDevicesWithStats = async () => {
     const devices = await Device.find().sort({ lastActive: -1 });
 
     return await Promise.all(devices.map(async (device) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
 
-        const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
 
-        const [totalCalls, answeredCalls, missedCalls, todayCalls, monthCalls] = await Promise.all([
-            CallLog.countDocuments({ deviceId: device.deviceId }),
-            // Answered includes both incoming 'answered' and any 'outgoing' calls
-            CallLog.countDocuments({
-                deviceId: device.deviceId,
-                callStatus: { $in: ['answered', 'outgoing'] }
-            }),
-            CallLog.countDocuments({
-                deviceId: device.deviceId,
-                callStatus: { $in: ['missed', 'rejected'] }
-            }),
-            CallLog.countDocuments({
-                deviceId: device.deviceId,
-                timestamp: { $gte: today }
-            }),
-            CallLog.countDocuments({
-                deviceId: device.deviceId,
-                timestamp: { $gte: firstOfMonth }
-            })
+        // Fetch stats using aggregation for better performance and duration summing
+        const getStatsForRange = async (startDate) => {
+            const result = await CallLog.aggregate([
+                {
+                    $match: {
+                        deviceId: device.deviceId,
+                        timestamp: { $gte: startDate }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: { $sum: 1 },
+                        answered: {
+                            $sum: {
+                                $cond: [{ $in: ['$callStatus', ['answered', 'outgoing']] }, 1, 0]
+                            }
+                        },
+                        missed: {
+                            $sum: {
+                                $cond: [{ $in: ['$callStatus', ['missed', 'rejected']] }, 1, 0]
+                            }
+                        },
+                        duration: { $sum: { $ifNull: ['$duration', 0] } }
+                    }
+                }
+            ]);
+
+            const stats = result[0] || { total: 0, answered: 0, missed: 0, duration: 0 };
+            return {
+                total: stats.total,
+                answered: stats.answered,
+                missed: stats.missed,
+                duration: formatDuration(stats.duration)
+            };
+        };
+
+        const [todayStats, monthStats, totalAllTime] = await Promise.all([
+            getStatsForRange(todayStart),
+            getStatsForRange(monthStart),
+            CallLog.countDocuments({ deviceId: device.deviceId })
         ]);
-
-        // Calculate call durations (for answered or outgoing calls)
-        const callsWithDuration = await CallLog.find({
-            deviceId: device.deviceId,
-            callStatus: { $in: ['answered', 'outgoing'] },
-            duration: { $gt: 0 }
-        });
-
-        const totalSeconds = callsWithDuration.reduce((sum, call) => sum + (call.duration || 0), 0);
-        const totalDurationFormatted = formatDuration(totalSeconds);
-
-        // Calculate average
-        const avgSeconds = callsWithDuration.length > 0 ? Math.floor(totalSeconds / callsWithDuration.length) : 0;
-        const avgDurationFormatted = formatDuration(avgSeconds);
 
         // Determine status (offline if last active > 5 minutes ago)
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60000);
@@ -218,13 +227,9 @@ const fetchDevicesWithStats = async () => {
             status,
             lastActive: device.lastActive,
             callStats: {
-                totalCalls,
-                answeredCalls,
-                missedCalls,
-                avgCallDuration: avgDurationFormatted,
-                totalCallDuration: totalDurationFormatted,
-                todayCalls,
-                monthCalls
+                totalCalls: totalAllTime,
+                today: todayStats,
+                month: monthStats
             }
         };
     }));
