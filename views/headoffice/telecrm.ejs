@@ -19,40 +19,86 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <% devices.forEach(function(device) { %>
                                 <div onclick="showDeviceDetails('<%= device.id %>')"
-                                    class="glass-card p-6 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
+                                    class="glass-card p-5 group transition-all hover:shadow-2xl cursor-pointer hover:-translate-y-1">
                                     <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-2">
                                             <div
-                                                class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-xl">
-                                                <i data-lucide="smartphone" class="w-6 h-6"></i>
+                                                class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-lg">
+                                                <i data-lucide="smartphone" class="w-5 h-5"></i>
                                             </div>
                                             <div>
-                                                <h4 class="text-lg font-black text-gray-900 leading-tight">
+                                                <h4 class="text-base font-black text-gray-900 leading-tight">
                                                     <%= device.name %>
                                                 </h4>
-                                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                                <p
+                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                                     <%= device.id %>
                                                 </p>
                                             </div>
                                         </div>
                                         <span
-                                            class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= device.status === 'online' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500' %>">
+                                            class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest <%= device.status === 'online' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500' %>">
                                             <%= device.status %>
                                         </span>
                                     </div>
 
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex items-center gap-2 text-gray-600">
-                                            <i data-lucide="user" class="w-4 h-4"></i>
-                                            <span class="font-bold">
-                                                <%= device.telecaller %>
-                                            </span>
+                                    <!-- Inline Telecaller Edit -->
+                                    <div class="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100"
+                                        onclick="event.stopPropagation()">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2 flex-1">
+                                                <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+                                                <input type="text" id="cardTelecaller_<%= device.id %>"
+                                                    value="<%= device.telecaller %>"
+                                                    class="bg-transparent border-none p-0 text-sm font-bold text-gray-900 focus:ring-0 w-full"
+                                                    onkeypress="if(event.key === 'Enter') saveCardTelecaller('<%= device.id %>')">
+                                            </div>
+                                            <button onclick="saveCardTelecaller('<%= device.id %>')"
+                                                id="saveBtn_<%= device.id %>"
+                                                class="p-1.5 bg-white hover:bg-primary-50 text-gray-400 hover:text-primary-600 rounded-lg shadow-sm border border-gray-100 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                                <i data-lucide="save" class="w-4 h-4"></i>
+                                            </button>
                                         </div>
-                                        <div class="flex items-center gap-2 text-gray-600">
-                                            <i data-lucide="phone" class="w-4 h-4"></i>
-                                            <span class="font-bold">Today: <%= device.callStats.todayCalls %>
-                                                    calls</span>
+                                    </div>
+
+                                    <!-- Stats Grid on Card -->
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="p-2 bg-primary-50 rounded-lg border border-primary-100">
+                                            <p
+                                                class="text-[8px] font-black text-primary-600 uppercase tracking-tighter mb-0.5">
+                                                Today</p>
+                                            <p class="text-sm font-black text-primary-700">
+                                                <%= device.callStats.todayCalls %>
+                                            </p>
                                         </div>
+                                        <div class="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                                            <p
+                                                class="text-[8px] font-black text-emerald-600 uppercase tracking-tighter mb-0.5">
+                                                Answered</p>
+                                            <p class="text-sm font-black text-emerald-700">
+                                                <%= device.callStats.answeredCalls %>
+                                            </p>
+                                        </div>
+                                        <div class="p-2 bg-red-50 rounded-lg border border-red-100">
+                                            <p
+                                                class="text-[8px] font-black text-red-600 uppercase tracking-tighter mb-0.5">
+                                                Missed</p>
+                                            <p class="text-sm font-black text-red-700">
+                                                <%= device.callStats.missedCalls %>
+                                            </p>
+                                        </div>
+                                        <div class="p-2 bg-purple-50 rounded-lg border border-purple-100">
+                                            <p
+                                                class="text-[8px] font-black text-purple-600 uppercase tracking-tighter mb-0.5">
+                                                Avg Duration</p>
+                                            <p class="text-[10px] font-bold text-purple-700 truncate">
+                                                <%= device.callStats.avgCallDuration %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <p class="text-[8px] font-bold text-gray-400 italic">Total: <%=
+                                                device.callStats.totalCalls %> calls</p>
                                     </div>
                                 </div>
                                 <% }); %>
@@ -103,15 +149,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Telecaller</p>
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" id="telecallerName_${device.id}" value="${device.telecaller}" 
-                                            class="text-lg font-bold text-gray-900 bg-gray-50 border-2 border-gray-200 rounded-xl px-3 py-2 focus:border-primary-500 focus:outline-none transition-all">
-                                        <button onclick="saveTelecallerName('${device.id}')" 
-                                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all active:scale-95 flex items-center gap-2">
-                                            <i data-lucide="save" class="w-4 h-4"></i>
-                                            Save
-                                        </button>
-                                    </div>
+                                    <p class="text-lg font-bold text-gray-900">${device.telecaller}</p>
                                 </div>
                                 <div>
                                     <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Status</p>
@@ -126,7 +164,7 @@
                             </div>
 
                             <div class="border-t border-gray-100 pt-6">
-                                <h4 class="text-xl font-black text-gray-900 mb-4">Call Statistics</h4>
+                                <h4 class="text-xl font-black text-gray-900 mb-4">Detailed Statistics</h4>
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     <div class="p-4 bg-primary-50 rounded-2xl border border-primary-100">
                                         <p class="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Total Calls</p>
@@ -160,8 +198,9 @@
                         if (typeof lucide !== 'undefined') lucide.createIcons();
                     }
 
-                    function saveTelecallerName(deviceId) {
-                        const input = document.getElementById(`telecallerName_${deviceId}`);
+                    function saveCardTelecaller(deviceId) {
+                        const input = document.getElementById(`cardTelecaller_${deviceId}`);
+                        const btn = document.getElementById(`saveBtn_${deviceId}`);
                         const newName = input.value.trim();
 
                         if (!newName) {
@@ -169,50 +208,48 @@
                             return;
                         }
 
-                        // Find and update device in local data
+                        // Find device in local data
                         const device = devices.find(d => d.id === deviceId);
-                        if (device) {
-                            const originalName = device.telecaller;
-                            device.telecaller = newName;
+                        if (!device) return;
 
-                            // Show success feedback
-                            const saveBtn = event.target.closest('button');
-                            const originalHTML = saveBtn.innerHTML;
-                            saveBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Saved!';
-                            saveBtn.classList.remove('bg-primary-600', 'hover:bg-primary-700');
-                            saveBtn.classList.add('bg-emerald-600');
+                        const originalName = device.telecaller;
 
-                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                        // Local update
+                        device.telecaller = newName;
 
-                            setTimeout(() => {
-                                saveBtn.innerHTML = originalHTML;
-                                saveBtn.classList.remove('bg-emerald-600');
-                                saveBtn.classList.add('bg-primary-600', 'hover:bg-primary-700');
-                                if (typeof lucide !== 'undefined') lucide.createIcons();
-                            }, 2000);
+                        // UI Feedback
+                        const originalBtnHTML = btn.innerHTML;
+                        btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>';
+                        btn.classList.add('scale-110');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
 
-                            // Send update to server
-                            fetch(`/api/telecrm/device/${deviceId}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ telecaller: newName })
+                        // Send update to server
+                        fetch(`/api/telecrm/device/${deviceId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ telecaller: newName })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    setTimeout(() => {
+                                        btn.innerHTML = originalBtnHTML;
+                                        btn.classList.remove('scale-110');
+                                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                                    }, 2000);
+                                } else {
+                                    throw new Error(data.error || 'Failed to update');
+                                }
                             })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        // Success feedback already shown above
-                                        console.log('Telecaller name updated successfully');
-                                    } else {
-                                        throw new Error(data.error || 'Failed to update');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Update error:', error);
-                                    alert('Error saving telecaller name: ' + error.message);
-                                    // Revert local change on failure
-                                    device.telecaller = originalName;
-                                });
-                        }
+                            .catch(error => {
+                                console.error('Update error:', error);
+                                alert('Error saving telecaller name: ' + error.message);
+                                input.value = originalName;
+                                device.telecaller = originalName;
+                                btn.innerHTML = originalBtnHTML;
+                                btn.classList.remove('scale-110');
+                                if (typeof lucide !== 'undefined') lucide.createIcons();
+                            });
                     }
 
                     function hideDeviceDetails() {
