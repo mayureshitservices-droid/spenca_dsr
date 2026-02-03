@@ -174,22 +174,8 @@ const downloadDailyReport = async (req, res) => {
 // GET /headoffice/telecrm
 const getTeleCRM = async (req, res) => {
     try {
-        const telecrmController = require('./telecrmController');
-
-        // Use the getDevices function to fetch real device data
-        const mockRes = {
-            json: (data) => data,
-            status: () => mockRes
-        };
-
-        const devices = await new Promise((resolve, reject) => {
-            telecrmController.getDevices({ query: {} }, {
-                json: resolve,
-                status: (code) => ({
-                    json: (error) => reject(error)
-                })
-            });
-        });
+        const { fetchDevicesWithStats } = require('./telecrmController');
+        const devices = await fetchDevicesWithStats();
 
         res.render('headoffice/telecrm', {
             user: { name: req.session.userName },

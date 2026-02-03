@@ -64,6 +64,9 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Error:', err);
+    if (req.path.startsWith('/api/')) {
+        return res.status(500).json({ error: 'Internal server error' });
+    }
     res.status(500).send('Something went wrong!');
 });
 
@@ -79,7 +82,7 @@ app.listen(PORT, () => {
 ║   Server running on: http://localhost:${PORT}        ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}                      ║
 ║                                                       ║
-║   📝 To seed admin user, run: npm run seed           ║
+║           ║
 ║                                                       ║
 ╚═══════════════════════════════════════════════════════╝
   `);

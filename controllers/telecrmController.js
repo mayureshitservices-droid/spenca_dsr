@@ -151,59 +151,72 @@ const updateTelecaller = async (req, res) => {
     }
 };
 
+// Helper function to fetch devices with stats
+const fetchDevicesWithStats = async () => {
+    const devices = await Device.find().sort({ lastActive: -1 });
+
+    return await Promise.all(devices.map(async (device) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [totalCalls, answeredCalls, missedCalls, todayCalls] = await Promise.all([
+            CallLog.countDocuments({ deviceId: device.deviceId }),
+            // Answered includes both incoming 'answered' and any 'outgoing' calls
+            CallLog.countDocuments({
+                deviceId: device.deviceId,
+                callStatus: { $in: ['answered', 'outgoing'] }
+            }),
+            CallLog.countDocuments({
+                deviceId: device.deviceId,
+                callStatus: { $in: ['missed', 'rejected'] }
+            }),
+            CallLog.countDocuments({
+                deviceId: device.deviceId,
+                timestamp: { $gte: today }
+            })
+        ]);
+
+        // Calculate average call duration (for answered or outgoing calls)
+        const callsWithDuration = await CallLog.find({
+            deviceId: device.deviceId,
+            callStatus: { $in: ['answered', 'outgoing'] },
+            duration: { $gt: 0 }
+        });
+
+        let avgCallDuration = '0s';
+        if (callsWithDuration.length > 0) {
+            const totalDuration = callsWithDuration.reduce((sum, call) => sum + call.duration, 0);
+            const avgSeconds = Math.floor(totalDuration / callsWithDuration.length);
+            const minutes = Math.floor(avgSeconds / 60);
+            const seconds = avgSeconds % 60;
+            avgCallDuration = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+        }
+
+        // Determine status (offline if last active > 5 minutes ago)
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60000);
+        const status = device.lastActive > fiveMinutesAgo ? 'online' : 'offline';
+
+        return {
+            id: device.deviceId,
+            name: device.deviceName,
+            telecaller: device.telecaller,
+            status,
+            lastActive: device.lastActive,
+            callStats: {
+                totalCalls,
+                answeredCalls,
+                missedCalls,
+                avgCallDuration,
+                todayCalls
+            }
+        };
+    }));
+};
+
 // GET /api/telecrm/devices (for Head Office)
 const getDevices = async (req, res) => {
     try {
-        const devices = await Device.find().sort({ lastActive: -1 });
-
-        // Calculate call stats for each device
-        const devicesWithStats = await Promise.all(devices.map(async (device) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            const [totalCalls, answeredCalls, missedCalls, todayCalls] = await Promise.all([
-                CallLog.countDocuments({ deviceId: device.deviceId }),
-                CallLog.countDocuments({ deviceId: device.deviceId, callStatus: 'answered' }),
-                CallLog.countDocuments({ deviceId: device.deviceId, callStatus: { $in: ['missed', 'rejected'] } }),
-                CallLog.countDocuments({ deviceId: device.deviceId, timestamp: { $gte: today } })
-            ]);
-
-            // Calculate average call duration
-            const answeredCallsWithDuration = await CallLog.find({
-                deviceId: device.deviceId,
-                callStatus: 'answered',
-                duration: { $gt: 0 }
-            });
-
-            let avgCallDuration = '0s';
-            if (answeredCallsWithDuration.length > 0) {
-                const totalDuration = answeredCallsWithDuration.reduce((sum, call) => sum + call.duration, 0);
-                const avgSeconds = Math.floor(totalDuration / answeredCallsWithDuration.length);
-                const minutes = Math.floor(avgSeconds / 60);
-                const seconds = avgSeconds % 60;
-                avgCallDuration = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-            }
-
-            // Determine status (offline if last active > 5 minutes ago)
-            const fiveMinutesAgo = new Date(Date.now() - 5 * 60000);
-            const status = device.lastActive > fiveMinutesAgo ? 'online' : 'offline';
-
-            return {
-                id: device.deviceId,
-                name: device.deviceName,
-                telecaller: device.telecaller,
-                status,
-                lastActive: device.lastActive,
-                callStats: {
-                    totalCalls,
-                    answeredCalls,
-                    missedCalls,
-                    avgCallDuration,
-                    todayCalls
-                }
-            };
-        }));
-
+        const devicesWithStats = await fetchDevicesWithStats();
         res.json(devicesWithStats);
     } catch (error) {
         console.error('Get devices error:', error);
@@ -216,5 +229,6 @@ module.exports = {
     heartbeat,
     submitCallLog,
     updateTelecaller,
-    getDevices
+    getDevices,
+    fetchDevicesWithStats // Exported for use in other controllers
 };
