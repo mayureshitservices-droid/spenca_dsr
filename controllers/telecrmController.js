@@ -1,5 +1,6 @@
 const Device = require('../models/Device');
 const CallLog = require('../models/CallLog');
+const Order = require('../models/Order');
 
 // POST /api/telecrm/register
 const registerDevice = async (req, res) => {
@@ -230,7 +231,27 @@ const fetchDevicesWithStats = async () => {
                 totalCalls: totalAllTime,
                 today: todayStats,
                 month: monthStats
-            }
+            },
+            history: await Promise.all((await CallLog.find({ deviceId: device.deviceId })
+                .sort({ timestamp: -1 })
+                .limit(50))
+                .map(async (log) => {
+                    // Try to find the latest order/visit for this phone number to get business context
+                    const latestOrder = await Order.findOne({ mobileNo: log.phoneNumber })
+                        .sort({ createdAt: -1 });
+
+                    return {
+                        timestamp: log.timestamp,
+                        phoneNumber: log.phoneNumber,
+                        callStatus: log.callStatus,
+                        duration: formatDuration(log.duration),
+                        customerName: latestOrder ? latestOrder.customerName : 'New Customer',
+                        outcome: latestOrder ? latestOrder.orderStatus : 'No Interaction',
+                        reminder: latestOrder && latestOrder.tentativeRepeatDate ? latestOrder.tentativeRepeatDate : null,
+                        orderDetails: latestOrder && latestOrder.products ? latestOrder.products.map(p => `${p.productName} (x${p.quantity})`).join(', ') : 'N/A',
+                        recordingUrl: log.recordingUrl
+                    };
+                }))
         };
     }));
 };
