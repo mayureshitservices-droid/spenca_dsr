@@ -62,12 +62,28 @@
                                     </div>
 
                                     <!-- Stats Grid on Card -->
-                                    <div class="grid grid-cols-2 gap-2">
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                                         <div class="p-2 bg-primary-50 rounded-lg border border-primary-100">
                                             <p
                                                 class="text-[8px] font-black text-primary-600 uppercase tracking-tighter mb-0.5">
-                                                Today</p>
+                                                Total Calls</p>
                                             <p class="text-sm font-black text-primary-700">
+                                                <%= device.callStats.totalCalls %>
+                                            </p>
+                                        </div>
+                                        <div class="p-2 bg-blue-50 rounded-lg border border-blue-100">
+                                            <p
+                                                class="text-[8px] font-black text-blue-600 uppercase tracking-tighter mb-0.5">
+                                                For Month</p>
+                                            <p class="text-sm font-black text-blue-700">
+                                                <%= device.callStats.monthCalls %>
+                                            </p>
+                                        </div>
+                                        <div class="p-2 bg-amber-50 rounded-lg border border-amber-100">
+                                            <p
+                                                class="text-[8px] font-black text-amber-600 uppercase tracking-tighter mb-0.5">
+                                                Today</p>
+                                            <p class="text-sm font-black text-amber-700">
                                                 <%= device.callStats.todayCalls %>
                                             </p>
                                         </div>
@@ -90,15 +106,11 @@
                                         <div class="p-2 bg-purple-50 rounded-lg border border-purple-100">
                                             <p
                                                 class="text-[8px] font-black text-purple-600 uppercase tracking-tighter mb-0.5">
-                                                Avg Duration</p>
-                                            <p class="text-[10px] font-bold text-purple-700 truncate">
-                                                <%= device.callStats.avgCallDuration %>
+                                                Total Duration</p>
+                                            <p class="text-[10px] font-black text-purple-700 truncate">
+                                                <%= device.callStats.totalCallDuration %>
                                             </p>
                                         </div>
-                                    </div>
-                                    <div class="mt-2 text-right">
-                                        <p class="text-[8px] font-bold text-gray-400 italic">Total: <%=
-                                                device.callStats.totalCalls %> calls</p>
                                     </div>
                                 </div>
                                 <% }); %>
@@ -166,26 +178,30 @@
                             <div class="border-t border-gray-100 pt-6">
                                 <h4 class="text-xl font-black text-gray-900 mb-4">Detailed Statistics</h4>
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <div class="p-4 bg-primary-50 rounded-2xl border border-primary-100">
-                                        <p class="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Total Calls</p>
-                                        <p class="text-2xl font-black text-primary-700">${device.callStats.totalCalls}</p>
-                                    </div>
-                                    <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                                        <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Answered</p>
-                                        <p class="text-2xl font-black text-emerald-700">${device.callStats.answeredCalls}</p>
-                                    </div>
-                                    <div class="p-4 bg-red-50 rounded-2xl border border-red-100">
-                                        <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Missed</p>
-                                        <p class="text-2xl font-black text-red-700">${device.callStats.missedCalls}</p>
-                                    </div>
-                                    <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                                        <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Today's Calls</p>
-                                        <p class="text-2xl font-black text-amber-700">${device.callStats.todayCalls}</p>
-                                    </div>
-                                    <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 md:col-span-2">
-                                        <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">Avg Duration</p>
-                                        <p class="text-2xl font-black text-purple-700">${device.callStats.avgCallDuration}</p>
-                                    </div>
+                                     <div class="p-4 bg-primary-50 rounded-2xl border border-primary-100">
+                                         <p class="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Total Calls</p>
+                                         <p class="text-2xl font-black text-primary-700">${device.callStats.totalCalls}</p>
+                                     </div>
+                                     <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                         <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">For Month</p>
+                                         <p class="text-2xl font-black text-blue-700">${device.callStats.monthCalls}</p>
+                                     </div>
+                                     <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                                         <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Today</p>
+                                         <p class="text-2xl font-black text-amber-700">${device.callStats.todayCalls}</p>
+                                     </div>
+                                     <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                         <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Answered</p>
+                                         <p class="text-2xl font-black text-emerald-700">${device.callStats.answeredCalls}</p>
+                                     </div>
+                                     <div class="p-4 bg-red-50 rounded-2xl border border-red-100">
+                                         <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Missed</p>
+                                         <p class="text-2xl font-black text-red-700">${device.callStats.missedCalls}</p>
+                                     </div>
+                                     <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                                         <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">Total Duration</p>
+                                         <p class="text-xl font-black text-purple-700">${device.callStats.totalCallDuration}</p>
+                                     </div>
                                 </div>
                             </div>
                         `;

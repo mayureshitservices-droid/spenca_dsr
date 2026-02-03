@@ -151,6 +151,17 @@ const updateTelecaller = async (req, res) => {
     }
 };
 
+// Helper to format duration
+const formatDuration = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
+};
+
 // Helper function to fetch devices with stats
 const fetchDevicesWithStats = async () => {
     const devices = await Device.find().sort({ lastActive: -1 });
@@ -159,7 +170,9 @@ const fetchDevicesWithStats = async () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const [totalCalls, answeredCalls, missedCalls, todayCalls] = await Promise.all([
+        const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        const [totalCalls, answeredCalls, missedCalls, todayCalls, monthCalls] = await Promise.all([
             CallLog.countDocuments({ deviceId: device.deviceId }),
             // Answered includes both incoming 'answered' and any 'outgoing' calls
             CallLog.countDocuments({
@@ -173,24 +186,26 @@ const fetchDevicesWithStats = async () => {
             CallLog.countDocuments({
                 deviceId: device.deviceId,
                 timestamp: { $gte: today }
+            }),
+            CallLog.countDocuments({
+                deviceId: device.deviceId,
+                timestamp: { $gte: firstOfMonth }
             })
         ]);
 
-        // Calculate average call duration (for answered or outgoing calls)
+        // Calculate call durations (for answered or outgoing calls)
         const callsWithDuration = await CallLog.find({
             deviceId: device.deviceId,
             callStatus: { $in: ['answered', 'outgoing'] },
             duration: { $gt: 0 }
         });
 
-        let avgCallDuration = '0s';
-        if (callsWithDuration.length > 0) {
-            const totalDuration = callsWithDuration.reduce((sum, call) => sum + call.duration, 0);
-            const avgSeconds = Math.floor(totalDuration / callsWithDuration.length);
-            const minutes = Math.floor(avgSeconds / 60);
-            const seconds = avgSeconds % 60;
-            avgCallDuration = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-        }
+        const totalSeconds = callsWithDuration.reduce((sum, call) => sum + (call.duration || 0), 0);
+        const totalDurationFormatted = formatDuration(totalSeconds);
+
+        // Calculate average
+        const avgSeconds = callsWithDuration.length > 0 ? Math.floor(totalSeconds / callsWithDuration.length) : 0;
+        const avgDurationFormatted = formatDuration(avgSeconds);
 
         // Determine status (offline if last active > 5 minutes ago)
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60000);
@@ -206,8 +221,10 @@ const fetchDevicesWithStats = async () => {
                 totalCalls,
                 answeredCalls,
                 missedCalls,
-                avgCallDuration,
-                todayCalls
+                avgCallDuration: avgDurationFormatted,
+                totalCallDuration: totalDurationFormatted,
+                todayCalls,
+                monthCalls
             }
         };
     }));
