@@ -193,7 +193,7 @@ const fetchDevicesWithStats = async () => {
                         },
                         missed: {
                             $sum: {
-                                $cond: [{ $in: ['$callStatus', ['missed', 'rejected']] }, 1, 0]
+                                $cond: [{ $in: ['$callStatus', ['missed', 'rejected', 'incoming', 'blocked']] }, 1, 0]
                             }
                         },
                         duration: { $sum: { $ifNull: ['$duration', 0] } }
