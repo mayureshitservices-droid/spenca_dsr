@@ -101,7 +101,7 @@ const submitCallLog = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Call log saved successfully'
+            message: 'Log synced'
         });
     } catch (error) {
         console.error('Call log submission error:', error);
