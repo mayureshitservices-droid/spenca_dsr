@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spenca-dsr-v2'; // Incremented version
+const CACHE_NAME = 'spenca-dsr-v3'; // Incremented version to refresh CSS
 const ASSETS_TO_CACHE = [
   '/login',
   '/css/style.css',
