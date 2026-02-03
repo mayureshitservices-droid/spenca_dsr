@@ -67,34 +67,36 @@ const heartbeat = async (req, res) => {
 // POST /api/telecrm/call-log
 const submitCallLog = async (req, res) => {
     try {
-        const { deviceId, token, phoneNumber, callStatus, duration, timestamp, recordingUrl } = req.body;
+        const { deviceId, token, callId, phoneNumber, callStatus, duration, timestamp, recordingUrl } = req.body;
 
-        if (!deviceId || !token) {
-            return res.status(400).json({ error: 'Device ID and token are required' });
+        if (!deviceId || !token || !callId) {
+            return res.status(400).json({ success: false, error: 'Device ID, token, and call ID are required' });
         }
 
         // Validate device and token
         const device = await Device.findByIdAndToken(deviceId, token);
 
         if (!device) {
-            return res.status(401).json({ error: 'Invalid device ID or token' });
+            return res.status(401).json({ success: false, error: 'Invalid device ID or token' });
         }
 
         if (!phoneNumber || !callStatus || !timestamp) {
-            return res.status(400).json({ error: 'Phone number, call status, and timestamp are required' });
+            return res.status(400).json({ success: false, error: 'Phone number, call status, and timestamp are required' });
         }
 
-        // Create call log
-        const callLog = new CallLog({
-            deviceId,
-            phoneNumber,
-            callStatus,
-            duration: duration || 0,
-            timestamp: new Date(timestamp),
-            recordingUrl: recordingUrl || null
-        });
-
-        await callLog.save();
+        // Upsert call log using callId
+        await CallLog.findOneAndUpdate(
+            { callId },
+            {
+                deviceId,
+                phoneNumber,
+                callStatus: callStatus.toLowerCase(),
+                duration: duration || 0,
+                timestamp: new Date(timestamp),
+                recordingUrl: recordingUrl || null
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
 
         // Update device last active
         device.lastActive = new Date();
@@ -106,7 +108,66 @@ const submitCallLog = async (req, res) => {
         });
     } catch (error) {
         console.error('Call log submission error:', error);
-        res.status(500).json({ error: 'Failed to save call log' });
+        res.status(500).json({ success: false, error: 'Failed to save call log' });
+    }
+};
+
+// POST /api/telecrm/call-outcome
+const submitCallOutcome = async (req, res) => {
+    try {
+        const {
+            deviceId,
+            token,
+            callId,
+            customerName,
+            outcome,
+            remarks,
+            followUpDate,
+            productQuantities,
+            needBranding,
+            reasonForLoss,
+            distributor
+        } = req.body;
+
+        if (!deviceId || !token || !callId) {
+            return res.status(400).json({ success: false, error: 'Device ID, token, and call ID are required' });
+        }
+
+        // Validate device and token
+        const device = await Device.findByIdAndToken(deviceId, token);
+
+        if (!device) {
+            return res.status(401).json({ success: false, error: 'Invalid device ID or token' });
+        }
+
+        // Upsert call log with outcome details using callId
+        await CallLog.findOneAndUpdate(
+            { callId },
+            {
+                deviceId,
+                customerName,
+                outcome,
+                remarks,
+                followUpDate: followUpDate ? new Date(followUpDate) : null,
+                productQuantities: productQuantities || {},
+                needBranding: !!needBranding,
+                reasonForLoss,
+                distributor
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+
+        // Update device last active
+        device.lastActive = new Date();
+        await device.save();
+
+        res.json({
+            success: true,
+            message: 'Outcome saved successfully'
+        });
+    } catch (error) {
+        console.error('Call outcome submission error:', error);
+        res.status(500).json({ success: false, error: 'Failed to save call outcome' });
     }
 };
 
@@ -236,19 +297,39 @@ const fetchDevicesWithStats = async () => {
                 .sort({ timestamp: -1 })
                 .limit(50))
                 .map(async (log) => {
-                    // Try to find the latest order/visit for this phone number to get business context
-                    const latestOrder = await Order.findOne({ mobileNo: log.phoneNumber })
-                        .sort({ createdAt: -1 });
+                    // Prioritize data from the new two-stage logging endpoint
+                    let customerName = log.customerName;
+                    let outcome = log.outcome;
+                    let reminder = log.followUpDate;
+                    let orderDetails = log.productQuantities && Object.keys(log.productQuantities).length > 0
+                        ? Object.entries(log.productQuantities).map(([p, q]) => `${p} (x${q})`).join(', ')
+                        : null;
+                    let distributor = log.distributor;
+
+                    // Fallback to legacy Order lookup if no outcome was manually provided via the new endpoint
+                    if (!outcome || outcome === 'No Interaction') {
+                        const latestOrder = await Order.findOne({ mobileNo: log.phoneNumber })
+                            .sort({ createdAt: -1 });
+
+                        if (latestOrder) {
+                            customerName = customerName || latestOrder.customerName;
+                            outcome = outcome === 'No Interaction' ? latestOrder.orderStatus : outcome;
+                            reminder = reminder || latestOrder.tentativeRepeatDate;
+                            orderDetails = orderDetails || (latestOrder.products ? latestOrder.products.map(p => `${p.productName} (x${p.quantity})`).join(', ') : 'N/A');
+                        }
+                    }
 
                     return {
-                        timestamp: log.timestamp,
-                        phoneNumber: log.phoneNumber,
-                        callStatus: log.callStatus,
+                        timestamp: log.timestamp || log.createdAt,
+                        phoneNumber: log.phoneNumber || 'Unknown',
+                        callStatus: log.callStatus || 'Unknown',
                         duration: formatDuration(log.duration),
-                        customerName: latestOrder ? latestOrder.customerName : 'New Customer',
-                        outcome: latestOrder ? latestOrder.orderStatus : 'No Interaction',
-                        reminder: latestOrder && latestOrder.tentativeRepeatDate ? latestOrder.tentativeRepeatDate : null,
-                        orderDetails: latestOrder && latestOrder.products ? latestOrder.products.map(p => `${p.productName} (x${p.quantity})`).join(', ') : 'N/A',
+                        customerName: customerName || 'New Customer',
+                        outcome: outcome || 'No Interaction',
+                        reminder: reminder || null,
+                        remarks: log.remarks || '',
+                        orderDetails: orderDetails || 'N/A',
+                        distributor: distributor || 'Main Branch',
                         recordingUrl: log.recordingUrl
                     };
                 }))
@@ -271,6 +352,7 @@ module.exports = {
     registerDevice,
     heartbeat,
     submitCallLog,
+    submitCallOutcome,
     updateTelecaller,
     getDevices,
     fetchDevicesWithStats // Exported for use in other controllers

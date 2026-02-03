@@ -13,6 +13,9 @@ router.post('/heartbeat', telecrmController.heartbeat);
 // Submit call log (requires deviceId + token)
 router.post('/call-log', telecrmController.submitCallLog);
 
+// Submit call outcome/form (requires deviceId + token)
+router.post('/call-outcome', telecrmController.submitCallOutcome);
+
 // --- Protected Routes (Requires Head Office / SysAdmin session) ---
 
 // Update telecaller name (requires session)

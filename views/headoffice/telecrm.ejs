@@ -213,7 +213,7 @@
 
                         detailContent.innerHTML = `
                             <div class="overflow-x-auto -mx-8">
-                                <table class="w-full text-left border-collapse min-w-[800px]">
+                                <table class="w-full text-left border-collapse min-w-[1000px]">
                                     <thead>
                                         <tr class="bg-gray-50 border-y border-gray-100">
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Time & Duration</th>
@@ -221,6 +221,7 @@
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Call Status</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Outcome & Reminder</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Details</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Notes & Remarks</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-50">
@@ -233,7 +234,7 @@
                                                 <td class="px-6 py-4">
                                                     <p class="text-sm font-bold text-gray-900">${log.customerName}</p>
                                                     <p class="text-xs text-gray-500 font-medium">${log.phoneNumber}</p>
-                                                    <p class="text-[10px] text-indigo-600 font-bold tracking-tight italic">Assigned Distributor: Main Branch</p>
+                                                    <p class="text-[10px] text-indigo-600 font-bold tracking-tight italic">Distributor: ${log.distributor || 'Main Branch'}</p>
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest 
@@ -254,11 +255,14 @@
                                                 <td class="px-6 py-4 max-w-[220px]">
                                                     <p class="text-[10px] text-gray-600 leading-tight italic line-clamp-2">${log.orderDetails}</p>
                                                 </td>
+                                                <td class="px-6 py-4 max-w-[200px]">
+                                                    <p class="text-[10px] text-gray-500 leading-tight italic line-clamp-2">${log.remarks || 'No notes'}</p>
+                                                </td>
                                             </tr>
                                         `).join('')}
                                         ${device.history.length === 0 ? `
                                             <tr>
-                                                <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                                                <td colspan="6" class="px-6 py-12 text-center text-gray-400">
                                                     <i data-lucide="phone-off" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
                                                     <p class="text-sm font-medium">No recent call history found</p>
                                                 </td>
