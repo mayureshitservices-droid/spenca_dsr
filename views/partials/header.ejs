@@ -31,13 +31,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <!-- Custom CSS with Cache Buster -->
-  <link rel="stylesheet" href="/css/style.css?v=1.0.2">
+  <link rel="stylesheet" href="/css/style.css?v=1.0.3">
 
   <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=4')
+        navigator.serviceWorker.register('/sw.js?v=5')
           .then(reg => console.log('Service Worker registered'))
           .catch(err => console.log('Service Worker registration failed', err));
       });
