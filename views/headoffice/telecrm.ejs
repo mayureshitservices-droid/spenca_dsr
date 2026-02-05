@@ -279,6 +279,7 @@
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Reminder Date</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Details</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Notes & Remarks</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Recording</th>
                                         </tr>
                                     </thead>
                                     <tbody id="callHistoryTableBody" class="divide-y divide-gray-50">
@@ -376,6 +377,23 @@
                                 </td>
                                 <td class="px-6 py-4 max-w-[200px]">
                                     <p class="text-[10px] text-gray-500 leading-tight italic line-clamp-2">${log.remarks || 'No notes'}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    ${log.recordingUrl ? `
+                                        <div class="flex items-center gap-2">
+                                            <a href="${log.recordingUrl}" target="_blank" 
+                                               class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all active:scale-95" title="Listen">
+                                                <i data-lucide="play-circle" class="w-3 h-3"></i>
+                                                Listen
+                                            </a>
+                                            <a href="${log.recordingUrl}" download 
+                                               class="p-1.5 bg-gray-50 text-gray-500 rounded-full hover:bg-gray-100 transition-all active:scale-95 flex items-center justify-center" title="Download">
+                                                <i data-lucide="download" class="w-3 h-3"></i>
+                                            </a>
+                                        </div>
+                                    ` : `
+                                        <span class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Recording</span>
+                                    `}
                                 </td>
                             </tr>
                             `).join('');

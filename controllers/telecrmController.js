@@ -348,6 +348,57 @@ const getDevices = async (req, res) => {
     }
 };
 
+// POST /api/telecrm/upload-recording
+const uploadRecording = async (req, res) => {
+    try {
+        const { deviceId, token, callId } = req.body;
+        const file = req.file;
+
+        if (!deviceId || !token || !callId || !file) {
+            return res.status(400).json({ success: false, error: 'Device ID, token, call ID, and file are required' });
+        }
+
+        // Validate device and token
+        const device = await Device.findByIdAndToken(deviceId, token);
+        if (!device) {
+            return res.status(401).json({ success: false, error: 'Invalid device ID or token' });
+        }
+
+        // Upload to OCI
+        const ociService = require('../services/ociService');
+        const fileName = `${callId}${require('path').extname(file.originalname)}`;
+
+        const recordingUrl = await ociService.uploadToOCI(file.buffer, fileName, file.mimetype);
+
+        // Update CallLog with recordingUrl
+        const log = await CallLog.findOneAndUpdate(
+            { callId },
+            { recordingUrl },
+            { new: true }
+        );
+
+        if (!log) {
+            // If log doesn't exist yet, we can create it or just return error
+            // Usually metadata arrives first, but we handle both two-stage cases
+            await new CallLog({
+                deviceId,
+                callId,
+                recordingUrl
+            }).save();
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Recording uploaded and linked',
+            recordingUrl
+        });
+
+    } catch (error) {
+        console.error('Recording upload error:', error);
+        res.status(500).json({ success: false, error: 'Failed to upload recording: ' + error.message });
+    }
+};
+
 module.exports = {
     registerDevice,
     heartbeat,
@@ -355,5 +406,6 @@ module.exports = {
     submitCallOutcome,
     updateTelecaller,
     getDevices,
-    fetchDevicesWithStats // Exported for use in other controllers
+    fetchDevicesWithStats,
+    uploadRecording
 };

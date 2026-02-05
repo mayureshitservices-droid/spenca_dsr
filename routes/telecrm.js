@@ -10,8 +10,14 @@ router.post('/register', telecrmController.registerDevice);
 // Heartbeat (requires deviceId + token)
 router.post('/heartbeat', telecrmController.heartbeat);
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
 // Submit call log (requires deviceId + token)
 router.post('/call-log', telecrmController.submitCallLog);
+
+// Upload call recording file (requires deviceId + token)
+router.post('/upload-recording', upload.single('file'), telecrmController.uploadRecording);
 
 // Submit call outcome/form (requires deviceId + token)
 router.post('/call-outcome', telecrmController.submitCallOutcome);
