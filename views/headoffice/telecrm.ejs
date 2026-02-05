@@ -191,10 +191,10 @@
                         <div
                             class="md:ml-auto flex flex-col sm:flex-row items-center gap-4 bg-primary-50 px-6 py-3 rounded-3xl border border-primary-100 shadow-sm w-full md:w-auto">
                             <div class="flex items-center gap-2">
-                                <input type="date" id="rangeStartDate"
+                                <input type="date" id="rangeStartDate" onchange="applyFilters()"
                                     class="px-3 py-1.5 bg-white border border-primary-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 font-bold text-base uppercase">
                                 <span class="text-primary-300 font-black">/</span>
-                                <input type="date" id="rangeEndDate"
+                                <input type="date" id="rangeEndDate" onchange="applyFilters()"
                                     class="px-3 py-1.5 bg-white border border-primary-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 font-bold text-base uppercase">
                             </div>
                             <button onclick="exportToExcel()"
@@ -205,37 +205,28 @@
                         </div>
                     </div>
 
-                    <!-- Search and Filters (Matching DSR Style) -->
+                    <!-- Search and Clear (Streamlined) -->
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="relative flex-1">
-                            <input type="text" id="tableSearch" placeholder="Search customer name or phone..."
+                            <input type="text" id="tableSearch"
+                                placeholder="Search customer, phone, status, outcome, or notes..."
                                 class="w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all shadow-around-sm text-base"
                                 onkeyup="applyFilters()">
                         </div>
-                        <div class="flex items-center gap-4">
-                            <select id="outcomeFilter" onchange="applyFilters()"
-                                class="px-4 py-3 bg-white border border-gray-200 rounded-2xl text-base font-bold outline-none focus:ring-2 focus:ring-primary-400 shadow-around-sm min-w-[180px]">
-                                <option value="">All Outcomes</option>
-                                <option value="Ordered">Ordered</option>
-                                <option value="Call Later">Call Later</option>
-                                <option value="Other Concerns">Other Concerns</option>
-                                <option value="Lost">Lost</option>
-                                <option value="No Interaction">No Interaction</option>
-                            </select>
-                            <button onclick="clearFilters()"
-                                class="px-6 py-3 text-sm font-black text-gray-500 hover:text-primary-600 bg-white rounded-2xl shadow-around-sm transition-all uppercase tracking-widest">
-                                Clear
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-8">
-                    <div id="detailContent" class="space-y-6">
-                        <!-- Content will be injected via JavaScript -->
+                        <button onclick="clearFilters()"
+                            class="px-6 py-3 text-sm font-black text-gray-400 hover:text-red-500 bg-white rounded-2xl shadow-around-sm transition-all uppercase tracking-widest border border-gray-100">
+                            Clear Filters
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <div class="glass-card p-8">
+                <div id="detailContent" class="space-y-6">
+                    <!-- Content will be injected via JavaScript -->
+                </div>
+            </div>
+        </div>
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
@@ -271,13 +262,13 @@
                                     <thead>
                                         <tr class="bg-gray-50 border-y border-gray-100">
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Time & Duration</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer Name</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Mobile Number</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Distributor</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Call Status</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Outcome</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Reminder Date</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer Name</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Details</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Distributor</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Notes & Remarks</th>
                                             <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Recording</th>
                                         </tr>
@@ -339,64 +330,76 @@
                             document.getElementById('paginationControls').classList.add('hidden');
                         } else {
                             document.getElementById('paginationControls').classList.remove('hidden');
-                            tbody.innerHTML = pageData.map(log => `
-                            <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <p class="text-sm font-bold text-gray-900">${new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
-                                    <p class="text-[10px] text-gray-500 font-mono tracking-tighter">${log.duration}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-sm font-bold text-gray-900">${log.customerName}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-xs text-gray-600 font-medium font-mono">${log.phoneNumber}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-xs ${log.distributor ? 'text-indigo-600 font-bold' : 'text-gray-400 italic'}">${log.distributor || 'None'}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest 
-                                        ${log.callStatus === 'answered' || log.callStatus === 'outgoing' ? 'bg-emerald-100 text-emerald-700' :
-                                    log.callStatus === 'missed' || log.callStatus === 'rejected' || log.callStatus === 'incoming' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">
-                                        ${log.callStatus}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-xs font-bold ${log.outcome === 'Ordered' ? 'text-emerald-600' : log.outcome === 'Visited' ? 'text-amber-600' : 'text-gray-400'}">
-                                        ${log.outcome}
-                                    </p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    ${log.reminder ? `<p class="text-xs text-indigo-600 font-bold flex items-center gap-1">
-                                        <i data-lucide="calendar" class="w-3 h-3"></i>
-                                        ${new Date(log.reminder).toLocaleDateString('en-IN')}
-                                    </p>` : '<p class="text-xs text-gray-400 italic">None</p>'}
-                                </td>
-                                <td class="px-6 py-4 max-w-[220px]">
-                                    <p class="text-[10px] text-gray-600 leading-tight font-medium line-clamp-2">${log.orderDetails !== 'N/A' ? log.orderDetails : '<span class="italic text-gray-400">None</span>'}</p>
-                                </td>
-                                <td class="px-6 py-4 max-w-[200px]">
-                                    <p class="text-[10px] text-gray-500 leading-tight italic line-clamp-2">${log.remarks || 'No notes'}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    ${log.recordingUrl ? `
-                                        <div class="flex items-center gap-2">
+                            tbody.innerHTML = pageData.map(log => {
+                                // Text Replacements
+                                const displayCustomerName = log.customerName.toLowerCase() === 'new customer' ? '-' : log.customerName;
+                                const displayDistributor = (log.distributor && log.distributor.toLowerCase() === 'main branch') ? '-' : (log.distributor || '-');
+                                const displayOutcome = log.outcome === 'No Interaction' ? '-' : log.outcome;
+                                const displayDate = new Date(log.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                                const displayTime = new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                                return `
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col">
+                                            <p class="text-[11px] text-gray-400 font-bold mb-0.5 uppercase tracking-tighter">${displayDate}</p>
+                                            <p class="text-sm text-gray-900">${displayTime}</p>
+                                            <p class="text-[10px] text-gray-500 font-mono tracking-tighter">${log.duration}s</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-xs text-gray-600 font-bold font-mono">${log.phoneNumber}</p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest 
+                                            ${log.callStatus === 'answered' || log.callStatus === 'outgoing' ? 'bg-emerald-100 text-emerald-700' :
+                                        log.callStatus === 'missed' || log.callStatus === 'rejected' || log.callStatus === 'incoming' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">
+                                            ${log.callStatus}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-xs font-bold ${log.outcome === 'Ordered' ? 'text-emerald-600' : log.outcome === 'Visited' ? 'text-amber-600' : 'text-gray-400'}">
+                                            ${displayOutcome}
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        ${log.reminder ? `<p class="text-xs text-indigo-600 font-bold flex items-center gap-1">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                                            ${new Date(log.reminder).toLocaleDateString('en-IN')}
+                                        </p>` : '<p class="text-xs text-gray-400 italic">-</p>'}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-sm font-bold text-gray-900">${displayCustomerName}</p>
+                                    </td>
+                                    <td class="px-6 py-4 max-w-[220px]">
+                                        <p class="text-[10px] text-gray-600 leading-tight font-medium line-clamp-2 cursor-help" 
+                                           title="${log.orderDetails !== 'N/A' && log.orderDetails ? log.orderDetails.replace(/"/g, '&quot;') : 'No order details'}">
+                                            ${log.orderDetails !== 'N/A' && log.orderDetails ? log.orderDetails : '<span class="italic text-gray-400">-</span>'}
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-xs ${displayDistributor !== '-' ? 'text-indigo-600 font-bold' : 'text-gray-400 italic'}">${displayDistributor}</p>
+                                    </td>
+                                    <td class="px-6 py-4 max-w-[200px]">
+                                        <p class="text-[10px] text-gray-500 leading-tight italic line-clamp-2 cursor-help" 
+                                           title="${log.remarks ? log.remarks.replace(/"/g, '&quot;') : 'No notes'}">
+                                            ${log.remarks || '<span class="italic text-gray-400">-</span>'}
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        ${log.recordingUrl ? `
                                             <a href="${log.recordingUrl}" target="_blank" 
                                                class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all active:scale-95" title="Listen">
                                                 <i data-lucide="play-circle" class="w-3 h-3"></i>
                                                 Listen
                                             </a>
-                                            <a href="${log.recordingUrl}" download 
-                                               class="p-1.5 bg-gray-50 text-gray-500 rounded-full hover:bg-gray-100 transition-all active:scale-95 flex items-center justify-center" title="Download">
-                                                <i data-lucide="download" class="w-3 h-3"></i>
-                                            </a>
-                                        </div>
-                                    ` : `
-                                        <span class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Recording</span>
-                                    `}
-                                </td>
-                            </tr>
-                            `).join('');
+                                        ` : `
+                                            <span class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">No Recording</span>
+                                        `}
+                                    </td>
+                                </tr>
+                                `;
+                            }).join('');
 
                             // Update pagination controls
                             const paginationInfo = document.getElementById('paginationInfo');
@@ -422,19 +425,29 @@
 
                     function applyFilters() {
                         const search = document.getElementById('tableSearch').value.toLowerCase();
-                        const outcome = document.getElementById('outcomeFilter').value;
+                        const startDate = document.getElementById('rangeStartDate').value;
+                        const endDate = document.getElementById('rangeEndDate').value;
 
                         const device = devices.find(d => d.id === currentDeviceId);
                         if (!device) return;
 
                         filteredHistory = device.history.filter(log => {
                             const matchesSearch = !search ||
-                                log.customerName.toLowerCase().includes(search) ||
-                                log.phoneNumber.includes(search);
+                                (log.customerName && log.customerName.toLowerCase().includes(search)) ||
+                                (log.phoneNumber && log.phoneNumber.includes(search)) ||
+                                (log.outcome && log.outcome.toLowerCase().includes(search)) ||
+                                (log.callStatus && log.callStatus.toLowerCase().includes(search)) ||
+                                (log.distributor && log.distributor.toLowerCase().includes(search)) ||
+                                (log.remarks && log.remarks.toLowerCase().includes(search)) ||
+                                (log.orderDetails && log.orderDetails.toLowerCase().includes(search));
 
-                            const matchesOutcome = !outcome || log.outcome === outcome;
+                            let matchesDate = true;
+                            if (startDate && endDate) {
+                                const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+                                matchesDate = logDate >= startDate && logDate <= endDate;
+                            }
 
-                            return matchesSearch && matchesOutcome;
+                            return matchesSearch && matchesDate;
                         });
 
                         currentPage = 1; // Reset to page 1 on filter
@@ -443,7 +456,8 @@
 
                     function clearFilters() {
                         document.getElementById('tableSearch').value = '';
-                        document.getElementById('outcomeFilter').value = '';
+                        document.getElementById('rangeStartDate').value = '';
+                        document.getElementById('rangeEndDate').value = '';
                         applyFilters();
                     }
 
