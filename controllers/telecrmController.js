@@ -354,6 +354,13 @@ const uploadRecording = async (req, res) => {
         const { deviceId, token, callId } = req.body;
         const file = req.file;
 
+        console.log(`[Upload] Received upload request: deviceId=${deviceId}, callId=${callId}`);
+        if (file) {
+            console.log(`[Upload] File details: name=${file.originalname}, size=${file.size} bytes, type=${file.mimetype}`);
+        } else {
+            console.error('[Upload] No file provided in the request');
+        }
+
         if (!deviceId || !token || !callId || !file) {
             return res.status(400).json({ success: false, error: 'Device ID, token, call ID, and file are required' });
         }
@@ -368,9 +375,12 @@ const uploadRecording = async (req, res) => {
         const ociService = require('../services/ociService');
         const fileName = `${callId}${require('path').extname(file.originalname)}`;
 
+        console.log(`[Upload] Starting OCI upload for: ${fileName}`);
         const recordingUrl = await ociService.uploadToOCI(file.buffer, fileName, file.mimetype);
+        console.log(`[Upload] OCI upload successful. PAR URL: ${recordingUrl}`);
 
         // Update CallLog with recordingUrl
+        console.log(`[Upload] Updating database for callId: ${callId}`);
         const log = await CallLog.findOneAndUpdate(
             { callId },
             { recordingUrl },
