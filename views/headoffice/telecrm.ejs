@@ -232,8 +232,8 @@
             <%- include('../partials/footer') %>
 
                 <script>
-                    // Data passed from server - passed as raw JSON to avoid quote-escaping issues
-                    const devices = <% - JSON.stringify(devices) %>;
+                    // Data passed from server - URI encoded to satisfy IDE and avoid quote issues
+                    const devices = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(devices)) %>'));
 
                     let currentDeviceId = null;
                     let currentPage = 1;
