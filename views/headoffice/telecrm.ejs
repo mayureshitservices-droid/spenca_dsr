@@ -173,59 +173,14 @@
                                 <% }); %>
                         </div>
                         <% } %>
-            </div>
-
-            <!-- Device Detail View (Hidden Initially) -->
-            <div id="deviceDetails" class="hidden">
-                <div class="flex flex-col gap-6 mb-6">
-                    <div class="flex flex-col md:flex-row md:items-center gap-6">
-                        <div class="flex items-center gap-4 flex-grow">
-                            <button onclick="hideDeviceDetails()"
-                                class="w-fit p-3 bg-white hover:bg-gray-50 rounded-full shadow-lg border border-gray-100 transition-all active:scale-95 group">
-                                <i data-lucide="arrow-left" class="w-6 h-6 text-black group-hover:text-primary-500"></i>
-                            </button>
-                            <h3 id="detailTitle" class="text-2xl font-black text-gray-900 leading-tight">Device Details
-                            </h3>
-                        </div>
-
-                        <div
-                            class="md:ml-auto flex flex-col sm:flex-row items-center gap-4 bg-primary-50 px-6 py-3 rounded-3xl border border-primary-100 shadow-sm w-full md:w-auto">
-                            <div class="flex items-center gap-2">
-                                <input type="date" id="rangeStartDate" onchange="applyFilters()"
-                                    class="px-3 py-1.5 bg-white border border-primary-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 font-bold text-base uppercase">
-                                <span class="text-primary-300 font-black">/</span>
-                                <input type="date" id="rangeEndDate" onchange="applyFilters()"
-                                    class="px-3 py-1.5 bg-white border border-primary-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-400 font-bold text-base uppercase">
+                            <div class="glass-card p-8 mt-6">
+                                <div id="detailContent" class="space-y-6">
+                                    <!-- Content will be injected via JavaScript -->
+                                </div>
                             </div>
-                            <button onclick="exportToExcel()"
-                                class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-primary-600/20 transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap">
-                                <i data-lucide="download-cloud" class="w-3 h-3"></i>
-                                Download Logs
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Search and Clear (Streamlined) -->
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="relative flex-1">
-                            <input type="text" id="tableSearch"
-                                placeholder="Search customer, phone, status, outcome, or notes..."
-                                class="w-full px-4 py-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition-all shadow-around-sm text-base text-gray-900"
-                                onkeyup="applyFilters()">
-                        </div>
-                        <button onclick="clearFilters()"
-                            class="px-6 py-3 text-sm font-black text-gray-400 hover:text-red-500 bg-white rounded-2xl shadow-around-sm transition-all uppercase tracking-widest border border-gray-100">
-                            Clear Filters
-                        </button>
-                    </div>
-
-                    <div class="glass-card p-8 mt-6">
-                        <div id="detailContent" class="space-y-6">
-                            <!-- Content will be injected via JavaScript -->
-                        </div>
-                    </div>
-                </div>
             </div>
+        </div>
+        </div>
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
