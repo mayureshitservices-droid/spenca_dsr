@@ -232,8 +232,8 @@
             <%- include('../partials/footer') %>
 
                 <script>
-                    // Data passed from server
-                    const devices = JSON.parse('<%- JSON.stringify(devices) %>');
+                    // Data passed from server - passed as raw JSON to avoid quote-escaping issues
+                    const devices = <% - JSON.stringify(devices) %>;
 
                     let currentDeviceId = null;
                     let currentPage = 1;
@@ -330,12 +330,15 @@
                         } else {
                             document.getElementById('paginationControls').classList.remove('hidden');
                             tbody.innerHTML = pageData.map(log => {
-                                // Text Replacements
-                                const displayCustomerName = log.customerName.toLowerCase() === 'new customer' ? '-' : log.customerName;
-                                const displayDistributor = (log.distributor && log.distributor.toLowerCase() === 'main branch') ? '-' : (log.distributor || '-');
-                                const displayOutcome = log.outcome === 'No Interaction' ? '-' : log.outcome;
-                                const displayDate = new Date(log.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-                                const displayTime = new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                                // Text Replacements with safety checks
+                                const logCustomerName = log.customerName || 'New Customer';
+                                const displayCustomerName = logCustomerName.toLowerCase() === 'new customer' ? '-' : logCustomerName;
+                                const logDistributor = log.distributor || 'None';
+                                const displayDistributor = (logDistributor && logDistributor.toLowerCase() === 'main branch') ? '-' : (logDistributor || '-');
+                                const displayOutcome = (log.outcome === 'No Interaction' || !log.outcome) ? '-' : log.outcome;
+                                const timestamp = log.timestamp ? new Date(log.timestamp) : new Date();
+                                const displayDate = timestamp.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                                const displayTime = timestamp.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
                                 return `
                                 <tr class="hover:bg-gray-50/50 transition-colors">
@@ -343,17 +346,17 @@
                                         <div class="flex flex-col">
                                             <p class="text-[11px] text-gray-400 font-bold mb-0.5 uppercase tracking-tighter">${displayDate}</p>
                                             <p class="text-sm text-gray-900">${displayTime}</p>
-                                            <p class="text-[10px] text-gray-500 font-mono tracking-tighter">${log.duration}s</p>
+                                            <p class="text-[10px] text-gray-500 font-mono tracking-tighter">${log.duration || 0}s</p>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <p class="text-xs text-gray-600 font-bold font-mono">${log.phoneNumber}</p>
+                                        <p class="text-xs text-gray-600 font-bold font-mono">${log.phoneNumber || 'N/A'}</p>
                                     </td>
                                     <td class="px-6 py-4">
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest 
                                             ${log.callStatus === 'answered' || log.callStatus === 'outgoing' ? 'bg-emerald-100 text-emerald-700' :
                                         log.callStatus === 'missed' || log.callStatus === 'rejected' || log.callStatus === 'incoming' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">
-                                            ${log.callStatus}
+                                            ${log.callStatus || 'Unknown'}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4">
