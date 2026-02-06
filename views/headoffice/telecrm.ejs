@@ -206,7 +206,7 @@
                     </div>
 
                     <!-- Search and Clear (Streamlined) -->
-                    <div class="flex flex-col md:flex-row gap-4 text-white">
+                    <div class="flex flex-col md:flex-row gap-4">
                         <div class="relative flex-1">
                             <input type="text" id="tableSearch"
                                 placeholder="Search customer, phone, status, outcome, or notes..."
@@ -226,35 +226,36 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <%- include('../partials/fab', { user, userRole }) %>
-                <%- include('../partials/footer') %>
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
 
-                    <script>
-                        // Data passed from server
-                        const devices = JSON.parse('<%- JSON.stringify(devices) %>');
+                <script>
+                    // Data passed from server
+                    const devices = JSON.parse('<%- JSON.stringify(devices) %>');
 
-                        let currentDeviceId = null;
-                        let currentPage = 1;
-                        const itemsPerPage = 20;
-                        let filteredHistory = [];
+                    let currentDeviceId = null;
+                    let currentPage = 1;
+                    const itemsPerPage = 20;
+                    let filteredHistory = [];
 
-                        function showDeviceDetails(deviceId) {
-                            currentDeviceId = deviceId;
-                            const device = devices.find(d => d.id === deviceId);
-                            if (!device) return;
+                    function showDeviceDetails(deviceId) {
+                        currentDeviceId = deviceId;
+                        const device = devices.find(d => d.id === deviceId);
+                        if (!device) return;
 
-                            const listView = document.getElementById('deviceList');
-                            const detailView = document.getElementById('deviceDetails');
-                            const detailTitle = document.getElementById('detailTitle');
-                            const detailContent = document.getElementById('detailContent');
+                        const listView = document.getElementById('deviceList');
+                        const detailView = document.getElementById('deviceDetails');
+                        const detailTitle = document.getElementById('detailTitle');
+                        const detailContent = document.getElementById('detailContent');
 
-                            detailTitle.innerText = device.name;
-                            currentPage = 1;
-                            filteredHistory = [...device.history];
+                        detailTitle.innerText = device.name;
+                        currentPage = 1;
+                        filteredHistory = [...device.history];
 
-                            // Inject Table Structure and Pagination Placeholder
-                            detailContent.innerHTML = `
+                        // Inject Table Structure and Pagination Placeholder
+                        detailContent.innerHTML = `
                             <div class="overflow-x-auto -mx-8">
                                 <table class="w-full text-left border-collapse min-w-[1300px]">
                                     <thead>
@@ -293,31 +294,31 @@
                             </div>
                         `;
 
-                            listView.classList.add('hidden');
-                            detailView.classList.remove('hidden');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        listView.classList.add('hidden');
+                        detailView.classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                            // Initial render of the table
-                            renderCallHistoryTable();
+                        // Initial render of the table
+                        renderCallHistoryTable();
 
-                            // Refresh icons
-                            if (typeof lucide !== 'undefined') lucide.createIcons();
-                        }
+                        // Refresh icons
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
 
-                        function renderCallHistoryTable() {
-                            const tbody = document.getElementById('callHistoryTableBody');
-                            if (!tbody) return;
+                    function renderCallHistoryTable() {
+                        const tbody = document.getElementById('callHistoryTableBody');
+                        if (!tbody) return;
 
-                            const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
-                            if (currentPage < 1) currentPage = 1;
-                            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+                        const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
+                        if (currentPage < 1) currentPage = 1;
+                        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
-                            const start = (currentPage - 1) * itemsPerPage;
-                            const end = start + itemsPerPage;
-                            const pageData = filteredHistory.slice(start, end);
+                        const start = (currentPage - 1) * itemsPerPage;
+                        const end = start + itemsPerPage;
+                        const pageData = filteredHistory.slice(start, end);
 
-                            if (pageData.length === 0) {
-                                tbody.innerHTML = `
+                        if (pageData.length === 0) {
+                            tbody.innerHTML = `
                                 <tr>
                                     <td colspan="9" class="px-6 py-12 text-center text-gray-400">
                                         <i data-lucide="phone-off" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
@@ -325,18 +326,18 @@
                                     </td>
                                 </tr>
                             `;
-                                document.getElementById('paginationControls').classList.add('hidden');
-                            } else {
-                                document.getElementById('paginationControls').classList.remove('hidden');
-                                tbody.innerHTML = pageData.map(log => {
-                                    // Text Replacements
-                                    const displayCustomerName = log.customerName.toLowerCase() === 'new customer' ? '-' : log.customerName;
-                                    const displayDistributor = (log.distributor && log.distributor.toLowerCase() === 'main branch') ? '-' : (log.distributor || '-');
-                                    const displayOutcome = log.outcome === 'No Interaction' ? '-' : log.outcome;
-                                    const displayDate = new Date(log.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-                                    const displayTime = new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                            document.getElementById('paginationControls').classList.add('hidden');
+                        } else {
+                            document.getElementById('paginationControls').classList.remove('hidden');
+                            tbody.innerHTML = pageData.map(log => {
+                                // Text Replacements
+                                const displayCustomerName = log.customerName.toLowerCase() === 'new customer' ? '-' : log.customerName;
+                                const displayDistributor = (log.distributor && log.distributor.toLowerCase() === 'main branch') ? '-' : (log.distributor || '-');
+                                const displayOutcome = log.outcome === 'No Interaction' ? '-' : log.outcome;
+                                const displayDate = new Date(log.timestamp).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                                const displayTime = new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
-                                    return `
+                                return `
                                 <tr class="hover:bg-gray-50/50 transition-colors">
                                     <td class="px-6 py-4">
                                         <div class="flex flex-col">
@@ -351,7 +352,7 @@
                                     <td class="px-6 py-4">
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest 
                                             ${log.callStatus === 'answered' || log.callStatus === 'outgoing' ? 'bg-emerald-100 text-emerald-700' :
-                                            log.callStatus === 'missed' || log.callStatus === 'rejected' || log.callStatus === 'incoming' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">
+                                        log.callStatus === 'missed' || log.callStatus === 'rejected' || log.callStatus === 'incoming' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">
                                             ${log.callStatus}
                                         </span>
                                     </td>
@@ -397,148 +398,148 @@
                                     </td>
                                 </tr>
                                 `;
-                                }).join('');
+                            }).join('');
 
-                                // Update pagination controls
-                                const paginationInfo = document.getElementById('paginationInfo');
-                                const prevBtn = document.getElementById('prevPageBtn');
-                                const nextBtn = document.getElementById('nextPageBtn');
+                            // Update pagination controls
+                            const paginationInfo = document.getElementById('paginationInfo');
+                            const prevBtn = document.getElementById('prevPageBtn');
+                            const nextBtn = document.getElementById('nextPageBtn');
 
-                                paginationInfo.innerText = `Showing ${start + 1}-${Math.min(end, filteredHistory.length)} of ${filteredHistory.length}`;
-                                prevBtn.disabled = currentPage === 1;
-                                nextBtn.disabled = currentPage === totalPages;
+                            paginationInfo.innerText = `Showing ${start + 1}-${Math.min(end, filteredHistory.length)} of ${filteredHistory.length}`;
+                            prevBtn.disabled = currentPage === 1;
+                            nextBtn.disabled = currentPage === totalPages;
+                        }
+
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+
+                    function changePage(newPage) {
+                        currentPage = newPage;
+                        renderCallHistoryTable();
+
+                        // Smooth scroll to top of table
+                        const filterBar = document.getElementById('tableSearch').parentElement.parentElement;
+                        filterBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    function applyFilters() {
+                        const search = document.getElementById('tableSearch').value.toLowerCase();
+                        const startDate = document.getElementById('rangeStartDate').value;
+                        const endDate = document.getElementById('rangeEndDate').value;
+
+                        const device = devices.find(d => d.id === currentDeviceId);
+                        if (!device) return;
+
+                        filteredHistory = device.history.filter(log => {
+                            const matchesSearch = !search ||
+                                (log.customerName && log.customerName.toLowerCase().includes(search)) ||
+                                (log.phoneNumber && log.phoneNumber.includes(search)) ||
+                                (log.outcome && log.outcome.toLowerCase().includes(search)) ||
+                                (log.callStatus && log.callStatus.toLowerCase().includes(search)) ||
+                                (log.distributor && log.distributor.toLowerCase().includes(search)) ||
+                                (log.remarks && log.remarks.toLowerCase().includes(search)) ||
+                                (log.orderDetails && log.orderDetails.toLowerCase().includes(search));
+
+                            let matchesDate = true;
+                            if (startDate && endDate) {
+                                const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+                                matchesDate = logDate >= startDate && logDate <= endDate;
                             }
 
-                            if (typeof lucide !== 'undefined') lucide.createIcons();
-                        }
-
-                        function changePage(newPage) {
-                            currentPage = newPage;
-                            renderCallHistoryTable();
-
-                            // Smooth scroll to top of table
-                            const filterBar = document.getElementById('tableSearch').parentElement.parentElement;
-                            filterBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-
-                        function applyFilters() {
-                            const search = document.getElementById('tableSearch').value.toLowerCase();
-                            const startDate = document.getElementById('rangeStartDate').value;
-                            const endDate = document.getElementById('rangeEndDate').value;
-
-                            const device = devices.find(d => d.id === currentDeviceId);
-                            if (!device) return;
-
-                            filteredHistory = device.history.filter(log => {
-                                const matchesSearch = !search ||
-                                    (log.customerName && log.customerName.toLowerCase().includes(search)) ||
-                                    (log.phoneNumber && log.phoneNumber.includes(search)) ||
-                                    (log.outcome && log.outcome.toLowerCase().includes(search)) ||
-                                    (log.callStatus && log.callStatus.toLowerCase().includes(search)) ||
-                                    (log.distributor && log.distributor.toLowerCase().includes(search)) ||
-                                    (log.remarks && log.remarks.toLowerCase().includes(search)) ||
-                                    (log.orderDetails && log.orderDetails.toLowerCase().includes(search));
-
-                                let matchesDate = true;
-                                if (startDate && endDate) {
-                                    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
-                                    matchesDate = logDate >= startDate && logDate <= endDate;
-                                }
-
-                                return matchesSearch && matchesDate;
-                            });
-
-                            currentPage = 1; // Reset to page 1 on filter
-                            renderCallHistoryTable();
-                        }
-
-                        function clearFilters() {
-                            document.getElementById('tableSearch').value = '';
-                            document.getElementById('rangeStartDate').value = '';
-                            document.getElementById('rangeEndDate').value = '';
-                            applyFilters();
-                        }
-
-                        function exportToExcel() {
-                            if (!currentDeviceId) return;
-
-                            const start = document.getElementById('rangeStartDate').value;
-                            const end = document.getElementById('rangeEndDate').value;
-
-                            if (!start || !end) {
-                                alert('Action Required: Please select both start and end dates to generate the report.');
-                                return;
-                            }
-
-                            window.location.href = `/headoffice/telecrm/export/${currentDeviceId}?startDate=${start}&endDate=${end}`;
-                        }
-
-                        function saveCardTelecaller(deviceId) {
-                            const input = document.getElementById(`cardTelecaller_${deviceId}`);
-                            const btn = document.getElementById(`saveBtn_${deviceId}`);
-                            const newName = input.value.trim();
-
-                            if (!newName) {
-                                alert('Telecaller name cannot be empty');
-                                return;
-                            }
-
-                            // Find device in local data
-                            const device = devices.find(d => d.id === deviceId);
-                            if (!device) return;
-
-                            const originalName = device.telecaller;
-
-                            // Local update
-                            device.telecaller = newName;
-
-                            // UI Feedback
-                            const originalBtnHTML = btn.innerHTML;
-                            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>';
-                            btn.classList.add('scale-110');
-                            if (typeof lucide !== 'undefined') lucide.createIcons();
-
-                            // Send update to server
-                            fetch(`/api/telecrm/device/${deviceId}`, {
-                                method: 'PATCH',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ telecaller: newName })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        setTimeout(() => {
-                                            btn.innerHTML = originalBtnHTML;
-                                            btn.classList.remove('scale-110');
-                                            if (typeof lucide !== 'undefined') lucide.createIcons();
-                                        }, 2000);
-                                    } else {
-                                        throw new Error(data.error || 'Failed to update');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Update error:', error);
-                                    alert('Error saving telecaller name: ' + error.message);
-                                    input.value = originalName;
-                                    device.telecaller = originalName;
-                                    btn.innerHTML = originalBtnHTML;
-                                    btn.classList.remove('scale-110');
-                                    if (typeof lucide !== 'undefined') lucide.createIcons();
-                                });
-                        }
-
-                        function hideDeviceDetails() {
-                            document.getElementById('deviceList').classList.remove('hidden');
-                            document.getElementById('deviceDetails').classList.add('hidden');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }
-
-                        // Set default dates to today
-                        document.addEventListener('DOMContentLoaded', () => {
-                            const today = new Date().toISOString().split('T')[0];
-                            const startEl = document.getElementById('rangeStartDate');
-                            const endEl = document.getElementById('rangeEndDate');
-                            if (startEl) startEl.value = today;
-                            if (endEl) endEl.value = today;
+                            return matchesSearch && matchesDate;
                         });
-                    </script>
+
+                        currentPage = 1; // Reset to page 1 on filter
+                        renderCallHistoryTable();
+                    }
+
+                    function clearFilters() {
+                        document.getElementById('tableSearch').value = '';
+                        document.getElementById('rangeStartDate').value = '';
+                        document.getElementById('rangeEndDate').value = '';
+                        applyFilters();
+                    }
+
+                    function exportToExcel() {
+                        if (!currentDeviceId) return;
+
+                        const start = document.getElementById('rangeStartDate').value;
+                        const end = document.getElementById('rangeEndDate').value;
+
+                        if (!start || !end) {
+                            alert('Action Required: Please select both start and end dates to generate the report.');
+                            return;
+                        }
+
+                        window.location.href = `/headoffice/telecrm/export/${currentDeviceId}?startDate=${start}&endDate=${end}`;
+                    }
+
+                    function saveCardTelecaller(deviceId) {
+                        const input = document.getElementById(`cardTelecaller_${deviceId}`);
+                        const btn = document.getElementById(`saveBtn_${deviceId}`);
+                        const newName = input.value.trim();
+
+                        if (!newName) {
+                            alert('Telecaller name cannot be empty');
+                            return;
+                        }
+
+                        // Find device in local data
+                        const device = devices.find(d => d.id === deviceId);
+                        if (!device) return;
+
+                        const originalName = device.telecaller;
+
+                        // Local update
+                        device.telecaller = newName;
+
+                        // UI Feedback
+                        const originalBtnHTML = btn.innerHTML;
+                        btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>';
+                        btn.classList.add('scale-110');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                        // Send update to server
+                        fetch(`/api/telecrm/device/${deviceId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ telecaller: newName })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    setTimeout(() => {
+                                        btn.innerHTML = originalBtnHTML;
+                                        btn.classList.remove('scale-110');
+                                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                                    }, 2000);
+                                } else {
+                                    throw new Error(data.error || 'Failed to update');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Update error:', error);
+                                alert('Error saving telecaller name: ' + error.message);
+                                input.value = originalName;
+                                device.telecaller = originalName;
+                                btn.innerHTML = originalBtnHTML;
+                                btn.classList.remove('scale-110');
+                                if (typeof lucide !== 'undefined') lucide.createIcons();
+                            });
+                    }
+
+                    function hideDeviceDetails() {
+                        document.getElementById('deviceList').classList.remove('hidden');
+                        document.getElementById('deviceDetails').classList.add('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+
+                    // Set default dates to today
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const today = new Date().toISOString().split('T')[0];
+                        const startEl = document.getElementById('rangeStartDate');
+                        const endEl = document.getElementById('rangeEndDate');
+                        if (startEl) startEl.value = today;
+                        if (endEl) endEl.value = today;
+                    });
+                </script>
