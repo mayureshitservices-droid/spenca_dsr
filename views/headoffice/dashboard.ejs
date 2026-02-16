@@ -171,7 +171,8 @@
             </div>
         </div>
 
-        <%- include('../partials/fab', { user, userRole }) %>
+        <%- include('../partials/fab', { user, userRole, extraFabItems: [ { label: 'IMS' , icon: 'box' ,
+            onClick: "window.location.href='/headoffice/ims'" } ] }) %>
             <%- include('../partials/footer') %>
 
                 <script>

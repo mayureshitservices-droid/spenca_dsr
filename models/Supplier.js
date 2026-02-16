@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-const customerSchema = new mongoose.Schema({
-    customerName: {
+const supplierSchema = new mongoose.Schema({
+    supplierName: {
         type: String,
-        required: [true, 'Customer name is required'],
+        required: [true, 'Supplier name is required'],
         trim: true,
         unique: true
     },
@@ -11,14 +11,8 @@ const customerSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    mobileNo: {
+    phoneNumber: {
         type: String,
-        trim: true
-    },
-
-    category: {
-        type: String,
-        enum: ['Hotel', 'Gym', 'Resort', 'Water Park'],
         trim: true
     },
     gstNo: {
@@ -38,7 +32,6 @@ const customerSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for autocomplete
-customerSchema.index({ customerName: 'text' });
+supplierSchema.index({ supplierName: 'text' });
 
-module.exports = mongoose.model('Customer', customerSchema);
+module.exports = mongoose.model('Supplier', supplierSchema);

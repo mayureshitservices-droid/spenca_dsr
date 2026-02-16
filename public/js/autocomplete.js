@@ -219,6 +219,126 @@ function addProductRow() {
     setupProductAutocomplete(productRows);
 }
 
+// Supplier Autocomplete for Inward Form
+let supplierTimeout;
+function setupSupplierAutocomplete() {
+    const supplierInput = document.getElementById('supplierInput');
+    const suggestionsDiv = document.getElementById('supplierSuggestions');
+    const supplierIdInput = document.getElementById('selectedSupplierId');
+
+    if (!supplierInput || !suggestionsDiv) return;
+
+    supplierInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        clearTimeout(supplierTimeout);
+
+        if (query.length < 2) {
+            suggestionsDiv.innerHTML = '';
+            suggestionsDiv.classList.add('hidden');
+            supplierIdInput.value = '';
+            return;
+        }
+
+        supplierTimeout = setTimeout(() => {
+            fetch(`/api/suppliers/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(suppliers => {
+                    if (suppliers.length === 0) {
+                        suggestionsDiv.innerHTML = '<div class="px-5 py-4 text-sm text-gray-500 font-bold italic">No suppliers found.</div>';
+                        suggestionsDiv.classList.remove('hidden');
+                        supplierIdInput.value = '';
+                        return;
+                    }
+
+                    let html = '';
+                    suppliers.forEach(s => {
+                        html += `
+                            <div class="px-5 py-3 hover:bg-indigo-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0" onclick="selectSupplier('${s._id}', '${s.supplierName.replace(/'/g, "\\'")}')">
+                                <div class="font-black text-gray-900">${s.supplierName}</div>
+                                <div class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${s.contactPerson || ''} ${s.mobileNo || ''}</div>
+                            </div>
+                        `;
+                    });
+
+                    suggestionsDiv.innerHTML = html;
+                    suggestionsDiv.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!supplierInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+            suggestionsDiv.classList.add('hidden');
+        }
+    });
+}
+
+function selectSupplier(id, name) {
+    document.getElementById('supplierInput').value = name;
+    document.getElementById('selectedSupplierId').value = id;
+    document.getElementById('supplierSuggestions').classList.add('hidden');
+}
+
+// Raw Material Autocomplete for Inward Form
+let materialTimeout;
+function setupRawMaterialAutocomplete() {
+    const materialInput = document.getElementById('materialInput');
+    const suggestionsDiv = document.getElementById('materialSuggestions');
+    const productIdInput = document.getElementById('selectedProductId');
+
+    if (!materialInput || !suggestionsDiv) return;
+
+    materialInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        clearTimeout(materialTimeout);
+
+        if (query.length < 2) {
+            suggestionsDiv.innerHTML = '';
+            suggestionsDiv.classList.add('hidden');
+            productIdInput.value = '';
+            return;
+        }
+
+        materialTimeout = setTimeout(() => {
+            fetch(`/api/raw-materials/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(materials => {
+                    if (materials.length === 0) {
+                        suggestionsDiv.innerHTML = '<div class="px-5 py-4 text-sm text-gray-500 font-bold italic">No materials found.</div>';
+                        suggestionsDiv.classList.remove('hidden');
+                        productIdInput.value = '';
+                        return;
+                    }
+
+                    let html = '';
+                    materials.forEach(m => {
+                        html += `
+                            <div class="px-5 py-3 hover:bg-indigo-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0" onclick="selectMaterial('${m._id}', '${m.productName.replace(/'/g, "\\'")}')">
+                                <div class="font-black text-gray-900">${m.productName}</div>
+                                <div class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">${m.packaging || ''} ${m.uom || ''}</div>
+                            </div>
+                        `;
+                    });
+
+                    suggestionsDiv.innerHTML = html;
+                    suggestionsDiv.classList.remove('hidden');
+                });
+        }, 300);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!materialInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+            suggestionsDiv.classList.add('hidden');
+        }
+    });
+}
+
+function selectMaterial(id, name) {
+    document.getElementById('materialInput').value = name;
+    document.getElementById('selectedProductId').value = id;
+    document.getElementById('materialSuggestions').classList.add('hidden');
+}
+
 function removeProductRow(rowId) {
     const row = document.getElementById(`productRow_${rowId}`);
     if (row) {
@@ -240,16 +360,8 @@ function handleOrderStatusChange() {
     }
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function () {
-    setupCustomerAutocomplete();
-    setupProductAutocomplete(1);
-
-    const orderStatusSelect = document.getElementById('orderStatus');
-    if (orderStatusSelect) {
-        orderStatusSelect.addEventListener('change', handleOrderStatusChange);
-    }
-});
+// Note: Auto-initialization removed to prevent conflicts in multi-item forms.
+// Individual pages should call the required setup functions manually.
 
 // Collect products before form submission
 function collectProducts() {
@@ -311,3 +423,93 @@ function collectProducts() {
     return true;
 }
 
+
+// Generic Autocomplete Helper used by Multi-item forms
+function setupAutocomplete(options) {
+    const {
+        input,
+        suggestions,
+        hiddenInput,
+        url,
+        formatResult,
+        onSelect
+    } = options;
+
+    if (!input || !suggestions) return;
+
+    let timeout;
+    input.addEventListener('input', function () {
+        const query = this.value.trim();
+        clearTimeout(timeout);
+
+        if (query.length < 2) {
+            suggestions.innerHTML = '';
+            suggestions.classList.add('hidden');
+            if (hiddenInput) hiddenInput.value = '';
+            return;
+        }
+
+        console.log(`Autocomplete: Searching for "${query}" at ${url}`);
+        suggestions.innerHTML = '<div class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest animate-pulse">Searching...</div>';
+        suggestions.classList.remove('hidden');
+
+        timeout = setTimeout(() => {
+            fetch(`${url}?q=${encodeURIComponent(query)}`)
+                .then(response => {
+                    console.log(`Autocomplete: Fetch status ${response.status}`);
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        console.error('Autocomplete: Invalid content-type', contentType);
+                        throw new Error('Received non-JSON response (likely HTML redirect)');
+                    }
+                    return response.json();
+                })
+                .then(items => {
+                    console.log('Autocomplete: Received items', items);
+                    if (!Array.isArray(items)) {
+                        console.warn('Autocomplete received unexpected format:', items);
+                        return; // Fail silently or handle object response if needed
+                    }
+
+                    if (items.length === 0) {
+                        suggestions.innerHTML = '<div class="px-6 py-4 text-sm text-gray-400 font-bold">No results found</div>';
+                    } else {
+                        suggestions.innerHTML = '';
+                        items.forEach(item => {
+                            const resultHtml = formatResult ? formatResult(item) : `
+                                <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
+                                    <div class="font-black text-gray-900 uppercase text-xs">${item.name || item.productName || item.supplierName || item.customerName}</div>
+                                </div>
+                            `;
+
+                            const temp = document.createElement('div');
+                            temp.innerHTML = resultHtml.trim();
+                            const el = temp.firstElementChild;
+
+                            if (el) {
+                                el.addEventListener('click', (e) => {
+                                    e.stopPropagation(); // Prevent immediate closing
+                                    if (hiddenInput) hiddenInput.value = item._id;
+                                    input.value = item.name || item.productName || item.supplierName || item.customerName;
+                                    suggestions.classList.add('hidden');
+                                    if (onSelect) onSelect(item);
+                                });
+                                suggestions.appendChild(el);
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Autocomplete error:', error);
+                    suggestions.innerHTML = '<div class="px-6 py-4 text-xs font-bold text-red-500 uppercase">Search failed</div>';
+                });
+        }, 300);
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.classList.add('hidden');
+        }
+    });
+}

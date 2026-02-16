@@ -8,104 +8,130 @@
         <!-- Mini FABs -->
         <div class="flex flex-col items-end gap-3 mb-2 invisible transition-all duration-300 transform translate-y-10 opacity-0 z-[1000]"
             id="fabMenu">
-            <% if (userRole==='sysadmin' ) { %>
-                <a href="/sysadmin/users"
-                    class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                    <span class="text-sm">Users</span>
-                    <i data-lucide="user-plus" class="w-5 h-5"></i>
-                </a>
-                <a href="/sysadmin/products"
-                    class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                    <span class="text-sm">Products</span>
-                    <i data-lucide="package" class="w-5 h-5"></i>
-                </a>
-                <a href="/sysadmin/dashboard"
-                    class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                    <span class="text-sm">Dashboard</span>
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                </a>
-                <% } else if (userRole==='salesperson' ) { %>
-                    <a href="/salesperson/reminders"
-                        class="flex items-center gap-3 bg-white hover:bg-amber-500 text-amber-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                        <span class="text-sm">Reminders</span>
-                        <i data-lucide="bell" class="w-5 h-5"></i>
-                    </a>
-                    <a href="/salesperson/create-order"
+            <% if (typeof hideDefaults==='undefined' || !hideDefaults) { %>
+                <% if (userRole==='sysadmin' ) { %>
+                    <a href="/sysadmin/users"
                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                        <span class="text-sm">New Order</span>
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span class="text-sm">Users</span>
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
                     </a>
-                    <a href="/salesperson/orders"
+                    <a href="/sysadmin/products"
                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                        <span class="text-sm">My Orders</span>
-                        <i data-lucide="list" class="w-5 h-5"></i>
+                        <span class="text-sm">Products</span>
+                        <i data-lucide="package" class="w-5 h-5"></i>
                     </a>
-                    <a href="/salesperson/dashboard"
+                    <a href="/sysadmin/dashboard"
                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                         <span class="text-sm">Dashboard</span>
                         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                     </a>
-                    <% } else if (userRole==='sales_head' ) { %>
-                        <a href="/sales-head/pending-orders"
-                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                            <span class="text-sm">Pending</span>
-                            <i data-lucide="history" class="w-5 h-5"></i>
+                    <% } else if (userRole==='salesperson' ) { %>
+                        <a href="/salesperson/reminders"
+                            class="flex items-center gap-3 bg-white hover:bg-amber-500 text-amber-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                            <span class="text-sm">Reminders</span>
+                            <i data-lucide="bell" class="w-5 h-5"></i>
                         </a>
-                        <a href="/sales-head/all-orders"
+                        <a href="/salesperson/create-order"
                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                            <span class="text-sm">All Orders</span>
-                            <i data-lucide="list-checks" class="w-5 h-5"></i>
+                            <span class="text-sm">New Order</span>
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
                         </a>
-                        <a href="/sales-head/dashboard"
+                        <a href="/salesperson/orders"
+                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                            <span class="text-sm">My Orders</span>
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                        </a>
+                        <a href="/salesperson/dashboard"
                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                             <span class="text-sm">Dashboard</span>
                             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                         </a>
-                        <% } else if (userRole==='owner' ) { %>
-                            <button
-                                onclick="if(window.location.pathname === '/owner/dashboard') { switchDashboardView('activity') } else { window.location.href = '/owner/dashboard' }"
-                                class="flex items-center gap-3 bg-white hover:bg-emerald-500 text-emerald-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                                <span class="text-sm">Detailed View</span>
-                                <i data-lucide="list-ordered" class="w-5 h-5"></i>
-                            </button>
-                            <button
-                                onclick="if(window.location.pathname === '/owner/dashboard') { switchDashboardView('charts') } else { window.location.href = '/owner/dashboard' }"
-                                class="flex items-center gap-3 bg-white hover:bg-purple-500 text-purple-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                                <span class="text-sm">Analytics View</span>
-                                <i data-lucide="pie-chart" class="w-5 h-5"></i>
-                            </button>
-                            <a href="/owner/reports"
+                        <% } else if (userRole==='sales_head' ) { %>
+                            <a href="/sales-head/pending-orders"
                                 class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                                <span class="text-sm">Reports</span>
-                                <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                                <span class="text-sm">Pending</span>
+                                <i data-lucide="history" class="w-5 h-5"></i>
                             </a>
-                            <a href="/owner/dashboard"
+                            <a href="/sales-head/all-orders"
+                                class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                <span class="text-sm">All Orders</span>
+                                <i data-lucide="list-checks" class="w-5 h-5"></i>
+                            </a>
+                            <a href="/sales-head/dashboard"
                                 class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                 <span class="text-sm">Dashboard</span>
                                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                             </a>
-                            <% } else if (userRole==='headoffice' ) { %>
-                                <button onclick="showSalespersonDetails(null, 'All Activity')"
+                            <% } else if (userRole==='owner' ) { %>
+                                <button
+                                    onclick="if(window.location.pathname === '/owner/dashboard') { switchDashboardView('activity') } else { window.location.href = '/owner/dashboard' }"
                                     class="flex items-center gap-3 bg-white hover:bg-emerald-500 text-emerald-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                     <span class="text-sm">Detailed View</span>
                                     <i data-lucide="list-ordered" class="w-5 h-5"></i>
                                 </button>
-                                <a href="/headoffice/telecrm"
-                                    class="flex items-center gap-3 bg-white hover:bg-purple-600 text-purple-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                                    <span class="text-sm">TeleCRM</span>
-                                    <i data-lucide="smartphone" class="w-5 h-5"></i>
+                                <button
+                                    onclick="if(window.location.pathname === '/owner/dashboard') { switchDashboardView('charts') } else { window.location.href = '/owner/dashboard' }"
+                                    class="flex items-center gap-3 bg-white hover:bg-purple-500 text-purple-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                    <span class="text-sm">Analytics View</span>
+                                    <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                                </button>
+                                <a href="/owner/reports"
+                                    class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                    <span class="text-sm">Reports</span>
+                                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
                                 </a>
-                                <a href="/headoffice/dashboard"
+                                <a href="/owner/dashboard"
                                     class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                     <span class="text-sm">Dashboard</span>
                                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                                 </a>
-                                <% } %>
+                                <% } else if (userRole==='headoffice' ) { %>
+                                    <button onclick="showSalespersonDetails(null, 'All Activity')"
+                                        class="flex items-center gap-3 bg-white hover:bg-emerald-500 text-emerald-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                        <span class="text-sm">Detailed View</span>
+                                        <i data-lucide="list-ordered" class="w-5 h-5"></i>
+                                    </button>
+                                    <a href="/headoffice/telecrm"
+                                        class="flex items-center gap-3 bg-white hover:bg-purple-600 text-purple-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                        <span class="text-sm">TeleCRM</span>
+                                        <i data-lucide="smartphone" class="w-5 h-5"></i>
+                                    </a>
+                                    <a href="/headoffice/dashboard"
+                                        class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                        <span class="text-sm">Dashboard</span>
+                                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                                    </a>
+                                    <% } else if (userRole==='factory_incharge' ) { %>
+                                        <a href="/factory-incharge/dashboard"
+                                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                            <span class="text-sm">Dashboard</span>
+                                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                                        </a>
+                                        <a href="/factory-incharge/inward"
+                                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                            <span class="text-sm">Inward History</span>
+                                            <i data-lucide="history" class="w-5 h-5"></i>
+                                        </a>
+                                        <% } %>
+                                            <% } %>
+                                                <!-- Extra Page Specific Items -->
+                                                <% if (typeof extraFabItems !=='undefined' && extraFabItems.length> 0) {
+                                                    %>
+                                                    <% extraFabItems.forEach(function(item) { %>
+                                                        <button onclick="<%- item.onClick %>"
+                                                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group border border-gray-200">
+                                                            <span class="text-sm font-black">
+                                                                <%= item.label %>
+                                                            </span>
+                                                            <i data-lucide="<%= item.icon %>" class="w-5 h-5"></i>
+                                                        </button>
+                                                        <% }); %>
+                                                            <% } %>
         </div>
 
         <!-- Main FAB Button -->
         <button
-            class="w-16 h-16 rounded-full bg-primary-600 text-white shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 active:scale-95 z-[1001]"
+            class="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 active:scale-95 z-[1001]"
             id="fabMain">
             <i data-lucide="plus" class="transition-transform duration-300 w-8 h-8" id="fabIcon"></i>
         </button>

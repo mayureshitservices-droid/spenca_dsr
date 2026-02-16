@@ -1,0 +1,672 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <!-- Stock Section (Default View) -->
+            <div class="mb-16 scroll-mt-24" id="stock-section">
+                <div class="flex items-center gap-4 mb-8">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Raw Material Stock</h2>
+                    <span
+                        class="px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Inventory</span>
+                </div>
+
+                <% if (rawMaterials.length===0) { %>
+                    <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="box" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Raw Materials</h3>
+                        <p class="text-gray-500 font-medium">Add raw materials from the Products page.</p>
+                    </div>
+                    <% } else { %>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            <% rawMaterials.forEach(function(material) { %>
+                                <div
+                                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 border-t-emerald-500">
+                                    <div class="p-6 flex flex-col flex-grow">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <h5 class="text-xl font-black text-gray-900 leading-tight tracking-tight">
+                                                <%= material.productName %>
+                                            </h5>
+                                            <span
+                                                class="text-[10px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg uppercase">Stock</span>
+                                        </div>
+
+                                        <% if (material.specification) { %>
+                                            <div class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">
+                                                <%= material.specification %>
+                                            </div>
+                                            <% } %>
+
+                                                <div class="grid grid-cols-2 gap-3 mb-6">
+                                                    <div
+                                                        class="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
+                                                        <span
+                                                            class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Available</span>
+                                                        <span class="text-2xl font-black text-emerald-700">
+                                                            <%= (material.availableQty || 0).toFixed(2) %>
+                                                        </span>
+                                                        <span
+                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                            <%= material.uom %>
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
+                                                        <span
+                                                            class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
+                                                        <span class="text-2xl font-black text-amber-700">
+                                                            <%= (material.bufferQty || 0).toFixed(2) %>
+                                                        </span>
+                                                        <span
+                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                            <%= material.uom %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- Suppliers Section -->
+            <div class="mb-16 scroll-mt-24 hidden" id="suppliers-section">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-3xl font-black text-gray-900 tracking-tight">Suppliers</h2>
+                        <span
+                            class="px-4 py-1.5 bg-orange-100 text-orange-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Partners</span>
+                    </div>
+                    <button onclick="openAddSupplierModal()"
+                        class="inline-flex items-center gap-3 py-3 px-6 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg"
+                        style="background-color: #1C2574; box-shadow: 0 10px 15px -3px rgba(28, 37, 116, 0.3);">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        Add New Supplier
+                    </button>
+                </div>
+
+                <% if (suppliers.length===0) { %>
+                    <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="truck" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Suppliers Yet</h3>
+                        <p class="text-gray-500 font-medium">Add your first supplier to get started.</p>
+                    </div>
+                    <% } else { %>
+                        <div
+                            class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-100">
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Supplier Name</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Phone Number</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                GST No</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <% suppliers.forEach(function(supplier) { %>
+                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                                <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                                                    <%= supplier.supplierName %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-700 font-mono">
+                                                    <%= supplier.phoneNumber || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
+                                                    <%= supplier.gstNo || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span
+                                                        class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= supplier.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' %>">
+                                                        <%= supplier.status %>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- Customers Section -->
+            <div class="mb-16 scroll-mt-24 hidden" id="customers-section">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-3xl font-black text-gray-900 tracking-tight">Customers</h2>
+                        <span
+                            class="px-4 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Directory</span>
+                    </div>
+                    <button onclick="openAddCustomerModal()"
+                        class="inline-flex items-center gap-3 py-3 px-6 text-white font-bold rounded-2xl transition-all transform hover:scale-105 shadow-lg"
+                        style="background-color: #1C2574; box-shadow: 0 10px 15px -3px rgba(28, 37, 116, 0.3);">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        Add New Customer
+                    </button>
+                </div>
+
+                <% if (customers.length===0) { %>
+                    <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="users" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Customers</h3>
+                        <p class="text-gray-500 font-medium">Customer list is empty.</p>
+                    </div>
+                    <% } else { %>
+                        <div
+                            class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-100">
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Customer Name</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Category</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Mobile</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <% customers.forEach(function(customer) { %>
+                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                                <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                                                    <%= customer.customerName %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                                                    <%= customer.category || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
+                                                    <%= customer.mobileNo || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600">
+                                                    <%= customer.address || '-' %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- Inward History Section -->
+            <div class="mb-16 scroll-mt-24 hidden" id="inward-section">
+                <div class="flex items-center gap-4 mb-8">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Inward History</h2>
+                    <span
+                        class="px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Log</span>
+                </div>
+
+                <% if (inwardTransactions.length===0) { %>
+                    <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="clipboard-list" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Inward Records</h3>
+                        <p class="text-gray-500 font-medium">No material inward history found.</p>
+                    </div>
+                    <% } else { %>
+                        <div
+                            class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-100">
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Date</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Supplier</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Material</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                                Qty</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                                Price</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                                GST%</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Invoice No</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Invoice Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <% inwardTransactions.forEach(function(item) { %>
+                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                                <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
+                                                    <%= item.createdAt ? new
+                                                        Date(item.createdAt).toLocaleDateString('en-IN') : 'N/A' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                                                    <%= item.supplierName || 'Unknown' %>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="text-sm font-bold text-gray-900">
+                                                        <%= item.productName || 'Unknown' %>
+                                                    </div>
+                                                    <div class="text-[10px] text-gray-400 font-bold uppercase">
+                                                        <%= (item.productId && item.productId.packaging) ?
+                                                            item.productId.packaging : '' %>
+                                                    </div>
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-bold text-gray-900 text-right tabular-nums">
+                                                    <%= (item.quantity || 0).toFixed(2) %> <span
+                                                            class="text-[10px] text-gray-400 font-normal">
+                                                            <%= (item.productId && item.productId.uom) ?
+                                                                item.productId.uom : '' %>
+                                                        </span>
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-bold text-gray-900 text-right tabular-nums">
+                                                    ₹<%= (item.price || 0).toFixed(2) %>
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-bold text-gray-900 text-right tabular-nums">
+                                                    <%= (item.gstPercentage || 0).toFixed(0) %>%
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
+                                                    <%= item.invoiceNo || '-' %>
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-medium text-gray-600 whitespace-nowrap">
+                                                    <%= item.invoiceDate ? new
+                                                        Date(item.invoiceDate).toLocaleDateString('en-IN') : '-' %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+            </div>
+
+            <!-- Dispatch History Section -->
+            <div class="mb-16 scroll-mt-24 hidden" id="dispatch-section">
+                <div class="flex items-center gap-4 mb-8">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Dispatch History</h2>
+                    <span
+                        class="px-4 py-1.5 bg-purple-100 text-purple-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Log</span>
+                </div>
+
+                <% if (dispatchTransactions.length===0) { %>
+                    <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="truck" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Dispatch Records</h3>
+                        <p class="text-gray-500 font-medium">No material dispatch history found.</p>
+                    </div>
+                    <% } else { %>
+                        <div
+                            class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-100">
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Date</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Receiver</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Product</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                                Qty</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Invoice No</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Invoice Date</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Vehicle</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Driver</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Driver Mobile</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <% dispatchTransactions.forEach(function(item) { %>
+                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                                <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
+                                                    <%= item.dispatchDate ? new
+                                                        Date(item.dispatchDate).toLocaleDateString('en-IN') : 'N/A' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                                                    <%= item.receiverName || 'Unknown' %>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="text-sm font-bold text-gray-900">
+                                                        <%= item.productName || 'Unknown' %>
+                                                    </div>
+                                                    <div class="text-[10px] text-gray-400 font-bold uppercase">
+                                                        <%= (item.productId && item.productId.packaging) ?
+                                                            item.productId.packaging : '' %>
+                                                    </div>
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-bold text-gray-900 text-right tabular-nums">
+                                                    <%= (item.quantity || 0).toFixed(2) %> <span
+                                                            class="text-[10px] text-gray-400 font-normal">
+                                                            <%= (item.productId && item.productId.uom) ?
+                                                                item.productId.uom : '' %>
+                                                        </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
+                                                    <%= item.invoiceNo || '-' %>
+                                                </td>
+                                                <td
+                                                    class="px-6 py-4 text-sm font-medium text-gray-600 whitespace-nowrap">
+                                                    <%= item.invoiceDate ? new
+                                                        Date(item.invoiceDate).toLocaleDateString('en-IN') : '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
+                                                    <%= item.vehicleNo || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-700">
+                                                    <%= item.driverName || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
+                                                    <%= item.driverMobileNo || '-' %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <% } %>
+            </div>
+        </div>
+
+        <!-- Add Supplier Modal -->
+        <div id="addSupplierModal" class="fixed inset-0 z-[2000] hidden items-center justify-center p-4">
+            <div onclick="closeAddSupplierModal()" class="absolute inset-0 bg-gray-900/80 backdrop-blur-md"></div>
+            <div
+                class="relative w-full max-w-2xl bg-white rounded-3xl shadow-around-lg overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+                <div class="p-8 border-b border-gray-100 flex items-center justify-between"
+                    style="background-color: #f8f9ff;">
+                    <div>
+                        <h3 class="text-2xl font-black text-gray-900 tracking-tight">Add New Supplier</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-1 uppercase tracking-widest"
+                            style="color: #1C2574;">Partner Details</p>
+                    </div>
+                    <button onclick="closeAddSupplierModal()"
+                        class="p-2 hover:bg-white rounded-xl transition-colors text-gray-400 hover:text-gray-900 shadow-sm hover:shadow-md">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-y-auto flex-grow">
+                    <form action="/headoffice/suppliers/create" method="POST" class="p-8 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="col-span-1 md:col-span-2 space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Supplier
+                                    Name</label>
+                                <input type="text" name="supplierName" required class="input-field"
+                                    placeholder="Enter supplier name...">
+                            </div>
+
+                            <div class="col-span-1 md:col-span-2 space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Address</label>
+                                <textarea name="address" rows="2" class="input-field"
+                                    placeholder="Complete office/warehouse address..."></textarea>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Phone
+                                    Number</label>
+                                <input type="text" name="phoneNumber" class="input-field" placeholder="+91 ...">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">GST
+                                    No</label>
+                                <input type="text" name="gstNo" class="input-field" placeholder="22AAAAA0000A1Z5">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment
+                                    Terms</label>
+                                <input type="text" name="paymentTerms" class="input-field"
+                                    placeholder="e.g., 30 Days Net">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</label>
+                                <select name="status" class="input-field">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-100">
+                            <button type="button" onclick="closeAddSupplierModal()"
+                                class="px-8 py-4 text-gray-500 font-bold hover:text-gray-900 transition-colors">Discard</button>
+                            <button type="submit"
+                                class="px-10 py-4 text-white font-bold rounded-2xl shadow-xl transition-all transform active:scale-95 leading-none"
+                                style="background-color: #1C2574; box-shadow: 0 10px 15px -3px rgba(28, 37, 116, 0.3);">
+                                Save Supplier
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Customer Modal -->
+        <div id="addCustomerModal" class="fixed inset-0 z-[2000] hidden items-center justify-center p-4">
+            <div onclick="closeAddCustomerModal()" class="absolute inset-0 bg-gray-900/80 backdrop-blur-md">
+            </div>
+            <div
+                class="relative w-full max-w-2xl bg-white rounded-3xl shadow-around-lg overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300 max-h-[90vh] flex flex-col">
+                <div class="p-8 border-b border-gray-100 flex items-center justify-between"
+                    style="background-color: #f8f9ff;">
+                    <div>
+                        <h3 class="text-2xl font-black text-gray-900 tracking-tight">Add New Customer</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-1 uppercase tracking-widest"
+                            style="color: #1C2574;">Directory Details</p>
+                    </div>
+                    <button onclick="closeAddCustomerModal()"
+                        class="p-2 hover:bg-white rounded-xl transition-colors text-gray-400 hover:text-gray-900 shadow-sm hover:shadow-md">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-y-auto flex-grow">
+                    <form action="/headoffice/customers/create" method="POST" class="p-8 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="col-span-1 md:col-span-2 space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer
+                                    Name</label>
+                                <input type="text" name="customerName" required class="input-field"
+                                    placeholder="Enter customer name...">
+                            </div>
+
+                            <div class="col-span-1 md:col-span-2 space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Address</label>
+                                <textarea name="address" rows="2" class="input-field"
+                                    placeholder="Complete business/delivery address..."></textarea>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Mobile
+                                    Number</label>
+                                <input type="text" name="mobileNo" class="input-field" placeholder="+91 ...">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</label>
+                                <select name="category" class="input-field">
+                                    <option value="Hotel">Hotel</option>
+                                    <option value="Gym">Gym</option>
+                                    <option value="Resort">Resort</option>
+                                    <option value="Water Park">Water Park</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">GST
+                                    No</label>
+                                <input type="text" name="gstNo" class="input-field" placeholder="22AAAAA0000A1Z5">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Payment
+                                    Terms</label>
+                                <input type="text" name="paymentTerms" class="input-field"
+                                    placeholder="e.g., 30 Days Net">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</label>
+                                <select name="status" class="input-field">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-100">
+                            <button type="button" onclick="closeAddCustomerModal()"
+                                class="px-8 py-4 text-gray-500 font-bold hover:text-gray-900 transition-colors">Discard</button>
+                            <button type="submit"
+                                class="px-10 py-4 text-white font-bold rounded-2xl shadow-xl transition-all transform active:scale-95 leading-none"
+                                style="background-color: #1C2574; box-shadow: 0 10px 15px -3px rgba(28, 37, 116, 0.3);">
+                                Save Customer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ { label: 'Stock' ,
+            icon: 'box' , onClick: "showSection('stock-section')" }, { label: 'Inward History' , icon: 'clipboard-list'
+            , onClick: "showSection('inward-section')" }, { label: 'Dispatch History' , icon: 'truck' ,
+            onClick: "showSection('dispatch-section')" }, { label: 'Suppliers' , icon: 'users' ,
+            onClick: "showSection('suppliers-section')" }, { label: 'Customers' , icon: 'user-check' ,
+            onClick: "showSection('customers-section')" }, { label: 'Dashboard' , icon: 'layout-dashboard' ,
+            onClick: "window.location.href='/headoffice/dashboard'" } ] }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    function showSection(sectionId) {
+                        const sections = ['stock-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section'];
+
+                        // Close FAB menu first
+                        const fabBackdrop = document.getElementById('fabBackdrop');
+                        if (fabBackdrop && !fabBackdrop.classList.contains('invisible')) {
+                            fabBackdrop.click();
+                        }
+
+                        sections.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                if (id === sectionId) {
+                                    el.classList.remove('hidden');
+                                    // Update hash without triggering reload
+                                    history.replaceState(null, null, '#' + id);
+                                    setTimeout(() => {
+                                        el.scrollIntoView({ behavior: 'smooth' });
+                                    }, 50);
+                                } else {
+                                    el.classList.add('hidden');
+                                }
+                            }
+                        });
+                    }
+
+                    function openAddSupplierModal() {
+                        const modal = document.getElementById('addSupplierModal');
+                        if (modal) {
+                            modal.classList.remove('hidden');
+                            modal.classList.add('flex');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    }
+
+                    function openAddCustomerModal() {
+                        const modal = document.getElementById('addCustomerModal');
+                        if (modal) {
+                            modal.classList.remove('hidden');
+                            modal.classList.add('flex');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    }
+
+                    function closeAddCustomerModal() {
+                        const modal = document.getElementById('addCustomerModal');
+                        if (modal) {
+                            modal.classList.remove('flex');
+                            modal.classList.add('hidden');
+                            document.body.style.overflow = '';
+                        }
+                    }
+
+                    function closeAddSupplierModal() {
+                        const modal = document.getElementById('addSupplierModal');
+                        if (modal) {
+                            modal.classList.remove('flex');
+                            modal.classList.add('hidden');
+                            document.body.style.overflow = '';
+                        }
+                    }
+
+                    // Handle view persistence via hash
+                    document.addEventListener('DOMContentLoaded', function () {
+                        lucide.createIcons();
+
+                        const hash = window.location.hash.substring(1);
+                        const validSections = ['stock-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section'];
+
+                        if (hash && validSections.includes(hash)) {
+                            showSection(hash);
+                        } else {
+                            showSection('stock-section');
+                        }
+                    });
+                </script>

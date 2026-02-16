@@ -257,3 +257,14 @@
 
                 <script src="/js/autocomplete.js"></script>
                 <script src="/js/gps.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        setupCustomerAutocomplete();
+                        setupProductAutocomplete(1);
+
+                        const orderStatusSelect = document.getElementById('orderStatus');
+                        if (orderStatusSelect) {
+                            orderStatusSelect.addEventListener('change', handleOrderStatusChange);
+                        }
+                    });
+                </script>

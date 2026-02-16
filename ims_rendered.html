@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>
+    Spenca
+  </title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- PWA Support -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1C2574">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Spenca">
+  <link rel="apple-touch-icon" href="/img/icon-192.png">
+
+
+
+
+
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Custom CSS with Cache Buster -->
+  <link rel="stylesheet" href="/css/style.css?v=1.0.3">
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js?v=5')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed', err));
+      });
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+    <div class="min-h-screen flex items-center justify-center p-4 bg-gray-100">
+        <div class="w-full max-auto max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden transition-all">
+            <div class="p-8 sm:p-12">
+                <div class="text-center mb-10">
+                    <div class="inline-flex items-center justify-center p-4 bg-primary-50 rounded-2xl mb-6">
+                        <i data-lucide="droplet" class="w-10 h-10 text-primary-600 fill-primary-600"></i>
+                    </div>
+                    <h1 class="text-3xl font-black text-black tracking-tight mb-2 uppercase">SPENCA</h1>
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">Mineral Water</p>
+                </div>
+
+                
+
+                        <form action="/login" method="POST" class="space-y-6">
+                            <div>
+                                <label for="email"
+                                    class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                                    Email Address
+                                </label>
+                                <div class="relative group">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-primary-600 text-gray-400">
+                                        <i data-lucide="mail" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="email" id="email" name="email" class="input-field pl-11"
+                                        placeholder="name@example.com" required autofocus>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="password"
+                                    class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                                    Password
+                                </label>
+                                <div class="relative group">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-primary-600 text-gray-400">
+                                        <i data-lucide="lock" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="password" id="password" name="password" class="input-field pl-11"
+                                        placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" class="w-full btn-primary">
+                                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                                    Sign In
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-10 pt-8 border-t border-gray-100 text-center space-y-4">
+                            <!-- Custom PWA Install Button (Hidden by default) -->
+                            <div id="pwa-install-container" class="hidden animate-bounce">
+                                <button id="pwa-install-btn"
+                                    class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    Install Spenca App
+                                </button>
+                            </div>
+
+                            <p class="text-gray-400 text-sm flex items-center justify-center gap-2">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                Enterprise Secure Access Only
+                            </p>
+                            <p class="text-gray-400 text-sm flex items-center justify-center gap-2">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                System Admin : 7385556980
+                            </p>
+                        </div>
+
+                        <script>
+                            let deferredPrompt;
+                            const pwaInstallContainer = document.getElementById('pwa-install-container');
+                            const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+                            window.addEventListener('beforeinstallprompt', (e) => {
+                                // Prevent Chrome 67 and earlier from automatically showing the prompt
+                                e.preventDefault();
+                                // Stash the event so it can be triggered later.
+                                deferredPrompt = e;
+                                // Update UI notify the user they can add to home screen
+                                pwaInstallContainer.classList.remove('hidden');
+
+                                pwaInstallBtn.addEventListener('click', (e) => {
+                                    // hide our user interface that shows our A2HS button
+                                    pwaInstallContainer.classList.add('hidden');
+                                    // Show the prompt
+                                    deferredPrompt.prompt();
+                                    // Wait for the user to respond to the prompt
+                                    deferredPrompt.userChoice.then((choiceResult) => {
+                                        if (choiceResult.outcome === 'accepted') {
+                                            console.log('User accepted the A2HS prompt');
+                                        } else {
+                                            console.log('User dismissed the A2HS prompt');
+                                        }
+                                        deferredPrompt = null;
+                                    });
+                                });
+                            });
+
+                            window.addEventListener('appinstalled', (evt) => {
+                                console.log('Spenca was installed.');
+                                pwaInstallContainer.classList.add('hidden');
+                            });
+                        </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    lucide.createIcons();
+</script>
+
+<!-- Custom Scripts -->
+<script src="/js/fab.js"></script>
+</body>
+
+</html>

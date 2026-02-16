@@ -1,0 +1,348 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <!-- Header -->
+            <div class="flex items-center gap-6 mb-12">
+                <a href="/factory-incharge/dispatch"
+                    class="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-black hover:bg-gray-50 transition-all active:scale-95 group">
+                    <i data-lucide="arrow-left" class="w-6 h-6 group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+                <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none">dispatch</h1>
+            </div>
+
+            <!-- Alerts -->
+            <% if (typeof success !=='undefined' && success) { %>
+                <div
+                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                        <p class="font-bold">
+                            <%= success %>
+                        </p>
+                    </div>
+                </div>
+                <% } %>
+
+                    <% if (typeof error !=='undefined' && error) { %>
+                        <div
+                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+                                <p class="font-bold">
+                                    <%= error %>
+                                </p>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <div class="glass-card overflow-hidden">
+                                <div class="card-header-primary">
+                                    <h2 class="text-xl font-black uppercase">Dispatch/Outward</h2>
+                                </div>
+
+                                <form id="dispatchForm" action="/factory-incharge/dispatch" method="POST"
+                                    onsubmit="return collectItems()" class="p-8 space-y-8">
+
+                                    <div class="space-y-8">
+                                        <!-- Phase 1: Customer Selection -->
+                                        <div class="space-y-3">
+                                            <label
+                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Customer
+                                                Name *</label>
+                                            <div class="relative">
+                                                <input type="text" id="receiverInput" name="receiverName" required
+                                                    class="input-field"
+                                                    placeholder="Search or type customer/destination..."
+                                                    autocomplete="off">
+                                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                                    id="receiverSuggestions"></div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="border-gray-100/50">
+
+                                        <!-- Phase 2: Products Section -->
+                                        <div class="space-y-6">
+                                            <div class="flex items-center justify-between">
+                                                <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
+                                                    Products to Dispatch</h3>
+                                            </div>
+
+                                            <div id="itemsContainer" class="space-y-6">
+                                                <!-- Product Row Template -->
+                                                <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
+                                                    id="itemRow_1">
+                                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                                                        <!-- Product Selection -->
+                                                        <div class="md:col-span-8 space-y-2">
+                                                            <label
+                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
+                                                                Product *</label>
+                                                            <div class="relative">
+                                                                <input type="text" id="productInput_1" required
+                                                                    autocomplete="off" class="input-field shadow-sm"
+                                                                    placeholder="Start typing product name...">
+                                                                <input type="hidden" id="selectedProductId_1"
+                                                                    class="item-product-id">
+                                                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                                                    id="productSuggestions_1"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Quantity -->
+                                                        <div class="md:col-span-3 space-y-2">
+                                                            <label
+                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Qty
+                                                                *</label>
+                                                            <input type="number" step="0.01" id="quantity_1" required
+                                                                class="input-field shadow-sm item-quantity"
+                                                                placeholder="0.00">
+                                                        </div>
+
+                                                        <!-- Actions -->
+                                                        <div class="md:col-span-1">
+                                                            <button type="button" onclick="removeItemRow(1)"
+                                                                class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
+                                                                <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" onclick="addItemRow()"
+                                                class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
+                                                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                                Add Another Product
+                                            </button>
+                                        </div>
+
+                                        <hr class="border-gray-100/50">
+
+                                        <!-- Phase 3: Secondary Transaction Info -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div class="space-y-3">
+                                                <label
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                                    No</label>
+                                                <div class="relative">
+                                                    <input type="text" name="invoiceNo" class="input-field"
+                                                        placeholder="INV/2024/001">
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                <label
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                                    Date</label>
+                                                <div class="relative">
+                                                    <input type="date" name="invoiceDate" class="input-field">
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                <label
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Vehicle
+                                                    No</label>
+                                                <div class="relative">
+                                                    <input type="text" name="vehicleNo" class="input-field"
+                                                        placeholder="MH-12-AB-1234">
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                <label
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Driver
+                                                    Name</label>
+                                                <div class="relative">
+                                                    <input type="text" name="driverName" class="input-field"
+                                                        placeholder="Full name">
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                <label
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Driver
+                                                    Mobile</label>
+                                                <div class="relative">
+                                                    <input type="tel" name="driverMobileNo" class="input-field"
+                                                        placeholder="Mobile number">
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-3 md:col-span-2">
+                                                <label
+                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Remarks</label>
+                                                <div class="relative">
+                                                    <input type="text" name="remark" class="input-field"
+                                                        placeholder="Any special instructions or notes...">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- Hidden field for collected items -->
+                                    <input type="hidden" name="items" id="itemsData">
+
+                                    <!-- Submit -->
+                                    <div class="pt-6">
+                                        <button type="submit" class="btn-primary w-full py-5 text-lg">
+                                            submit
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+        </div>
+
+
+        <%- include('../partials/footer') %>
+
+            <!-- Autocomplete with Cache Bust -->
+            <script src="/js/autocomplete.js?v=<%= Date.now() %>"></script>
+            <script>
+                let rowCount = 1;
+
+                function addItemRow() {
+                    rowCount++;
+                    const container = document.getElementById('itemsContainer');
+                    const row = document.createElement('div');
+                    row.className = 'group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200 animate-in slide-in-from-top-4 duration-300';
+                    row.id = `itemRow_${rowCount}`;
+
+                    row.innerHTML = `
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                                <div class="md:col-span-8 space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Product *</label>
+                                    <div class="relative">
+                                        <input type="text" id="productInput_${rowCount}" required autocomplete="off"
+                                            class="input-field shadow-sm" placeholder="Start typing product name...">
+                                        <input type="hidden" id="selectedProductId_${rowCount}" class="item-product-id">
+                                        <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                            id="productSuggestions_${rowCount}"></div>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-3 space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Qty *</label>
+                                    <input type="number" step="0.01" id="quantity_${rowCount}" required
+                                        class="input-field shadow-sm item-quantity" placeholder="0.00">
+                                </div>
+                                <div class="md:col-span-1">
+                                    <button type="button" onclick="removeItemRow(${rowCount})" class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
+                                        <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                    container.appendChild(row);
+                    lucide.createIcons();
+                    initProductAutocomplete(rowCount);
+                }
+
+                function removeItemRow(id) {
+                    const rows = document.querySelectorAll('[id^="itemRow_"]');
+                    if (rows.length > 1) {
+                        const row = document.getElementById(`itemRow_${id}`);
+                        row.classList.add('animate-out', 'fade-out', 'zoom-out', 'duration-200');
+                        setTimeout(() => row.remove(), 200);
+                    } else {
+                        alert('At least one product is required');
+                    }
+                }
+
+                function initProductAutocomplete(id) {
+                    setupAutocomplete({
+                        input: document.getElementById(`productInput_${id}`),
+                        suggestions: document.getElementById(`productSuggestions_${id}`),
+                        hiddenInput: document.getElementById(`selectedProductId_${id}`),
+                        url: '/api/finished-goods/search',
+                        formatResult: (item) => `
+                                <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
+                                    <div class="font-black text-gray-900 uppercase text-xs">${item.productName}</div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">${item.packaging} | ${item.uom}</div>
+                                    <div class="text-[10px] font-black text-emerald-600 uppercase mt-1">Stock: ${item.availableQty || 0} ${item.uom}</div>
+                                </div>
+                            `,
+                        onSelect: (item) => {
+                            document.getElementById(`productInput_${id}`).value = item.productName;
+                        }
+                    });
+                }
+
+                function collectItems() {
+                    const items = [];
+                    const rows = document.querySelectorAll('[id^="itemRow_"]');
+                    let isValid = true;
+
+                    rows.forEach(row => {
+                        const id = row.id.split('_')[1];
+                        const productId = document.getElementById(`selectedProductId_${id}`).value;
+                        const quantity = document.getElementById(`quantity_${id}`).value;
+
+                        if (!productId || !quantity) {
+                            isValid = false;
+                            row.classList.add('border-red-200', 'bg-red-50/30');
+                            setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
+                        } else {
+                            items.push({
+                                productId,
+                                quantity
+                            });
+                        }
+                    });
+
+                    if (!isValid) {
+                        alert('Please fill all required fields for each product and select products from the suggestions.');
+                        return false;
+                    }
+
+                    document.getElementById('itemsData').value = JSON.stringify(items);
+                    return true;
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    console.log('Initializing Dispatch Form...');
+
+                    try {
+                        // Initialize Customer Autocomplete
+                        console.log('Setting up Customer Autocomplete...');
+                        const receiverInput = document.getElementById('receiverInput');
+                        const receiverSuggestions = document.getElementById('receiverSuggestions');
+
+                        if (!receiverInput) console.error('CRITICAL: receiverInput element NOT found!');
+                        if (!receiverSuggestions) console.error('CRITICAL: receiverSuggestions element NOT found!');
+
+                        setupAutocomplete({
+                            input: receiverInput,
+                            suggestions: receiverSuggestions,
+                            url: '/api/factory-incharge/customers/search',
+                            formatResult: (item) => `
+                                    <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
+                                        <div class="font-black text-gray-900 uppercase text-xs">${item.customerName}</div>
+                                        <div class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">${item.address || ''}</div>
+                                    </div>
+                                `,
+                            onSelect: (item) => {
+                                console.log('Customer selected:', item.customerName);
+                                document.getElementById('receiverInput').value = item.customerName;
+                            }
+                        });
+                        console.log('Customer Autocomplete Initialized');
+
+                        // Initialize First Product Row
+                        initProductAutocomplete(1);
+                        console.log('Product Autocomplete Initialized');
+
+                    } catch (e) {
+                        console.error('Initialization Error:', e);
+                    }
+
+                    // Icons last, as it's purely visual
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                });
+            </script>

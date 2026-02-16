@@ -1,5 +1,8 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
+const Product = require('../models/Product');
+const Customer = require('../models/Customer');
+const Supplier = require('../models/Supplier');
 const ExcelJS = require('exceljs');
 
 // GET /headoffice/dashboard
@@ -304,9 +307,109 @@ const exportTeleCRM = async (req, res) => {
     }
 };
 
+// GET /headoffice/ims
+const getIMS = async (req, res) => {
+    try {
+        const Product = require('../models/Product');
+        const Customer = require('../models/Customer');
+        const Inward = require('../models/Inward');
+        const Dispatch = require('../models/Dispatch');
+
+        // Fetch raw materials for stock view
+        const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
+
+        // Fetch customers
+        const customers = await Customer.find().sort({ customerName: 1 });
+
+        // Fetch suppliers
+        const suppliers = await Supplier.find().sort({ supplierName: 1 });
+
+        // Fetch Inward History
+        const inwardTransactions = await Inward.find()
+            .populate('productId')
+            .sort({ createdAt: -1 });
+
+        // Fetch Dispatch History
+        const dispatchTransactions = await Dispatch.find()
+            .populate('productId')
+            .sort({ dispatchDate: -1 });
+
+        res.render('headoffice/ims', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            rawMaterials,
+            suppliers,
+            customers,
+            inwardTransactions,
+            dispatchTransactions
+        });
+    } catch (error) {
+        console.error('IMS Dashboard error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+// POST /headoffice/suppliers/create
+const createSupplier = async (req, res) => {
+    try {
+        const { supplierName, address, phoneNumber, gstNo, paymentTerms, status } = req.body;
+
+        const existingSupplier = await Supplier.findOne({ supplierName });
+        if (existingSupplier) {
+            return res.status(400).send('Supplier with this name already exists');
+        }
+
+        const supplier = new Supplier({
+            supplierName,
+            address,
+            phoneNumber,
+            gstNo,
+            paymentTerms,
+            status
+        });
+
+        await supplier.save();
+        res.redirect('/headoffice/ims#suppliers-section');
+    } catch (error) {
+        console.error('Create Supplier error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+// POST /headoffice/customers/create
+const createCustomer = async (req, res) => {
+    try {
+        const { customerName, address, mobileNo, category, gstNo, paymentTerms, status } = req.body;
+
+        const existingCustomer = await Customer.findOne({ customerName });
+        if (existingCustomer) {
+            return res.status(400).send('Customer with this name already exists');
+        }
+
+        const customer = new Customer({
+            customerName,
+            address,
+            mobileNo,
+            category,
+            gstNo,
+            paymentTerms,
+            status
+        });
+
+        await customer.save();
+        res.redirect('/headoffice/ims#customers-section');
+    } catch (error) {
+        console.error('Create Customer error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
+    getIMS,
     downloadDailyReport,
     getTeleCRM,
-    exportTeleCRM
+    exportTeleCRM,
+    createSupplier,
+    createCustomer
 };

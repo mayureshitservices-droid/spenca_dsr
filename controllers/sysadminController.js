@@ -113,10 +113,15 @@ const getProducts = async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
 
+        // Segregate products for the view - default to Finished Good if not set
+        const finishedGoods = products.filter(p => !p.productType || p.productType === 'Finished Good');
+        const rawMaterials = products.filter(p => p.productType === 'Raw Material');
+
         res.render('sysadmin/products', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            products,
+            finishedGoods,
+            rawMaterials,
             success: req.query.success,
             error: req.query.error
         });
@@ -129,11 +134,16 @@ const getProducts = async (req, res) => {
 // POST /sysadmin/products/create
 const createProduct = async (req, res) => {
     try {
-        const { productName, packaging, remarks } = req.body;
+        const { productName, productType, packaging, specification, uom, availableQty, bufferQty, remarks } = req.body;
 
         const newProduct = new Product({
             productName,
+            productType: productType || 'Finished Good',
             packaging,
+            specification,
+            uom,
+            availableQty: availableQty ? parseFloat(availableQty) : 0,
+            bufferQty: bufferQty ? parseFloat(bufferQty) : 0,
             photo: req.file ? '/uploads/' + req.file.filename : null,
             remarks
         });
@@ -144,6 +154,31 @@ const createProduct = async (req, res) => {
     } catch (error) {
         console.error('Create product error:', error);
         res.redirect('/sysadmin/products?error=Failed to create product');
+    }
+};
+
+// GET /sysadmin/products/:id
+const getProduct = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id).populate('components.productId');
+        if (!product) return res.status(404).json({ error: 'Product not found' });
+        res.json(product);
+    } catch (error) {
+        console.error('Get product error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// POST /sysadmin/products/:id/bom
+const updateBOM = async (req, res) => {
+    try {
+        const { components } = req.body;
+        // components is expected to be an array of { productId, productName, quantity, uom }
+        await Product.findByIdAndUpdate(req.params.id, { components });
+        res.json({ success: true, message: 'BOM updated successfully' });
+    } catch (error) {
+        console.error('Update BOM error:', error);
+        res.status(500).json({ error: 'Failed to update BOM' });
     }
 };
 
@@ -165,6 +200,8 @@ module.exports = {
     toggleUserStatus,
     getProducts,
     createProduct,
+    getProduct,
+    updateBOM,
     deleteProduct,
     upload
 };

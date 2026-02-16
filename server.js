@@ -45,6 +45,7 @@ const ownerRoutes = require('./routes/owner');
 const headofficeRoutes = require('./routes/headoffice');
 const apiRoutes = require('./routes/api');
 const telecrmRoutes = require('./routes/telecrm');
+const factoryInchargeRoutes = require('./routes/factoryIncharge.js');
 
 // Mount routes
 app.use('/', authRoutes);
@@ -53,6 +54,7 @@ app.use('/salesperson', salespersonRoutes);
 
 app.use('/owner', ownerRoutes);
 app.use('/headoffice', headofficeRoutes);
+app.use('/factory-incharge', factoryInchargeRoutes);
 app.use('/api/telecrm', telecrmRoutes);
 app.use('/api', apiRoutes);
 

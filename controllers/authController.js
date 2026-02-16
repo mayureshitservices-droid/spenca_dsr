@@ -64,7 +64,8 @@ const getDashboardRoute = (role) => {
         'sales_head': '/sales-head/dashboard',
         'owner': '/owner/dashboard',
         'salesperson': '/salesperson/dashboard',
-        'headoffice': '/headoffice/dashboard'
+        'headoffice': '/headoffice/dashboard',
+        'factory_incharge': '/factory-incharge/dashboard'
     };
     return routes[role] || '/login';
 };

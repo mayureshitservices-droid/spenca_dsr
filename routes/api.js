@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const salespersonController = require('../controllers/salespersonController');
 const ownerController = require('../controllers/ownerController');
+const factoryInchargeController = require('../controllers/factoryInchargeController');
 const { isAuthenticated } = require('../middleware/auth');
 const { checkRole } = require('../middleware/roleCheck');
 
@@ -11,6 +12,10 @@ router.use(isAuthenticated);
 router.get('/customers/search', salespersonController.searchCustomers);
 router.get('/customers/:id', salespersonController.getCustomer);
 router.get('/products/search', salespersonController.searchProducts);
+router.get('/suppliers/search', factoryInchargeController.searchSuppliers);
+router.get('/raw-materials/search', factoryInchargeController.searchRawMaterials);
+router.get('/finished-goods/search', factoryInchargeController.searchFinishedGoods);
+router.get('/factory-incharge/customers/search', factoryInchargeController.searchCustomers);
 
 // Owner stats API (accessible by owner)
 router.get('/owner/stats/total-orders', checkRole(['owner']), ownerController.getTotalOrders);

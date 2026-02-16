@@ -1,0 +1,114 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div class="space-y-2">
+                    <h1 class="text-4xl font-black text-black tracking-tight uppercase leading-none">
+                        Inward History
+                    </h1>
+                </div>
+
+                <a href="/factory-incharge/inward/new" class="btn-primary w-full md:w-auto px-8">
+                    Record New Inward
+                </a>
+            </div>
+
+            <!-- Transactions Grid -->
+            <% if (inwardTransactions.length===0) { %>
+                <div
+                    class="bg-white/95 backdrop-blur-md rounded-3xl p-20 text-center shadow-around-lg border border-gray-100">
+                    <div class="flex flex-col items-center gap-6">
+                        <div
+                            class="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest">No Activity Recorded
+                            </h3>
+                            <p class="text-sm font-medium text-gray-400">Your material history will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+                <% } else { %>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <% inwardTransactions.forEach(item=> { %>
+                            <div
+                                class="glass-card p-6 flex flex-col group transition-all hover:shadow-2xl hover:-translate-y-2">
+                                <!-- Top Meta: Just the Date -->
+                                <div class="mb-6 pb-4 border-b border-gray-50 flex justify-between items-center">
+                                    <p class="text-sm font-black text-gray-900">
+                                        <%= new Date(item.createdAt).toLocaleDateString('en-IN', { day: '2-digit' ,
+                                            month: 'short' , year: 'numeric' }) %>
+                                    </p>
+                                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
+                                        <%= new Date(item.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit' ,
+                                            minute: '2-digit' }) %>
+                                    </span>
+                                </div>
+
+                                <!-- Main Content -->
+                                <div class="space-y-6 flex-grow">
+                                    <!-- Supplier -->
+                                    <p
+                                        class="text-base font-black text-gray-900 uppercase group-hover:text-indigo-600 transition-colors tracking-tight leading-none">
+                                        <%= item.supplierName %>
+                                    </p>
+                                </div>
+
+                                <% if (item.invoiceNo) { %>
+                                    <div class="flex items-center gap-4 pt-4 border-t border-gray-50">
+                                        <div class="leading-tight">
+                                            <label
+                                                class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Invoice</label>
+                                            <p class="text-[10px] font-black text-gray-900 uppercase">#<%=
+                                                    item.invoiceNo %>
+                                                    <span class="text-gray-400 mx-1">|</span>
+                                                    <%= item.invoiceDate ? new
+                                                        Date(item.invoiceDate).toLocaleDateString('en-IN', {
+                                                        day: '2-digit' , month: 'short' }) : 'N/A' %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <% } %>
+
+                                        <!-- Material & Quantity in Same Row -->
+                                        <div
+                                            class="flex items-start justify-between gap-4 pt-6 border-t border-gray-50">
+                                            <div class="leading-tight">
+                                                <label
+                                                    class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Material</label>
+                                                <p class="text-base font-black text-gray-900 uppercase leading-none">
+                                                    <%= item.productName %>
+                                                </p>
+                                                <p
+                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mt-1">
+                                                    <%= item.productId ? item.productId.packaging : '' %>
+                                                </p>
+                                            </div>
+
+                                            <div class="text-right">
+                                                <label
+                                                    class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Qty</label>
+                                                <div class="flex items-baseline justify-end gap-1">
+                                                    <span class="text-xl font-black text-black leading-none">
+                                                        <%= item.quantity.toFixed(2) %>
+                                                    </span>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                                        <%= item.productId ? item.productId.uom : '' %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                            </div>
+                    </div>
+                    <% }) %>
+        </div>
+        <% } %>
+            </div>
+
+            <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ {
+                label: 'Dispatch History' , icon: 'upload' ,
+                onClick: "window.location.href='/factory-incharge/dispatch'" } ] }) %>
+                <%- include('../partials/footer') %>

@@ -19,6 +19,8 @@ router.patch('/users/:id/toggle-status', sysadminController.toggleUserStatus);
 // Product management
 router.get('/products', sysadminController.getProducts);
 router.post('/products/create', sysadminController.upload.single('photo'), sysadminController.createProduct);
+router.get('/products/:id', sysadminController.getProduct);
+router.post('/products/:id/bom', sysadminController.updateBOM);
 router.delete('/products/:id', sysadminController.deleteProduct);
 
 module.exports = router;

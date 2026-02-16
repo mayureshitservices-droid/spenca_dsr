@@ -1,0 +1,201 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+            <!-- Alerts -->
+            <% if (typeof success !=='undefined' && success) { %>
+                <div
+                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                        <p class="font-bold">
+                            <%= success %>
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-400">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <% } %>
+
+                    <% if (typeof error !=='undefined' && error) { %>
+                        <div
+                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+                                <p class="font-bold">
+                                    <%= error %>
+                                </p>
+                            </div>
+                            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <% } %>
+
+                            <!-- Stock Section -->
+                            <div class="mb-16 scroll-mt-24" id="stock-section">
+                                <div class="flex items-center gap-4 mb-8">
+                                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Raw Material Stock</h2>
+                                    <span
+                                        class="px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Inventory</span>
+                                </div>
+
+                                <% if (rawMaterials.length===0) { %>
+                                    <div
+                                        class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                                        <i data-lucide="box" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Raw Materials</h3>
+                                        <p class="text-gray-500 font-medium">No raw materials are currently assigned to
+                                            the factory.</p>
+                                    </div>
+                                    <% } else { %>
+                                        <div
+                                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                            <% rawMaterials.forEach(function(material) { %>
+                                                <div
+                                                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 border-t-emerald-500">
+                                                    <div class="p-6 flex flex-col flex-grow">
+                                                        <div class="flex justify-between items-start mb-4">
+                                                            <h5
+                                                                class="text-xl font-black text-gray-900 leading-tight tracking-tight">
+                                                                <%= material.productName %>
+                                                            </h5>
+                                                            <span
+                                                                class="text-[10px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg uppercase">Stock</span>
+                                                        </div>
+
+                                                        <% if (material.specification) { %>
+                                                            <div
+                                                                class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">
+                                                                <%= material.specification %>
+                                                            </div>
+                                                            <% } %>
+
+                                                                <div class="grid grid-cols-2 gap-3 mb-6">
+                                                                    <div
+                                                                        class="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
+                                                                        <span
+                                                                            class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Available</span>
+                                                                        <span
+                                                                            class="text-2xl font-black text-emerald-700">
+                                                                            <%= (material.availableQty || 0).toFixed(2)
+                                                                                %>
+                                                                        </span>
+                                                                        <span
+                                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                                            <%= material.uom %>
+                                                                        </span>
+                                                                    </div>
+                                                                    <div
+                                                                        class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
+                                                                        <span
+                                                                            class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
+                                                                        <span
+                                                                            class="text-2xl font-black text-amber-700">
+                                                                            <%= (material.bufferQty || 0).toFixed(2) %>
+                                                                        </span>
+                                                                        <span
+                                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                                            <%= material.uom %>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                    </div>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+        </div>
+
+        <!-- Autocomplete Datalists -->
+        <datalist id="supplierList">
+            <% suppliers.forEach(function(s) { %>
+                <option value="<%= s.supplierName %>" data-id="<%= s._id %>"></option>
+                <% }); %>
+        </datalist>
+
+        <datalist id="materialList">
+            <% rawMaterials.forEach(function(m) { %>
+                <option value="<%= m.productName %>" data-id="<%= m._id %>"></option>
+                <% }); %>
+        </datalist>
+
+        <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ { label: 'Inward' ,
+            icon: 'download' , onClick: "window.location.href='/factory-incharge/inward'" }, { label: 'Dispatch' ,
+            icon: 'upload' , onClick: "window.location.href='/factory-incharge/dispatch'" } ] }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    function openInwardModal() {
+                        const modal = document.getElementById('inwardModal');
+                        if (modal) {
+                            modal.classList.remove('hidden');
+                            modal.classList.add('flex');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    }
+
+                    function closeInwardModal() {
+                        const modal = document.getElementById('inwardModal');
+                        if (modal) {
+                            modal.classList.remove('flex');
+                            modal.classList.add('hidden');
+                            document.body.style.overflow = '';
+                        }
+                    }
+
+                    function updateId(inputId, hiddenId, listId) {
+                        const input = document.getElementById(inputId);
+                        const hidden = document.getElementById(hiddenId);
+                        const list = document.getElementById(listId);
+                        const option = Array.from(list.options).find(o => o.value === input.value);
+                        if (option) {
+                            hidden.value = option.getAttribute('data-id');
+                        } else {
+                            hidden.value = '';
+                        }
+                    }
+
+                    function showSection(sectionId) {
+                        const sections = ['stock-section', 'inward-section', 'dispatch-section'];
+
+                        // Close FAB menu first
+                        const fabBackdrop = document.getElementById('fabBackdrop');
+                        if (fabBackdrop && !fabBackdrop.classList.contains('invisible')) {
+                            fabBackdrop.click();
+                        }
+
+                        sections.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                if (id === sectionId) {
+                                    el.classList.remove('hidden');
+                                    // Update hash
+                                    history.replaceState(null, null, '#' + id);
+                                    setTimeout(() => {
+                                        el.scrollIntoView({ behavior: 'smooth' });
+                                    }, 50);
+                                } else {
+                                    el.classList.add('hidden');
+                                }
+                            }
+                        });
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        lucide.createIcons();
+
+                        // Handle initial hash
+                        const hash = window.location.hash.substring(1);
+                        const validSections = ['stock-section', 'inward-section', 'dispatch-section'];
+                        if (hash && validSections.includes(hash)) {
+                            showSection(hash);
+                        } else {
+                            showSection('stock-section');
+                        }
+                    });
+                </script>
