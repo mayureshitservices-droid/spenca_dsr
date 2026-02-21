@@ -124,9 +124,7 @@
                 <% }); %>
         </datalist>
 
-        <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ { label: 'Inward' ,
-            icon: 'download' , onClick: "window.location.href='/factory-incharge/inward'" }, { label: 'Dispatch' ,
-            icon: 'upload' , onClick: "window.location.href='/factory-incharge/dispatch'" } ] }) %>
+        <%- include('../partials/fab', { user, userRole }) %>
             <%- include('../partials/footer') %>
 
                 <script>

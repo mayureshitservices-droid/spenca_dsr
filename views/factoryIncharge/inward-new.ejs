@@ -198,20 +198,22 @@
         </div>
 
 
-        <%- include('../partials/footer') %>
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
 
-            <script src="/js/autocomplete.js"></script>
-            <script>
-                let rowCount = 1;
+                <!-- Autocomplete with Cache Bust -->
+                <script src="/js/autocomplete.js?v=<%= Date.now() %>"></script>
+                <script>
+                    let rowCount = 1;
 
-                function addItemRow() {
-                    rowCount++;
-                    const container = document.getElementById('itemsContainer');
-                    const row = document.createElement('div');
-                    row.className = 'group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200 animate-in slide-in-from-top-4 duration-300';
-                    row.id = `itemRow_${rowCount}`;
+                    function addItemRow() {
+                        rowCount++;
+                        const container = document.getElementById('itemsContainer');
+                        const row = document.createElement('div');
+                        row.className = 'group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200 animate-in slide-in-from-top-4 duration-300';
+                        row.id = `itemRow_${rowCount}`;
 
-                    row.innerHTML = `
+                        row.innerHTML = `
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
                                 <div class="md:col-span-5 space-y-2">
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Material *</label>
@@ -251,96 +253,124 @@
                             </div>
                         `;
 
-                    container.appendChild(row);
-                    lucide.createIcons();
-                    initMaterialAutocomplete(rowCount);
-                }
-
-                function removeItemRow(id) {
-                    const rows = document.querySelectorAll('[id^="itemRow_"]');
-                    if (rows.length > 1) {
-                        const row = document.getElementById(`itemRow_${id}`);
-                        row.classList.add('animate-out', 'fade-out', 'zoom-out', 'duration-200');
-                        setTimeout(() => row.remove(), 200);
-                    } else {
-                        alert('At least one item is required');
+                        container.appendChild(row);
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                        initMaterialAutocomplete(rowCount);
                     }
-                }
 
-                function initMaterialAutocomplete(id) {
-                    setupAutocomplete({
-                        input: document.getElementById(`materialInput_${id}`),
-                        suggestions: document.getElementById(`materialSuggestions_${id}`),
-                        hiddenInput: document.getElementById(`selectedProductId_${id}`),
-                        url: '/api/raw-materials/search',
-                        formatResult: (item) => `
+                    function removeItemRow(id) {
+                        const rows = document.querySelectorAll('[id^="itemRow_"]');
+                        if (rows.length > 1) {
+                            const row = document.getElementById(`itemRow_${id}`);
+                            row.classList.add('animate-out', 'fade-out', 'zoom-out', 'duration-200');
+                            setTimeout(() => row.remove(), 200);
+                        } else {
+                            alert('At least one item is required');
+                        }
+                    }
+
+                    function initMaterialAutocomplete(id) {
+                        console.log(`Initializing Material Autocomplete for row ${id}...`);
+                        const input = document.getElementById(`materialInput_${id}`);
+                        const suggestions = document.getElementById(`materialSuggestions_${id}`);
+                        const hiddenInput = document.getElementById(`selectedProductId_${id}`);
+
+                        if (!input) console.error(`CRITICAL: materialInput_${id} NOT found!`);
+
+                        setupAutocomplete({
+                            input: input,
+                            suggestions: suggestions,
+                            hiddenInput: hiddenInput,
+                            url: '/api/raw-materials/search',
+                            formatResult: (item) => `
                                 <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
                                     <div class="font-black text-gray-900 uppercase text-xs">${item.productName}</div>
                                     <div class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">${item.packaging} | ${item.uom}</div>
                                 </div>
                             `,
-                        onSelect: (item) => {
-                            document.getElementById(`materialInput_${id}`).value = item.productName;
-                        }
-                    });
-                }
-
-                function collectItems() {
-                    const items = [];
-                    const rows = document.querySelectorAll('[id^="itemRow_"]');
-                    let isValid = true;
-
-                    rows.forEach(row => {
-                        const id = row.id.split('_')[1];
-                        const productId = document.getElementById(`selectedProductId_${id}`).value;
-                        const quantity = document.getElementById(`quantity_${id}`).value;
-                        const price = document.getElementById(`price_${id}`).value;
-                        const gstPercentage = document.getElementById(`gstPercentage_${id}`).value;
-
-                        if (!productId || !quantity || !price) {
-                            isValid = false;
-                            row.classList.add('border-red-200', 'bg-red-50/30');
-                            setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
-                        } else {
-                            items.push({
-                                productId,
-                                quantity,
-                                price,
-                                gstPercentage
-                            });
-                        }
-                    });
-
-                    if (!isValid) {
-                        alert('Please fill all required fields for each item and select materials from the suggestions.');
-                        return false;
+                            onSelect: (item) => {
+                                console.log(`Material selected for row ${id}:`, item.productName);
+                                document.getElementById(`materialInput_${id}`).value = item.productName;
+                            }
+                        });
                     }
 
-                    document.getElementById('itemsData').value = JSON.stringify(items);
-                    return true;
-                }
+                    function collectItems() {
+                        const items = [];
+                        const rows = document.querySelectorAll('[id^="itemRow_"]');
+                        let isValid = true;
 
-                document.addEventListener('DOMContentLoaded', () => {
-                    lucide.createIcons();
+                        rows.forEach(row => {
+                            const id = row.id.split('_')[1];
+                            const productId = document.getElementById(`selectedProductId_${id}`).value;
+                            const quantity = document.getElementById(`quantity_${id}`).value;
+                            const price = document.getElementById(`price_${id}`).value;
+                            const gstPercentage = document.getElementById(`gstPercentage_${id}`).value;
 
-                    // Initialize Supplier Autocomplete
-                    setupAutocomplete({
-                        input: document.getElementById('supplierInput'),
-                        suggestions: document.getElementById('supplierSuggestions'),
-                        hiddenInput: document.getElementById('selectedSupplierId'),
-                        url: '/api/suppliers/search',
-                        formatResult: (item) => `
-                                <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
-                                    <div class="font-black text-gray-900 uppercase text-xs">${item.supplierName}</div>
-                                    <div class="text-[10px] font-bold text-gray-400">GST: ${item.gstNo || 'N/A'}</div>
-                                </div>
-                            `,
-                        onSelect: (item) => {
-                            document.getElementById('supplierInput').value = item.supplierName;
+                            if (!productId || !quantity || !price) {
+                                isValid = false;
+                                row.classList.add('border-red-200', 'bg-red-50/30');
+                                setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
+                            } else {
+                                items.push({
+                                    productId,
+                                    quantity,
+                                    price,
+                                    gstPercentage
+                                });
+                            }
+                        });
+
+                        if (!isValid) {
+                            alert('Please fill all required fields for each item and select materials from the suggestions.');
+                            return false;
+                        }
+
+                        document.getElementById('itemsData').value = JSON.stringify(items);
+                        return true;
+                    }
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                        console.log('Initializing Inward Form...');
+
+                        try {
+                            // Initialize Supplier Autocomplete
+                            console.log('Setting up Supplier Autocomplete...');
+                            const supplierInput = document.getElementById('supplierInput');
+                            const supplierSuggestions = document.getElementById('supplierSuggestions');
+
+                            if (!supplierInput) console.error('CRITICAL: supplierInput NOT found!');
+                            if (!supplierSuggestions) console.error('CRITICAL: supplierSuggestions NOT found!');
+
+                            setupAutocomplete({
+                                input: supplierInput,
+                                suggestions: supplierSuggestions,
+                                hiddenInput: document.getElementById('selectedSupplierId'),
+                                url: '/api/suppliers/search',
+                                formatResult: (item) => `
+                                    <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
+                                        <div class="font-black text-gray-900 uppercase text-xs">${item.supplierName}</div>
+                                        <div class="text-[10px] font-bold text-gray-400">GST: ${item.gstNo || 'N/A'}</div>
+                                    </div>
+                                `,
+                                onSelect: (item) => {
+                                    console.log('Supplier selected:', item.supplierName);
+                                    document.getElementById('supplierInput').value = item.supplierName;
+                                }
+                            });
+                            console.log('Supplier Autocomplete Initialized');
+
+                            // Initialize First Material Row
+                            initMaterialAutocomplete(1);
+                            console.log('Material Autocomplete Initialized');
+
+                        } catch (e) {
+                            console.error('Initialization Error:', e);
+                        }
+
+                        // Icons last
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
                         }
                     });
-
-                    // Initialize First Material Row
-                    initMaterialAutocomplete(1);
-                });
-            </script>
+                </script>

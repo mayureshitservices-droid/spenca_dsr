@@ -120,7 +120,7 @@
                                                     class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Qty</label>
                                                 <div class="flex items-baseline justify-end gap-1">
                                                     <span class="text-xl font-black text-black leading-none">
-                                                        <%= item.quantity.toFixed(2) %>
+                                                        <%= (item.quantity || 0).toFixed(2) %>
                                                     </span>
                                                     <span class="text-[10px] font-bold text-gray-400 uppercase">
                                                         <%= item.productId ? item.productId.uom : '' %>
@@ -139,13 +139,10 @@
                                             </div>
                                             <% } %>
                             </div>
+                            <% }) %>
                     </div>
-                    <% }) %>
+                    <% } %>
         </div>
-        <% } %>
-            </div>
 
-            <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ {
-                label: 'Inward History' , icon: 'history' , onClick: "window.location.href='/factory-incharge/inward'" }
-                ] }) %>
-                <%- include('../partials/footer') %>
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>

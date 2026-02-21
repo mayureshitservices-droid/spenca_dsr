@@ -104,13 +104,18 @@
                                     <% } else if (userRole==='factory_incharge' ) { %>
                                         <a href="/factory-incharge/dashboard"
                                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                                            <span class="text-sm">Dashboard</span>
-                                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                                            <span class="text-sm">Inventory</span>
+                                            <i data-lucide="box" class="w-5 h-5"></i>
                                         </a>
                                         <a href="/factory-incharge/inward"
                                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                             <span class="text-sm">Inward History</span>
-                                            <i data-lucide="history" class="w-5 h-5"></i>
+                                            <i data-lucide="download" class="w-5 h-5"></i>
+                                        </a>
+                                        <a href="/factory-incharge/dispatch"
+                                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                            <span class="text-sm">Dispatch History</span>
+                                            <i data-lucide="upload" class="w-5 h-5"></i>
                                         </a>
                                         <% } %>
                                             <% } %>

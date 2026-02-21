@@ -435,7 +435,16 @@ function setupAutocomplete(options) {
         onSelect
     } = options;
 
-    if (!input || !suggestions) return;
+    if (!input) {
+        console.error('Autocomplete Error: Input element not found');
+        return;
+    }
+    if (!suggestions) {
+        console.error('Autocomplete Error: Suggestions container not found');
+        return;
+    }
+
+    console.log(`Autocomplete Initialized for input: ${input.id}, url: ${url}`);
 
     let timeout;
     input.addEventListener('input', function () {

@@ -198,21 +198,22 @@
         </div>
 
 
-        <%- include('../partials/footer') %>
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
 
-            <!-- Autocomplete with Cache Bust -->
-            <script src="/js/autocomplete.js?v=<%= Date.now() %>"></script>
-            <script>
-                let rowCount = 1;
+                <!-- Autocomplete with Cache Bust -->
+                <script src="/js/autocomplete.js?v=<%= Date.now() %>"></script>
+                <script>
+                    let rowCount = 1;
 
-                function addItemRow() {
-                    rowCount++;
-                    const container = document.getElementById('itemsContainer');
-                    const row = document.createElement('div');
-                    row.className = 'group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200 animate-in slide-in-from-top-4 duration-300';
-                    row.id = `itemRow_${rowCount}`;
+                    function addItemRow() {
+                        rowCount++;
+                        const container = document.getElementById('itemsContainer');
+                        const row = document.createElement('div');
+                        row.className = 'group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200 animate-in slide-in-from-top-4 duration-300';
+                        row.id = `itemRow_${rowCount}`;
 
-                    row.innerHTML = `
+                        row.innerHTML = `
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
                                 <div class="md:col-span-8 space-y-2">
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Product *</label>
@@ -237,112 +238,112 @@
                             </div>
                         `;
 
-                    container.appendChild(row);
-                    lucide.createIcons();
-                    initProductAutocomplete(rowCount);
-                }
-
-                function removeItemRow(id) {
-                    const rows = document.querySelectorAll('[id^="itemRow_"]');
-                    if (rows.length > 1) {
-                        const row = document.getElementById(`itemRow_${id}`);
-                        row.classList.add('animate-out', 'fade-out', 'zoom-out', 'duration-200');
-                        setTimeout(() => row.remove(), 200);
-                    } else {
-                        alert('At least one product is required');
+                        container.appendChild(row);
+                        lucide.createIcons();
+                        initProductAutocomplete(rowCount);
                     }
-                }
 
-                function initProductAutocomplete(id) {
-                    setupAutocomplete({
-                        input: document.getElementById(`productInput_${id}`),
-                        suggestions: document.getElementById(`productSuggestions_${id}`),
-                        hiddenInput: document.getElementById(`selectedProductId_${id}`),
-                        url: '/api/finished-goods/search',
-                        formatResult: (item) => `
+                    function removeItemRow(id) {
+                        const rows = document.querySelectorAll('[id^="itemRow_"]');
+                        if (rows.length > 1) {
+                            const row = document.getElementById(`itemRow_${id}`);
+                            row.classList.add('animate-out', 'fade-out', 'zoom-out', 'duration-200');
+                            setTimeout(() => row.remove(), 200);
+                        } else {
+                            alert('At least one product is required');
+                        }
+                    }
+
+                    function initProductAutocomplete(id) {
+                        setupAutocomplete({
+                            input: document.getElementById(`productInput_${id}`),
+                            suggestions: document.getElementById(`productSuggestions_${id}`),
+                            hiddenInput: document.getElementById(`selectedProductId_${id}`),
+                            url: '/api/finished-goods/search',
+                            formatResult: (item) => `
                                 <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
                                     <div class="font-black text-gray-900 uppercase text-xs">${item.productName}</div>
                                     <div class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">${item.packaging} | ${item.uom}</div>
                                     <div class="text-[10px] font-black text-emerald-600 uppercase mt-1">Stock: ${item.availableQty || 0} ${item.uom}</div>
                                 </div>
                             `,
-                        onSelect: (item) => {
-                            document.getElementById(`productInput_${id}`).value = item.productName;
-                        }
-                    });
-                }
-
-                function collectItems() {
-                    const items = [];
-                    const rows = document.querySelectorAll('[id^="itemRow_"]');
-                    let isValid = true;
-
-                    rows.forEach(row => {
-                        const id = row.id.split('_')[1];
-                        const productId = document.getElementById(`selectedProductId_${id}`).value;
-                        const quantity = document.getElementById(`quantity_${id}`).value;
-
-                        if (!productId || !quantity) {
-                            isValid = false;
-                            row.classList.add('border-red-200', 'bg-red-50/30');
-                            setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
-                        } else {
-                            items.push({
-                                productId,
-                                quantity
-                            });
-                        }
-                    });
-
-                    if (!isValid) {
-                        alert('Please fill all required fields for each product and select products from the suggestions.');
-                        return false;
+                            onSelect: (item) => {
+                                document.getElementById(`productInput_${id}`).value = item.productName;
+                            }
+                        });
                     }
 
-                    document.getElementById('itemsData').value = JSON.stringify(items);
-                    return true;
-                }
+                    function collectItems() {
+                        const items = [];
+                        const rows = document.querySelectorAll('[id^="itemRow_"]');
+                        let isValid = true;
 
-                document.addEventListener('DOMContentLoaded', () => {
-                    console.log('Initializing Dispatch Form...');
+                        rows.forEach(row => {
+                            const id = row.id.split('_')[1];
+                            const productId = document.getElementById(`selectedProductId_${id}`).value;
+                            const quantity = document.getElementById(`quantity_${id}`).value;
 
-                    try {
-                        // Initialize Customer Autocomplete
-                        console.log('Setting up Customer Autocomplete...');
-                        const receiverInput = document.getElementById('receiverInput');
-                        const receiverSuggestions = document.getElementById('receiverSuggestions');
+                            if (!productId || !quantity) {
+                                isValid = false;
+                                row.classList.add('border-red-200', 'bg-red-50/30');
+                                setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
+                            } else {
+                                items.push({
+                                    productId,
+                                    quantity
+                                });
+                            }
+                        });
 
-                        if (!receiverInput) console.error('CRITICAL: receiverInput element NOT found!');
-                        if (!receiverSuggestions) console.error('CRITICAL: receiverSuggestions element NOT found!');
+                        if (!isValid) {
+                            alert('Please fill all required fields for each product and select products from the suggestions.');
+                            return false;
+                        }
 
-                        setupAutocomplete({
-                            input: receiverInput,
-                            suggestions: receiverSuggestions,
-                            url: '/api/factory-incharge/customers/search',
-                            formatResult: (item) => `
+                        document.getElementById('itemsData').value = JSON.stringify(items);
+                        return true;
+                    }
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                        console.log('Initializing Dispatch Form...');
+
+                        try {
+                            // Initialize Customer Autocomplete
+                            console.log('Setting up Customer Autocomplete...');
+                            const receiverInput = document.getElementById('receiverInput');
+                            const receiverSuggestions = document.getElementById('receiverSuggestions');
+
+                            if (!receiverInput) console.error('CRITICAL: receiverInput element NOT found!');
+                            if (!receiverSuggestions) console.error('CRITICAL: receiverSuggestions element NOT found!');
+
+                            setupAutocomplete({
+                                input: receiverInput,
+                                suggestions: receiverSuggestions,
+                                url: '/api/factory-incharge/customers/search',
+                                formatResult: (item) => `
                                     <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
                                         <div class="font-black text-gray-900 uppercase text-xs">${item.customerName}</div>
                                         <div class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">${item.address || ''}</div>
                                     </div>
                                 `,
-                            onSelect: (item) => {
-                                console.log('Customer selected:', item.customerName);
-                                document.getElementById('receiverInput').value = item.customerName;
-                            }
-                        });
-                        console.log('Customer Autocomplete Initialized');
+                                onSelect: (item) => {
+                                    console.log('Customer selected:', item.customerName);
+                                    document.getElementById('receiverInput').value = item.customerName;
+                                }
+                            });
+                            console.log('Customer Autocomplete Initialized');
 
-                        // Initialize First Product Row
-                        initProductAutocomplete(1);
-                        console.log('Product Autocomplete Initialized');
+                            // Initialize First Product Row
+                            initProductAutocomplete(1);
+                            console.log('Product Autocomplete Initialized');
 
-                    } catch (e) {
-                        console.error('Initialization Error:', e);
-                    }
+                        } catch (e) {
+                            console.error('Initialization Error:', e);
+                        }
 
-                    // Icons last, as it's purely visual
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
-                    }
-                });
-            </script>
+                        // Icons last, as it's purely visual
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                </script>
