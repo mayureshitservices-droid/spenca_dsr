@@ -3,12 +3,13 @@ const os = require("oci-objectstorage");
 
 // These variables should be in your .env file
 const configuration = {
-    user: process.env.OCI_USER_OCID?.trim(),
-    fingerprint: process.env.OCI_FINGERPRINT?.trim(),
-    tenancy: process.env.OCI_TENANCY_OCID?.trim(),
-    region: process.env.OCI_REGION ? common.Region.fromRegionId(process.env.OCI_REGION.toLowerCase()) : null,
-    privateKey: process.env.OCI_PRIVATE_KEY?.replace(/\\n/g, '\n').trim()
+    user: process.env.OCI_USER_OCID?.trim() || null,
+    fingerprint: process.env.OCI_FINGERPRINT?.trim() || null,
+    tenancy: process.env.OCI_TENANCY_OCID?.trim() || null,
+    region: process.env.OCI_REGION ? common.Region.fromRegionId(process.env.OCI_REGION.trim().toLowerCase()) : null,
+    privateKey: process.env.OCI_PRIVATE_KEY?.replace(/\\n/g, '\n').trim() || null
 };
+
 
 // Check if credentials are provided
 const missingVars = [];

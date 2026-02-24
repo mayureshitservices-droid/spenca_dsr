@@ -1,6 +1,9 @@
 const Device = require('../models/Device');
 const CallLog = require('../models/CallLog');
 const Order = require('../models/Order');
+const Campaign = require('../models/Campaign');
+const CampaignContact = require('../models/CampaignContact');
+const exceljs = require('exceljs');
 
 // POST /api/telecrm/register
 const registerDevice = async (req, res) => {
@@ -36,22 +39,14 @@ const registerDevice = async (req, res) => {
 // POST /api/telecrm/heartbeat
 const heartbeat = async (req, res) => {
     try {
-        const { deviceId, token } = req.body;
-
-        if (!deviceId || !token) {
-            return res.status(400).json({ error: 'Device ID and token are required' });
-        }
-
-        const device = await Device.findByIdAndToken(deviceId, token);
-
-        if (!device) {
-            return res.status(401).json({ error: 'Invalid device ID or token' });
-        }
+        const device = req.device;
 
         // Update status and last active
         device.status = 'online';
         device.lastActive = new Date();
         await device.save();
+
+        console.log(`[Heartbeat] Updated for device: ${device.deviceId}`);
 
         res.json({
             success: true,
@@ -67,17 +62,12 @@ const heartbeat = async (req, res) => {
 // POST /api/telecrm/call-log
 const submitCallLog = async (req, res) => {
     try {
-        const { deviceId, token, callId, phoneNumber, callStatus, duration, timestamp, recordingUrl } = req.body;
+        const { callId, phoneNumber, callStatus, duration, timestamp, recordingUrl } = req.body;
+        const device = req.device;
+        const deviceId = device.deviceId;
 
-        if (!deviceId || !token || !callId) {
-            return res.status(400).json({ success: false, error: 'Device ID, token, and call ID are required' });
-        }
-
-        // Validate device and token
-        const device = await Device.findByIdAndToken(deviceId, token);
-
-        if (!device) {
-            return res.status(401).json({ success: false, error: 'Invalid device ID or token' });
+        if (!callId) {
+            return res.status(400).json({ success: false, error: 'Call ID is required' });
         }
 
         if (!phoneNumber || !callStatus || !timestamp) {
@@ -102,6 +92,29 @@ const submitCallLog = async (req, res) => {
         device.lastActive = new Date();
         await device.save();
 
+        // --- Automatic Campaign Update ---
+        try {
+            const activeCampaigns = await Campaign.find({ deviceId, status: 'active' });
+            for (const campaign of activeCampaigns) {
+                const contact = await CampaignContact.findOne({
+                    campaignId: campaign.campaignId,
+                    mobileNumber: phoneNumber
+                });
+
+                if (contact && contact.status === 'PENDING') {
+                    contact.status = 'CALLED';
+                    await contact.save();
+                    await Campaign.findOneAndUpdate(
+                        { campaignId: campaign.campaignId },
+                        { $inc: { calledCount: 1 } }
+                    );
+                }
+            }
+        } catch (err) {
+            console.error('[Campaign Sync] Error during auto-update in call-log:', err);
+        }
+        // ---------------------------------
+
         res.status(201).json({
             success: true,
             message: 'Log synced'
@@ -112,12 +125,11 @@ const submitCallLog = async (req, res) => {
     }
 };
 
+
 // POST /api/telecrm/call-outcome
 const submitCallOutcome = async (req, res) => {
     try {
         const {
-            deviceId,
-            token,
             callId,
             customerName,
             outcome,
@@ -128,16 +140,11 @@ const submitCallOutcome = async (req, res) => {
             reasonForLoss,
             distributor
         } = req.body;
+        const device = req.device;
+        const deviceId = device.deviceId;
 
-        if (!deviceId || !token || !callId) {
-            return res.status(400).json({ success: false, error: 'Device ID, token, and call ID are required' });
-        }
-
-        // Validate device and token
-        const device = await Device.findByIdAndToken(deviceId, token);
-
-        if (!device) {
-            return res.status(401).json({ success: false, error: 'Invalid device ID or token' });
+        if (!callId) {
+            return res.status(400).json({ success: false, error: 'Call ID is required' });
         }
 
         // Upsert call log with outcome details using callId
@@ -161,6 +168,53 @@ const submitCallOutcome = async (req, res) => {
         device.lastActive = new Date();
         await device.save();
 
+        // --- Automatic Campaign Update (Outcome) ---
+        try {
+            const log = await CallLog.findOne({ callId });
+            if (log && log.phoneNumber) {
+                const activeCampaigns = await Campaign.find({ deviceId, status: 'active' });
+                for (const campaign of activeCampaigns) {
+                    const contact = await CampaignContact.findOne({
+                        campaignId: campaign.campaignId,
+                        mobileNumber: log.phoneNumber
+                    });
+
+                    if (contact) {
+                        const oldStatus = contact.status;
+                        const isSuccess = ['Ordered', 'Regular Customer', 'Interested', 'Follow Up Required'].includes(outcome);
+                        const isLoss = ['Not Interested', 'Reason for Loss', 'Lost', 'Call Not Answered', 'No Interaction'].includes(outcome);
+
+                        let newStatus = oldStatus;
+                        if (isSuccess) newStatus = 'ANSWERED';
+                        else if (isLoss) newStatus = 'MISSED';
+
+                        if (newStatus !== oldStatus) {
+                            contact.status = newStatus;
+                            await contact.save();
+
+                            const update = { $inc: {} };
+                            if (oldStatus === 'PENDING') update.$inc.calledCount = 1;
+
+                            if (newStatus === 'ANSWERED') {
+                                update.$inc.answeredCount = 1;
+                                if (oldStatus === 'MISSED') update.$inc.missedCount = -1;
+                            } else if (newStatus === 'MISSED') {
+                                update.$inc.missedCount = 1;
+                                if (oldStatus === 'ANSWERED') update.$inc.answeredCount = -1;
+                            }
+
+                            if (Object.keys(update.$inc).length > 0) {
+                                await Campaign.findOneAndUpdate({ campaignId: campaign.campaignId }, update);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('[Campaign Sync] Error during auto-update in call-outcome:', err);
+        }
+        // -------------------------------------------
+
         res.json({
             success: true,
             message: 'Outcome saved successfully'
@@ -170,6 +224,7 @@ const submitCallOutcome = async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to save call outcome' });
     }
 };
+
 
 // PATCH /api/telecrm/device/:deviceId
 const updateTelecaller = async (req, res) => {
@@ -351,8 +406,10 @@ const getDevices = async (req, res) => {
 // POST /api/telecrm/upload-recording
 const uploadRecording = async (req, res) => {
     try {
-        const { deviceId, token, callId } = req.body;
+        const { callId } = req.body;
         const file = req.file;
+        const device = req.device;
+        const deviceId = device.deviceId;
 
         console.log(`[Upload] Received upload request: deviceId=${deviceId}, callId=${callId}`);
         if (file) {
@@ -361,14 +418,8 @@ const uploadRecording = async (req, res) => {
             console.error('[Upload] No file provided in the request');
         }
 
-        if (!deviceId || !token || !callId || !file) {
-            return res.status(400).json({ success: false, error: 'Device ID, token, call ID, and file are required' });
-        }
-
-        // Validate device and token
-        const device = await Device.findByIdAndToken(deviceId, token);
-        if (!device) {
-            return res.status(401).json({ success: false, error: 'Invalid device ID or token' });
+        if (!callId || !file) {
+            return res.status(400).json({ success: false, error: 'Call ID and file are required' });
         }
 
         // Upload to OCI
@@ -409,6 +460,161 @@ const uploadRecording = async (req, res) => {
     }
 };
 
+// --- Campaign Management (Admin) ---
+
+// POST /api/telecrm/campaigns
+const createCampaign = async (req, res) => {
+    try {
+        const { name, region, deviceId } = req.body;
+        const file = req.file;
+
+        if (!name || !region || !deviceId || !file) {
+            return res.status(400).json({ success: false, error: 'Name, region, deviceId, and Excel file are required' });
+        }
+
+        // Verify device exists
+        const device = await Device.findOne({ deviceId });
+        if (!device) {
+            return res.status(404).json({ success: false, error: 'Target device not found' });
+        }
+
+        const workbook = new exceljs.Workbook();
+        await workbook.xlsx.load(file.buffer);
+        const worksheet = workbook.getWorksheet(1);
+
+        const contacts = [];
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return; // Skip header
+
+            const customerName = row.getCell(1).value?.toString() || 'Unknown';
+            let mobileNumber = row.getCell(2).value?.toString().replace(/\D/g, '') || '';
+            const contactRegion = row.getCell(3).value?.toString() || region;
+
+            // Simple validation: 10 digits
+            if (mobileNumber.length === 10) {
+                contacts.push({
+                    customerName,
+                    mobileNumber,
+                    region: contactRegion
+                });
+            }
+        });
+
+        if (contacts.length === 0) {
+            return res.status(400).json({ success: false, error: 'No valid contacts found in the uploaded file' });
+        }
+
+        // Create Campaign
+        const campaign = new Campaign({
+            name,
+            region,
+            deviceId,
+            totalCount: contacts.length
+        });
+
+        await campaign.save();
+
+        // Create Contacts
+        const campaignContacts = contacts.map(c => ({
+            ...c,
+            campaignId: campaign.campaignId
+        }));
+
+        await CampaignContact.insertMany(campaignContacts);
+
+        res.status(201).json({
+            success: true,
+            message: `Campaign "${name}" created with ${contacts.length} contacts`,
+            campaignId: campaign.campaignId
+        });
+    } catch (error) {
+        console.error('Create campaign error:', error);
+        res.status(500).json({ success: false, error: 'Failed to create campaign' });
+    }
+};
+
+// GET /api/telecrm/admin/campaigns (For Monitoring)
+const getCampaignsForAdmin = async (req, res) => {
+    try {
+        const campaigns = await Campaign.find()
+            .sort({ createdAt: -1 })
+            .populate({
+                path: 'deviceId',
+                model: 'Device',
+                localField: 'deviceId',
+                foreignField: 'deviceId',
+                select: 'deviceName telecaller'
+            });
+
+        res.json(campaigns);
+    } catch (error) {
+        console.error('Get admin campaigns error:', error);
+        res.status(500).json({ error: 'Failed to fetch campaigns' });
+    }
+};
+
+// --- Campaign API (Android App) ---
+
+// GET /api/telecrm/campaigns
+// Accepts deviceId + token from query params, body, or headers (via authenticateDevice middleware)
+const getCampaigns = async (req, res) => {
+    try {
+        const device = req.device; // Set by authenticateDevice middleware
+        const deviceId = device.deviceId;
+
+        console.log(`[Campaigns] Request — method: ${req.method}, deviceId: ${deviceId}`);
+
+        const campaigns = await Campaign.find({ deviceId, status: 'active' });
+        console.log(`[Campaigns] Found ${campaigns.length} active campaign(s) for device ${deviceId}`);
+
+        const results = await Promise.all(campaigns.map(async (c) => {
+            const contacts = await CampaignContact.find({ campaignId: c.campaignId })
+                .select('customerName mobileNumber region status -_id');
+
+            return {
+                id: c.campaignId,
+                name: c.name,
+                region: c.region,
+                totalCount: c.totalCount,
+                calledCount: c.calledCount,
+                answeredCount: c.answeredCount,
+                missedCount: c.missedCount,
+                contacts
+            };
+        }));
+
+        res.json(results);
+    } catch (error) {
+        console.error('Get campaigns error:', error);
+        res.status(500).json([]); // Always return an array to prevent crashes in Android app
+    }
+};
+
+
+// POST /api/telecrm/campaigns/sync-stats
+const syncCampaignStats = async (req, res) => {
+    try {
+        const { campaignId, calledCount, answeredCount, missedCount } = req.body;
+        const device = req.device;
+        const deviceId = device.deviceId;
+
+        if (!campaignId) {
+            return res.status(400).json({ success: false, error: 'Campaign ID is required' });
+        }
+
+        await Campaign.findOneAndUpdate(
+            { campaignId, deviceId },
+            { calledCount, answeredCount, missedCount },
+            { new: true }
+        );
+
+        res.json({ success: true, message: 'Stats synced' });
+    } catch (error) {
+        console.error('Sync campaign stats error:', error);
+        res.status(500).json({ success: false, error: 'Failed to sync stats' });
+    }
+};
+
 module.exports = {
     registerDevice,
     heartbeat,
@@ -417,5 +623,9 @@ module.exports = {
     updateTelecaller,
     getDevices,
     fetchDevicesWithStats,
-    uploadRecording
+    uploadRecording,
+    createCampaign,
+    getCampaignsForAdmin,
+    getCampaigns,
+    syncCampaignStats
 };

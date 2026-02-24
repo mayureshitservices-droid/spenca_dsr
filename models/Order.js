@@ -103,7 +103,9 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
+orderSchema.index({ mobileNo: 1 });
 orderSchema.index({ salespersonId: 1, createdAt: -1 });
+
 orderSchema.index({ approvalStatus: 1 });
 orderSchema.index({ createdAt: -1 });
 

@@ -18,6 +18,7 @@ router.get('/dashboard', headofficeController.getDashboard);
 router.get('/ims', headofficeController.getIMS);
 router.get('/download-report', headofficeController.downloadDailyReport);
 router.get('/telecrm', headofficeController.getTeleCRM);
+router.get('/telecrm/campaigns', headofficeController.getCampaigns);
 router.get('/telecrm/export/:deviceId', headofficeController.exportTeleCRM);
 router.post('/suppliers/create', headofficeController.createSupplier);
 router.post('/customers/create', headofficeController.createCustomer);

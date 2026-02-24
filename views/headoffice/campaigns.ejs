@@ -1,0 +1,360 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Header section -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-3xl font-black text-gray-900 flex items-center gap-3">
+                        <i data-lucide="megaphone" class="w-8 h-8 text-indigo-600"></i>
+                        Campaign Management
+                    </h2>
+                    <p class="text-gray-500 font-medium mt-1">Create, assign and monitor tele-calling campaigns</p>
+                </div>
+                <button onclick="openCampaignModal()"
+                    class="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-indigo-600/20 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    Assign New Campaign
+                </button>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="glass-card p-6 border-l-4 border-indigo-500">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <i data-lucide="layers" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">Active Campaigns</p>
+                            <h3 class="text-2xl font-black text-gray-900">
+                                <%= campaigns.filter(c=> c.status === 'active').length %>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 border-l-4 border-emerald-500">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">Total Contacts</p>
+                            <h3 class="text-2xl font-black text-gray-900">
+                                <%= campaigns.reduce((acc, c)=> acc + c.totalCount, 0) %>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600">
+                            <i data-lucide="phone-call" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest">Calls Answered</p>
+                            <h3 class="text-2xl font-black text-gray-900">
+                                <%= campaigns.reduce((acc, c)=> acc + c.answeredCount, 0) %>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign List -->
+            <div class="glass-card overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <h3 class="font-black text-gray-900 uppercase tracking-widest text-sm">Campaign Overview</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <i data-lucide="search"
+                                class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="campaignSearch" placeholder="Search campaigns..."
+                                class="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-64 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50/50">
+                                <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    Campaign Detail</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    Assigned To</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    Progress</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    Stats</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                    Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <% if (campaigns.length===0) { %>
+                                <tr>
+                                    <td colspan="5" class="px-8 py-20 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <i data-lucide="megaphone-off" class="w-16 h-16 text-gray-200 mb-4"></i>
+                                            <p class="text-gray-500 font-bold">No campaigns found. Start by assigning a
+                                                new one!</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% } else { %>
+                                    <% campaigns.forEach(campaign=> { %>
+                                        <tr class="hover:bg-gray-50/50 transition-colors">
+                                            <td class="px-8 py-6">
+                                                <div class="flex flex-col">
+                                                    <span class="text-base font-black text-gray-900 leading-tight">
+                                                        <%= campaign.name %>
+                                                    </span>
+                                                    <span
+                                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mt-1">
+                                                        <%= campaign.region %> • ID: <%= campaign.campaignId %>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <div class="flex items-center gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs font-black">
+                                                        <%= campaign.deviceId && campaign.deviceId.telecaller ?
+                                                            campaign.deviceId.telecaller.charAt(0) : '?' %>
+                                                    </div>
+                                                    <div class="flex flex-col">
+                                                        <span class="text-sm font-bold text-gray-800">
+                                                            <%= campaign.deviceId ? campaign.deviceId.telecaller
+                                                                : 'Unassigned' %>
+                                                        </span>
+                                                        <span class="text-[10px] text-gray-400 font-medium">
+                                                            <%= campaign.deviceId ? campaign.deviceId.deviceName :
+                                                                campaign.deviceId %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <% const progress=campaign.totalCount> 0 ?
+                                                    Math.round((campaign.calledCount / campaign.totalCount) * 100) : 0;
+                                                    %>
+                                                    <div class="flex flex-col gap-2 w-48">
+                                                        <div
+                                                            class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-100">
+                                                            <div class="h-full bg-indigo-500 rounded-full"
+                                                                style="width: <%= progress %>%"></div>
+                                                        </div>
+                                                        <span
+                                                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                            <%= progress %>% Completed
+                                                        </span>
+                                                    </div>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="flex flex-col items-center">
+                                                        <span class="text-xs font-black text-gray-900">
+                                                            <%= campaign.totalCount %>
+                                                        </span>
+                                                        <span
+                                                            class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Total</span>
+                                                    </div>
+                                                    <div class="flex flex-col items-center text-emerald-600">
+                                                        <span class="text-xs font-black">
+                                                            <%= campaign.answeredCount %>
+                                                        </span>
+                                                        <span
+                                                            class="text-[8px] font-bold uppercase tracking-widest">Ans</span>
+                                                    </div>
+                                                    <div class="flex flex-col items-center text-red-500">
+                                                        <span class="text-xs font-black">
+                                                            <%= campaign.missedCount %>
+                                                        </span>
+                                                        <span
+                                                            class="text-[8px] font-bold uppercase tracking-widest">Miss</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <span
+                                                    class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest <%= campaign.status === 'active' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500' %>">
+                                                    <%= campaign.status %>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW CAMPAIGN MODAL -->
+        <div id="campaignModal"
+            class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[2000] hidden items-center justify-center p-4">
+            <div class="glass-card w-full max-w-xl shadow-2xl overflow-hidden scale-95 opacity-0 transition-all duration-300"
+                id="modalContainer">
+                <div class="bg-indigo-600 px-8 py-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-black text-white">Assign New Campaign</h3>
+                        <p class="text-indigo-100 text-xs font-medium">Upload Excel to create a new calling task</p>
+                    </div>
+                    <button onclick="closeCampaignModal()"
+                        class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <form id="campaignForm" class="p-8 space-y-6" onsubmit="handleCampaignSubmit(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Campaign
+                                Name</label>
+                            <input type="text" name="name" required placeholder="e.g. Summer Outreach 2024"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-gray-900">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Target
+                                Region</label>
+                            <input type="text" name="region" required placeholder="e.g. Mumbai North"
+                                class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-gray-900">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Assign to
+                            Executive (Device)</label>
+                        <select name="deviceId" required
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-gray-900">
+                            <option value="">Select a calling executive...</option>
+                            <% devices.forEach(device=> { %>
+                                <option value="<%= device.deviceId %>">
+                                    <%= device.telecaller %> (<%= device.deviceName %>)
+                                </option>
+                                <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest font-black">Upload
+                            Excel File (.xlsx)</label>
+                        <div class="relative">
+                            <input type="file" name="file" id="excelFile" accept=".xlsx" required class="hidden"
+                                onchange="updateFileName(this)">
+                            <label for="excelFile"
+                                class="w-full flex items-center justify-between px-4 py-4 bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-2xl cursor-pointer hover:bg-indigo-100 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                        <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span id="fileNameDisplay" class="text-sm font-black text-indigo-900">Choose
+                                            Excel file...</span>
+                                        <span class="text-[10px] text-indigo-600 font-bold uppercase">Columns: Name,
+                                            Mobile, Region</span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="px-3 py-1 bg-indigo-600 text-white text-[10px] font-black uppercase rounded-lg shadow-md">
+                                    Browse</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 pt-4">
+                        <button type="button" onclick="closeCampaignModal()"
+                            class="flex-1 px-8 py-4 text-xs font-black text-gray-400 hover:text-gray-900 uppercase tracking-widest transition-all">Cancel</button>
+                        <button type="submit" id="submitBtn"
+                            class="flex-[2] px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <span>Create Campaign</span>
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    function openCampaignModal() {
+                        const modal = document.getElementById('campaignModal');
+                        const container = document.getElementById('modalContainer');
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                        setTimeout(() => {
+                            container.classList.remove('scale-95', 'opacity-0');
+                            container.classList.add('scale-100', 'opacity-100');
+                        }, 10);
+                    }
+
+                    function closeCampaignModal() {
+                        const modal = document.getElementById('campaignModal');
+                        const container = document.getElementById('modalContainer');
+                        container.classList.add('scale-95', 'opacity-0');
+                        container.classList.remove('scale-100', 'opacity-100');
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                            modal.classList.remove('flex');
+                        }, 300);
+                    }
+
+                    function updateFileName(input) {
+                        const display = document.getElementById('fileNameDisplay');
+                        if (input.files && input.files[0]) {
+                            display.innerText = input.files[0].name;
+                        } else {
+                            display.innerText = 'Choose Excel file...';
+                        }
+                    }
+
+                    async function handleCampaignSubmit(event) {
+                        event.preventDefault();
+                        const form = event.target;
+                        const submitBtn = document.getElementById('submitBtn');
+                        const formData = new FormData(form);
+
+                        submitBtn.disabled = true;
+                        const originalBtnHTML = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+
+                        try {
+                            const response = await fetch('/api/telecrm/campaigns', {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                alert('Campaign created successfully!');
+                                window.location.reload();
+                            } else {
+                                throw new Error(data.error || 'Failed to create campaign');
+                            }
+                        } catch (error) {
+                            console.error('Submission error:', error);
+                            alert('Error: ' + error.message);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnHTML;
+                        }
+                    }
+
+                    // Simple search filter
+                    document.getElementById('campaignSearch').addEventListener('keyup', function () {
+                        const term = this.value.toLowerCase();
+                        const rows = document.querySelectorAll('tbody tr:not(.empty-state)');
+
+                        rows.forEach(row => {
+                            const text = row.innerText.toLowerCase();
+                            row.style.display = text.includes(term) ? '' : 'none';
+                        });
+                    });
+                </script>
