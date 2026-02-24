@@ -27,6 +27,7 @@ router.post('/call-outcome', authenticateDevice, telecrmController.submitCallOut
 
 // Get campaigns for device (GET with query params OR POST with body)
 router.get('/campaigns', authenticateDevice, telecrmController.getCampaigns);
+router.post('/campaigns', authenticateDevice, telecrmController.getCampaigns); // Unified POST endpoint
 router.post('/campaigns/fetch', authenticateDevice, telecrmController.getCampaigns);  // POST alias for Android
 
 // Sync campaign stats
@@ -35,7 +36,7 @@ router.post('/campaigns/sync-stats', authenticateDevice, telecrmController.syncC
 // --- Protected Routes (Requires Head Office / SysAdmin session) ---
 
 // Create new campaign (requires Excel upload)
-router.post('/campaigns', isAuthenticated, checkRole(['headoffice', 'sysadmin']), upload.single('file'), telecrmController.createCampaign);
+router.post('/admin/campaigns', isAuthenticated, checkRole(['headoffice', 'sysadmin']), upload.single('file'), telecrmController.createCampaign);
 
 // Get all campaigns with stats (for monitoring)
 router.get('/admin/campaigns', isAuthenticated, checkRole(['headoffice', 'sysadmin']), telecrmController.getCampaignsForAdmin);

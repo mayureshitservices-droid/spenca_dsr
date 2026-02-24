@@ -404,6 +404,38 @@ const createCustomer = async (req, res) => {
     }
 };
 
+// GET /headoffice/telecrm/campaigns
+const getCampaigns = async (req, res) => {
+    try {
+        const Campaign = require('../models/Campaign');
+        const Device = require('../models/Device');
+
+        // Fetch all campaigns with stats
+        const campaigns = await Campaign.find()
+            .sort({ createdAt: -1 })
+            .populate({
+                path: 'deviceId',
+                model: 'Device',
+                localField: 'deviceId',
+                foreignField: 'deviceId',
+                select: 'deviceName telecaller'
+            });
+
+        // Fetch all devices for the "Assign" dropdown
+        const devices = await Device.find().sort({ deviceName: 1 });
+
+        res.render('headoffice/campaigns', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            campaigns,
+            devices
+        });
+    } catch (error) {
+        console.error('Get campaigns page error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
     getIMS,
@@ -411,5 +443,6 @@ module.exports = {
     getTeleCRM,
     exportTeleCRM,
     createSupplier,
-    createCustomer
+    createCustomer,
+    getCampaigns
 };

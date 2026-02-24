@@ -326,7 +326,7 @@
                         submitBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
 
                         try {
-                            const response = await fetch('/api/telecrm/campaigns', {
+                            const response = await fetch('/api/telecrm/admin/campaigns', {
                                 method: 'POST',
                                 body: formData
                             });
