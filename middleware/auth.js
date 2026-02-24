@@ -4,8 +4,13 @@ const isAuthenticated = (req, res, next) => {
         return next();
     }
 
-    // For API requests, return 401 JSON instead of redirecting
-    if (req.originalUrl.startsWith('/api/')) {
+    // Robust check for API/JSON requests to prevent redirects for apps/AJAX
+    const isApiRequest = req.originalUrl.toLowerCase().startsWith('/api/') ||
+        (req.headers['accept'] && req.headers['accept'].includes('application/json')) ||
+        req.headers['x-requested-with'] === 'XMLHttpRequest';
+
+    if (isApiRequest) {
+        console.log(`[Auth] Unauthorized API request to ${req.originalUrl} from ${req.ip}`);
         return res.status(401).json({
             success: false,
             error: 'Authentication required. Please login.'
