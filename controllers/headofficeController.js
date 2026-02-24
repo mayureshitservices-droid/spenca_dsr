@@ -183,7 +183,14 @@ const getTeleCRM = async (req, res) => {
         res.render('headoffice/telecrm', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            devices
+            devices,
+            extraFabItems: [
+                {
+                    label: 'Manage Campaigns',
+                    icon: 'megaphone',
+                    onClick: "window.location.href='/headoffice/telecrm/campaigns'"
+                }
+            ]
         });
     } catch (error) {
         console.error('TeleCRM error:', error);
@@ -428,7 +435,19 @@ const getCampaigns = async (req, res) => {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             campaigns,
-            devices
+            devices,
+            extraFabItems: [
+                {
+                    label: 'Assign New',
+                    icon: 'plus-circle',
+                    onClick: 'openCampaignModal()'
+                },
+                {
+                    label: 'Manage Devices',
+                    icon: 'smartphone',
+                    onClick: "window.location.href='/headoffice/telecrm'"
+                }
+            ]
         });
     } catch (error) {
         console.error('Get campaigns page error:', error);

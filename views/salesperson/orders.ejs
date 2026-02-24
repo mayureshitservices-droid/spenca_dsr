@@ -57,7 +57,7 @@
 
                                 <!-- Order Details -->
                                 <div class="p-6 space-y-4">
-                                    <div class="flex justify-between items-center text-sm">
+                                    <div class="flex justify-between items-center text-sm mb-2">
                                         <span
                                             class="font-bold text-gray-500 uppercase tracking-widest text-[10px]">Products
                                             Included</span>
@@ -67,8 +67,26 @@
                                         </span>
                                     </div>
 
-
-
+                                    <!-- Detailed Product List -->
+                                    <% if (order.products && order.products.length> 0) { %>
+                                        <div class="space-y-1.5">
+                                            <% order.products.forEach(function(product) { %>
+                                                <div
+                                                    class="flex items-center justify-between text-xs bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                                                    <span class="font-bold text-gray-700 truncate flex-1 mr-2">
+                                                        <%= product.productName %>
+                                                    </span>
+                                                    <span class="font-black text-indigo-600 whitespace-nowrap">
+                                                        Qty: <%= product.quantity %>
+                                                            <% if (product.rate) { %>
+                                                                <span class="ml-2 text-emerald-600">@ Rs. <%=
+                                                                        product.rate %></span>
+                                                                <% } %>
+                                                    </span>
+                                                </div>
+                                                <% }); %>
+                                        </div>
+                                        <% } %>
                                 </div>
 
                                 <!-- Actions -->

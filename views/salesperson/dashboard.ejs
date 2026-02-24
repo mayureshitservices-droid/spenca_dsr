@@ -22,7 +22,7 @@
                                 <h4 class="text-lg font-black text-gray-900 leading-tight">Today</h4>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
                             <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
                                 <span
                                     class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total
@@ -38,6 +38,15 @@
                                     <%= stats.today.ordersCount %>
                                 </span>
                             </div>
+                            <div
+                                class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 col-span-2 lg:col-span-1">
+                                <span
+                                    class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total
+                                    Qty</span>
+                                <span class="text-2xl font-black text-emerald-700">
+                                    <%= stats.today.totalQuantity %>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -48,7 +57,7 @@
                                 <h4 class="text-lg font-black text-gray-900 leading-tight">This Month</h4>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
                             <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
                                 <span
                                     class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total
@@ -64,6 +73,15 @@
                                     <%= stats.month.ordersCount %>
                                 </span>
                             </div>
+                            <div
+                                class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 col-span-2 lg:col-span-1">
+                                <span
+                                    class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total
+                                    Qty</span>
+                                <span class="text-2xl font-black text-emerald-700">
+                                    <%= stats.month.totalQuantity %>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -74,7 +92,7 @@
                                 <h4 class="text-lg font-black text-gray-900 leading-tight">Previous Month</h4>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
                             <div class="p-3 bg-gray-50 rounded-2xl border border-gray-100">
                                 <span
                                     class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total
@@ -88,6 +106,15 @@
                                     class="block text-[10px] font-black text-primary-600 uppercase tracking-widest mb-1">Orders</span>
                                 <span class="text-2xl font-black text-primary-700">
                                     <%= stats.lastMonth.ordersCount %>
+                                </span>
+                            </div>
+                            <div
+                                class="p-3 bg-emerald-50 rounded-2xl border border-emerald-100 col-span-2 lg:col-span-1">
+                                <span
+                                    class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Total
+                                    Qty</span>
+                                <span class="text-2xl font-black text-emerald-700">
+                                    <%= stats.lastMonth.totalQuantity %>
                                 </span>
                             </div>
                         </div>

@@ -17,13 +17,43 @@ const getDashboard = async (req, res) => {
 
         // Helper function for stats
         const getStats = async (startDate, endDate = new Date()) => {
+            const mongoose = require('mongoose');
             const query = {
-                salespersonId,
+                salespersonId: new mongoose.Types.ObjectId(salespersonId),
                 createdAt: { $gte: startDate, $lte: endDate }
             };
-            const totalVisits = await Order.countDocuments(query);
-            const ordersCount = await Order.countDocuments({ ...query, orderStatus: 'Ordered' });
-            return { totalVisits, ordersCount };
+
+            const stats = await Order.aggregate([
+                { $match: query },
+                {
+                    $group: {
+                        _id: null,
+                        totalVisits: { $sum: 1 },
+                        ordersCount: {
+                            $sum: { $cond: [{ $eq: ['$orderStatus', 'Ordered'] }, 1, 0] }
+                        },
+                        totalQuantity: {
+                            $sum: {
+                                $cond: [
+                                    { $eq: ['$orderStatus', 'Ordered'] },
+                                    { $sum: "$products.quantity" },
+                                    0
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]);
+
+            if (!stats || stats.length === 0) {
+                return { totalVisits: 0, ordersCount: 0, totalQuantity: 0 };
+            }
+
+            return {
+                totalVisits: stats[0].totalVisits || 0,
+                ordersCount: stats[0].ordersCount || 0,
+                totalQuantity: stats[0].totalQuantity || 0
+            };
         };
 
         const [todayStats, monthStats, lastMonthStats] = await Promise.all([
