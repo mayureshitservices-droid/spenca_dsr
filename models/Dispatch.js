@@ -51,6 +51,10 @@ const dispatchSchema = new mongoose.Schema({
     remark: {
         type: String,
         trim: true
+    },
+    invoicePhoto: {
+        type: String,
+        trim: true
     }
 }, {
     timestamps: true

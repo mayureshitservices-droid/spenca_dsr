@@ -252,6 +252,9 @@
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Invoice Date</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
+                                                Photo</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -296,6 +299,21 @@
                                                     class="px-6 py-4 text-sm font-medium text-gray-600 whitespace-nowrap">
                                                     <%= item.invoiceDate ? new
                                                         Date(item.invoiceDate).toLocaleDateString('en-IN') : '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <% if (item.invoicePhoto) { %>
+                                                        <a href="<%= item.invoicePhoto %>" target="_blank"
+                                                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors shadow-sm group"
+                                                            title="View Invoice Photo">
+                                                            <i data-lucide="image" class="w-4 h-4"></i>
+                                                            <span
+                                                                class="text-[10px] font-black uppercase tracking-tight">View
+                                                                Photo</span>
+                                                        </a>
+                                                        <% } else { %>
+                                                            <span
+                                                                class="text-gray-300 text-[10px] font-bold uppercase">N/A</span>
+                                                            <% } %>
                                                 </td>
                                             </tr>
                                             <% }); %>
@@ -354,6 +372,9 @@
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Driver Mobile</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
+                                                Photo</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -399,6 +420,21 @@
                                                 </td>
                                                 <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
                                                     <%= item.driverMobileNo || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <% if (item.invoicePhoto) { %>
+                                                        <a href="<%= item.invoicePhoto %>" target="_blank"
+                                                            class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors shadow-sm group"
+                                                            title="View Invoice Photo">
+                                                            <i data-lucide="image" class="w-4 h-4"></i>
+                                                            <span
+                                                                class="text-[10px] font-black uppercase tracking-tight">View
+                                                                Photo</span>
+                                                        </a>
+                                                        <% } else { %>
+                                                            <span
+                                                                class="text-gray-300 text-[10px] font-bold uppercase">N/A</span>
+                                                            <% } %>
                                                 </td>
                                             </tr>
                                             <% }); %>

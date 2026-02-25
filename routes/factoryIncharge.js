@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const factoryInchargeController = require('../controllers/factoryInchargeController');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Middleware to check if user is factory incharge
 const isFactoryIncharge = (req, res, next) => {
@@ -27,10 +29,10 @@ router.use(isFactoryIncharge);
 router.get('/dashboard', factoryInchargeController.getDashboard);
 router.get('/inward', factoryInchargeController.getInwardList);
 router.get('/inward/new', factoryInchargeController.getInwardForm);
-router.post('/inward', factoryInchargeController.createInward);
+router.post('/inward', upload.single('invoicePhoto'), factoryInchargeController.createInward);
 
 router.get('/dispatch', factoryInchargeController.getDispatchList);
 router.get('/dispatch/new', factoryInchargeController.getDispatchForm);
-router.post('/dispatch', factoryInchargeController.createDispatch);
+router.post('/dispatch', upload.single('invoicePhoto'), factoryInchargeController.createDispatch);
 
 module.exports = router;

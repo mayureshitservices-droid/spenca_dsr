@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
             <!-- Alerts -->
-            <% if (typeof success !=='undefined' && success) { %>
+            <% if (locals.success) { %>
                 <div
                     class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
                     <div class="flex items-center gap-3">
@@ -19,7 +19,7 @@
                 </div>
                 <% } %>
 
-                    <% if (typeof error !=='undefined' && error) { %>
+                    <% if (locals.error) { %>
                         <div
                             class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
                             <div class="flex items-center gap-3">
@@ -33,6 +33,73 @@
                             </button>
                         </div>
                         <% } %>
+
+                            <!-- Summary Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                                <!-- Inward Card -->
+                                <div
+                                    class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-around-lg border-t-4 border-t-emerald-500 transition-all hover:shadow-2xl hover:-translate-y-1">
+                                    <div class="flex items-center gap-4 mb-4">
+                                        <div
+                                            class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                            <i data-lucide="arrow-down-left" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                Inward Today</p>
+                                            <h3 class="text-3xl font-black text-gray-900 leading-none">
+                                                <%= (stats.totalInwardToday || 0) %>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-tight">Material items
+                                        received</p>
+                                </div>
+
+                                <!-- Dispatch Card -->
+                                <div
+                                    class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-around-lg border-t-4 border-t-blue-500 transition-all hover:shadow-2xl hover:-translate-y-1">
+                                    <div class="flex items-center gap-4 mb-4">
+                                        <div
+                                            class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                                            <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                Dispatch Today</p>
+                                            <h3 class="text-3xl font-black text-gray-900 leading-none">
+                                                <%= (stats.totalDispatchToday || 0) %>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-tight">Products
+                                        dispatched</p>
+                                </div>
+
+                                <!-- Alert Card -->
+                                <% const isLow=stats.lowStockCount> 0; %>
+                                    <div
+                                        class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-around-lg border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-emerald-500' %> transition-all hover:shadow-2xl hover:-translate-y-1">
+                                        <div class="flex items-center gap-4 mb-4">
+                                            <div
+                                                class="w-12 h-12 rounded-2xl <%= isLow ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600' %> flex items-center justify-center">
+                                                <i data-lucide="<%= isLow ? 'alert-triangle' : 'shield-check' %>"
+                                                    class="w-6 h-6"></i>
+                                            </div>
+                                            <div>
+                                                <p
+                                                    class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                    Stock Alerts</p>
+                                                <h3 class="text-3xl font-black text-gray-900 leading-none">
+                                                    <%= (stats.lowStockCount || 0) %>
+                                                </h3>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs font-bold text-gray-400 uppercase tracking-tight">
+                                            <%= isLow ? 'Items below buffer limit' : 'All stocks are healthy' %>
+                                        </p>
+                                    </div>
+                            </div>
 
                             <!-- Stock Section -->
                             <div class="mb-16 scroll-mt-24" id="stock-section">
@@ -108,92 +175,20 @@
                                         </div>
                                         <% } %>
                             </div>
-
         </div>
-
-        <!-- Autocomplete Datalists -->
-        <datalist id="supplierList">
-            <% suppliers.forEach(function(s) { %>
-                <option value="<%= s.supplierName %>" data-id="<%= s._id %>"></option>
-                <% }); %>
-        </datalist>
-
-        <datalist id="materialList">
-            <% rawMaterials.forEach(function(m) { %>
-                <option value="<%= m.productName %>" data-id="<%= m._id %>"></option>
-                <% }); %>
-        </datalist>
 
         <%- include('../partials/fab', { user, userRole }) %>
             <%- include('../partials/footer') %>
 
                 <script>
-                    function openInwardModal() {
-                        const modal = document.getElementById('inwardModal');
-                        if (modal) {
-                            modal.classList.remove('hidden');
-                            modal.classList.add('flex');
-                            document.body.style.overflow = 'hidden';
-                        }
-                    }
-
-                    function closeInwardModal() {
-                        const modal = document.getElementById('inwardModal');
-                        if (modal) {
-                            modal.classList.remove('flex');
-                            modal.classList.add('hidden');
-                            document.body.style.overflow = '';
-                        }
-                    }
-
-                    function updateId(inputId, hiddenId, listId) {
-                        const input = document.getElementById(inputId);
-                        const hidden = document.getElementById(hiddenId);
-                        const list = document.getElementById(listId);
-                        const option = Array.from(list.options).find(o => o.value === input.value);
-                        if (option) {
-                            hidden.value = option.getAttribute('data-id');
-                        } else {
-                            hidden.value = '';
-                        }
-                    }
-
-                    function showSection(sectionId) {
-                        const sections = ['stock-section', 'inward-section', 'dispatch-section'];
-
-                        // Close FAB menu first
-                        const fabBackdrop = document.getElementById('fabBackdrop');
-                        if (fabBackdrop && !fabBackdrop.classList.contains('invisible')) {
-                            fabBackdrop.click();
-                        }
-
-                        sections.forEach(id => {
-                            const el = document.getElementById(id);
-                            if (el) {
-                                if (id === sectionId) {
-                                    el.classList.remove('hidden');
-                                    // Update hash
-                                    history.replaceState(null, null, '#' + id);
-                                    setTimeout(() => {
-                                        el.scrollIntoView({ behavior: 'smooth' });
-                                    }, 50);
-                                } else {
-                                    el.classList.add('hidden');
-                                }
-                            }
-                        });
-                    }
-
                     document.addEventListener('DOMContentLoaded', function () {
-                        lucide.createIcons();
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
 
-                        // Handle initial hash
+                        // Handle initial hash routing
                         const hash = window.location.hash.substring(1);
-                        const validSections = ['stock-section', 'inward-section', 'dispatch-section'];
-                        if (hash && validSections.includes(hash)) {
-                            showSection(hash);
-                        } else {
-                            showSection('stock-section');
+                        if (hash === 'stock-section') {
+                            const el = document.getElementById(hash);
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
                         }
                     });
                 </script>

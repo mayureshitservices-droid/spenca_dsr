@@ -43,7 +43,7 @@
                                 </div>
 
                                 <form id="inwardForm" action="/factory-incharge/inward" method="POST"
-                                    onsubmit="return collectItems()" class="p-8 space-y-8">
+                                    enctype="multipart/form-data" onsubmit="return collectItems()" class="p-8 space-y-8">
 
                                     <!-- Header Info: Supplier & Invoice -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -77,6 +77,27 @@
                                                 Date</label>
                                             <div class="relative">
                                                 <input type="date" name="invoiceDate" class="input-field">
+                                            </div>
+                                        </div>
+
+                                        <div class="md:col-span-2 space-y-3">
+                                            <label
+                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice Photo</label>
+                                            <div class="relative group">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="flex-1">
+                                                        <label for="invoicePhoto" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer bg-gray-50 hover:bg-gray-100/50 hover:border-primary-400 transition-all group-hover:shadow-sm">
+                                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                                <i data-lucide="image" class="w-8 h-8 text-gray-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                                                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400" id="photoStatusText">Click to upload invoice photo</p>
+                                                            </div>
+                                                            <input type="file" name="invoicePhoto" id="invoicePhoto" class="hidden" accept="image/*" onchange="updatePhotoLabel(this)">
+                                                        </label>
+                                                    </div>
+                                                    <div id="photoPreview" class="hidden">
+                                                        <img id="previewImg" class="w-32 h-32 object-cover rounded-3xl border-2 border-gray-100 shadow-sm">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -328,6 +349,30 @@
 
                         document.getElementById('itemsData').value = JSON.stringify(items);
                         return true;
+                    }
+
+                    function updatePhotoLabel(input) {
+                        const label = document.getElementById('photoStatusText');
+                        const preview = document.getElementById('photoPreview');
+                        const previewImg = document.getElementById('previewImg');
+                        
+                        if (input.files && input.files[0]) {
+                            const file = input.files[0];
+                            label.innerHTML = `SELECTED: ${file.name}`;
+                            label.classList.replace('text-gray-400', 'text-primary-600');
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                previewImg.src = e.target.result;
+                                preview.classList.remove('hidden');
+                                preview.classList.add('animate-in', 'fade-in', 'zoom-in', 'duration-300');
+                            }
+                            reader.readAsDataURL(file);
+                        } else {
+                            label.innerHTML = 'Click to upload invoice photo';
+                            label.classList.replace('text-primary-600', 'text-gray-400');
+                            preview.classList.add('hidden');
+                        }
                     }
 
                     document.addEventListener('DOMContentLoaded', () => {

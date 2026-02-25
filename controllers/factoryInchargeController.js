@@ -3,6 +3,8 @@ const Supplier = require('../models/Supplier');
 const Inward = require('../models/Inward');
 const Dispatch = require('../models/Dispatch');
 const Customer = require('../models/Customer');
+const ociService = require('../services/ociService');
+const path = require('path');
 
 // GET /factory-incharge/dashboard
 const getDashboard = async (req, res) => {
@@ -13,11 +15,27 @@ const getDashboard = async (req, res) => {
         // Fetch all active suppliers for inward form autocomplete
         const suppliers = await Supplier.find({ status: 'Active' }).sort({ supplierName: 1 });
 
+        // Calculate Stats
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [inwardToday, dispatchToday] = await Promise.all([
+            Inward.find({ createdAt: { $gte: today } }),
+            Dispatch.find({ createdAt: { $gte: today } })
+        ]);
+
+        const stats = {
+            totalInwardToday: inwardToday.reduce((acc, curr) => acc + (curr.quantity || 0), 0),
+            totalDispatchToday: dispatchToday.reduce((acc, curr) => acc + (curr.quantity || 0), 0),
+            lowStockCount: rawMaterials.filter(m => (m.availableQty || 0) < (m.bufferQty || 0)).length
+        };
+
         res.render('factoryIncharge/dashboard', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             rawMaterials,
             suppliers,
+            stats,
             success: req.query.success,
             error: req.query.error
         });
@@ -93,7 +111,22 @@ const createInward = async (req, res) => {
             return res.redirect('/factory-incharge/inward/new?error=No items added');
         }
 
-        // Process each item
+        // --- Phase 1: Handle Invoice Photo Upload (Optional) ---
+        let invoicePhotoUrl = null;
+        if (req.file) {
+            try {
+                const file = req.file;
+                const fileName = `invoices/INW_${invoiceNo || Date.now()}_${Date.now()}${path.extname(file.originalname)}`;
+                console.log(`[Inward Upload] Uploading invoice photo: ${fileName}`);
+
+                invoicePhotoUrl = await ociService.uploadToOCI(file.buffer, fileName, file.mimetype);
+                console.log(`[Inward Upload] Success. URL: ${invoicePhotoUrl}`);
+            } catch (ociError) {
+                console.error('[Inward Upload] OCI Error:', ociError);
+            }
+        }
+
+        // --- Phase 2: Process each item ---
         for (const item of inwardItems) {
             const product = await Product.findById(item.productId);
             if (!product) continue;
@@ -116,6 +149,7 @@ const createInward = async (req, res) => {
                 conditionConfirmed: true,
                 invoiceNo: invoiceNo || null,
                 invoiceDate: invoiceDate ? new Date(invoiceDate) : null,
+                invoicePhoto: invoicePhotoUrl,
                 recordedBy: req.session.userId
             });
 
@@ -126,7 +160,7 @@ const createInward = async (req, res) => {
             await product.save();
         }
 
-        res.redirect('/factory-incharge/inward?success=Inward transactions recorded successfully');
+        res.redirect('/factory-incharge/inward?success=Inward transactions recorded successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
     } catch (error) {
         console.error('Create Inward error:', error);
         res.redirect('/factory-incharge/dashboard?error=Failed to record inward');
@@ -203,6 +237,19 @@ const getDispatchForm = async (req, res) => {
 const createDispatch = async (req, res) => {
     try {
         const { receiverName, items, invoiceNo, invoiceDate, vehicleNo, driverName, driverMobileNo, remark } = req.body;
+
+        // Handle Invoice Photo Upload
+        let invoicePhotoUrl = null;
+        if (req.file) {
+            try {
+                const fileName = `dispatch_${Date.now()}_${req.file.originalname}`;
+                invoicePhotoUrl = await ociService.uploadToOCI(req.file.buffer, fileName, req.file.mimetype);
+                console.log('Dispatch Invoice Photo uploaded:', invoicePhotoUrl);
+            } catch (ociError) {
+                console.error('OCI Dispatch Photo Upload Error:', ociError);
+                // Continue without photo instead of failing? User choice, but for now we continue
+            }
+        }
 
         // Parse items from JSON string
         console.log('Dispatch Body:', req.body);
@@ -295,13 +342,14 @@ const createDispatch = async (req, res) => {
                 vehicleNo,
                 driverName,
                 driverMobileNo,
+                invoicePhoto: invoicePhotoUrl,
                 recordedBy: req.session.userId
             });
 
             await dispatch.save();
         }
 
-        res.redirect('/factory-incharge/dispatch?success=Dispatch transactions recorded and Raw Material stock updated successfully');
+        res.redirect('/factory-incharge/dispatch?success=Dispatch transactions recorded and Raw Material stock updated successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
     } catch (error) {
         console.error('Create Dispatch error:', error);
         res.redirect('/factory-incharge/dispatch/new?error=Server error during dispatch');

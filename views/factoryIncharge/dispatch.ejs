@@ -96,6 +96,19 @@
                                                                 </p>
                                                             </div>
                                                             <% } %>
+
+                                                                <% if (item.invoicePhoto) { %>
+                                                                    <div class="leading-tight">
+                                                                        <label
+                                                                            class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Photo</label>
+                                                                        <a href="<%= item.invoicePhoto %>"
+                                                                            target="_blank"
+                                                                            class="flex items-center gap-1 text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-tight">
+                                                                            <i data-lucide="image" class="w-3 h-3"></i>
+                                                                            View Photo
+                                                                        </a>
+                                                                    </div>
+                                                                    <% } %>
                                     </div>
                                     <% } %>
 

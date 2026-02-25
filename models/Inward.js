@@ -37,6 +37,10 @@ const inwardSchema = new mongoose.Schema({
     invoiceDate: {
         type: Date
     },
+    invoicePhoto: {
+        type: String,
+        trim: true
+    },
     inwardDate: {
         type: Date,
         default: Date.now
