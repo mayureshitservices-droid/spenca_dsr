@@ -2,179 +2,95 @@
     <%- include('../partials/navbar', { user, userRole }) %>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Header -->
+            <div class="mb-12">
+                <h1 class="text-4xl font-black text-gray-900 uppercase tracking-tight mb-2">Factory Control Hub</h1>
+                <p class="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">Management & Operations</p>
+            </div>
 
-            <!-- Alerts -->
-            <% if (locals.success) { %>
-                <div
-                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
-                        <p class="font-bold">
-                            <%= success %>
-                        </p>
+            <!-- Quick Action Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                <!-- Action: Record Inward -->
+                <a href="/factory-incharge/inward/new"
+                    class="group relative bg-white rounded-[2.5rem] p-8 shadow-around-lg border border-gray-100 transition-all hover:shadow-2xl hover:-translate-y-2 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i data-lucide="download" class="w-32 h-32"></i>
                     </div>
-                    <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-400">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
-                <% } %>
+                    <div
+                        class="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                        <i data-lucide="download" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900 uppercase mb-2">Record Inward</h3>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Log
+                        incoming raw materials & supplies</p>
+                </a>
 
-                    <% if (locals.error) { %>
-                        <div
-                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-100 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
-                                <p class="font-bold">
-                                    <%= error %>
-                                </p>
-                            </div>
-                            <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400">
-                                <i data-lucide="x" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <% } %>
+                <!-- Action: Record Production -->
+                <a href="/factory-incharge/production/new"
+                    class="group relative bg-white rounded-[2.5rem] p-8 shadow-around-lg border border-gray-100 transition-all hover:shadow-2xl hover:-translate-y-2 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i data-lucide="factory" class="w-32 h-32"></i>
+                    </div>
+                    <div
+                        class="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                        <i data-lucide="factory" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900 uppercase mb-2">Record Production</h3>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Register
+                        manufactured batches</p>
+                </a>
 
-                            <!-- Summary Cards -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                                <!-- Inward Card -->
-                                <div
-                                    class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-around-lg border-t-4 border-t-emerald-500 transition-all hover:shadow-2xl hover:-translate-y-1">
-                                    <div class="flex items-center gap-4 mb-4">
-                                        <div
-                                            class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                                            <i data-lucide="arrow-down-left" class="w-6 h-6"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                Inward Today</p>
-                                            <h3 class="text-3xl font-black text-gray-900 leading-none">
-                                                <%= (stats.totalInwardToday || 0) %>
-                                            </h3>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-tight">Material items
-                                        received</p>
-                                </div>
+                <!-- Action: Record Dispatch -->
+                <a href="/factory-incharge/dispatch/new"
+                    class="group relative bg-white rounded-[2.5rem] p-8 shadow-around-lg border border-gray-100 transition-all hover:shadow-2xl hover:-translate-y-2 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i data-lucide="upload" class="w-32 h-32"></i>
+                    </div>
+                    <div
+                        class="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i data-lucide="upload" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900 uppercase mb-2">Record Dispatch</h3>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Ship
+                        finished goods to customers</p>
+                </a>
 
-                                <!-- Dispatch Card -->
-                                <div
-                                    class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-around-lg border-t-4 border-t-blue-500 transition-all hover:shadow-2xl hover:-translate-y-1">
-                                    <div class="flex items-center gap-4 mb-4">
-                                        <div
-                                            class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
-                                            <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                Dispatch Today</p>
-                                            <h3 class="text-3xl font-black text-gray-900 leading-none">
-                                                <%= (stats.totalDispatchToday || 0) %>
-                                            </h3>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-tight">Products
-                                        dispatched</p>
-                                </div>
+                <!-- Action: View Stock -->
+                <a href="/factory-incharge/stock/raw-materials"
+                    class="group relative bg-white rounded-[2.5rem] p-8 shadow-around-lg border border-gray-100 transition-all hover:shadow-2xl hover:-translate-y-2 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i data-lucide="package-search" class="w-32 h-32"></i>
+                    </div>
+                    <div
+                        class="w-14 h-14 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6 group-hover:bg-amber-600 group-hover:text-white transition-all">
+                        <i data-lucide="package-search" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-gray-900 uppercase mb-2">Stock Inventory</h3>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Check
+                        current inventory levels</p>
+                </a>
 
-                                <!-- Alert Card -->
-                                <% const isLow=stats.lowStockCount> 0; %>
-                                    <div
-                                        class="bg-white/95 backdrop-blur-md rounded-3xl p-8 shadow-around-lg border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-emerald-500' %> transition-all hover:shadow-2xl hover:-translate-y-1">
-                                        <div class="flex items-center gap-4 mb-4">
-                                            <div
-                                                class="w-12 h-12 rounded-2xl <%= isLow ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600' %> flex items-center justify-center">
-                                                <i data-lucide="<%= isLow ? 'alert-triangle' : 'shield-check' %>"
-                                                    class="w-6 h-6"></i>
-                                            </div>
-                                            <div>
-                                                <p
-                                                    class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                                    Stock Alerts</p>
-                                                <h3 class="text-3xl font-black text-gray-900 leading-none">
-                                                    <%= (stats.lowStockCount || 0) %>
-                                                </h3>
-                                            </div>
-                                        </div>
-                                        <p class="text-xs font-bold text-gray-400 uppercase tracking-tight">
-                                            <%= isLow ? 'Items below buffer limit' : 'All stocks are healthy' %>
-                                        </p>
-                                    </div>
-                            </div>
+            </div>
 
-                            <!-- Stock Section -->
-                            <div class="mb-16 scroll-mt-24" id="stock-section">
-                                <div class="flex items-center gap-4 mb-8">
-                                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Raw Material Stock</h2>
-                                    <span
-                                        class="px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Inventory</span>
-                                </div>
-
-                                <% if (rawMaterials.length===0) { %>
-                                    <div
-                                        class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
-                                        <i data-lucide="box" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Raw Materials</h3>
-                                        <p class="text-gray-500 font-medium">No raw materials are currently assigned to
-                                            the factory.</p>
-                                    </div>
-                                    <% } else { %>
-                                        <div
-                                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                                            <% rawMaterials.forEach(function(material) { %>
-                                                <div
-                                                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 border-t-emerald-500">
-                                                    <div class="p-6 flex flex-col flex-grow">
-                                                        <div class="flex justify-between items-start mb-4">
-                                                            <h5
-                                                                class="text-xl font-black text-gray-900 leading-tight tracking-tight">
-                                                                <%= material.productName %>
-                                                            </h5>
-                                                            <span
-                                                                class="text-[10px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg uppercase">Stock</span>
-                                                        </div>
-
-                                                        <% if (material.specification) { %>
-                                                            <div
-                                                                class="text-xs font-bold text-gray-400 mb-4 uppercase tracking-widest">
-                                                                <%= material.specification %>
-                                                            </div>
-                                                            <% } %>
-
-                                                                <div class="grid grid-cols-2 gap-3 mb-6">
-                                                                    <div
-                                                                        class="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
-                                                                        <span
-                                                                            class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Available</span>
-                                                                        <span
-                                                                            class="text-2xl font-black text-emerald-700">
-                                                                            <%= (material.availableQty || 0).toFixed(2)
-                                                                                %>
-                                                                        </span>
-                                                                        <span
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
-                                                                            <%= material.uom %>
-                                                                        </span>
-                                                                    </div>
-                                                                    <div
-                                                                        class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
-                                                                        <span
-                                                                            class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
-                                                                        <span
-                                                                            class="text-2xl font-black text-amber-700">
-                                                                            <%= (material.bufferQty || 0).toFixed(2) %>
-                                                                        </span>
-                                                                        <span
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
-                                                                            <%= material.uom %>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                    </div>
-                                                </div>
-                                                <% }); %>
-                                        </div>
-                                        <% } %>
-                            </div>
+            <!-- Secondary Actions -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="/factory-incharge/inward"
+                    class="glass-card p-6 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                    <i data-lucide="history" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs font-black uppercase tracking-widest text-gray-600">Inward History</span>
+                </a>
+                <a href="/factory-incharge/production"
+                    class="glass-card p-6 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                    <i data-lucide="history" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs font-black uppercase tracking-widest text-gray-600">Production History</span>
+                </a>
+                <a href="/factory-incharge/dispatch"
+                    class="glass-card p-6 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                    <i data-lucide="history" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs font-black uppercase tracking-widest text-gray-600">Dispatch History</span>
+                </a>
+            </div>
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
@@ -183,12 +99,5 @@
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         if (typeof lucide !== 'undefined') lucide.createIcons();
-
-                        // Handle initial hash routing
-                        const hash = window.location.hash.substring(1);
-                        if (hash === 'stock-section') {
-                            const el = document.getElementById(hash);
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }
                     });
                 </script>

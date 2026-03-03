@@ -1,0 +1,108 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Header -->
+            <div class="flex items-center gap-6 mb-12">
+                <a href="/headoffice/dashboard"
+                    class="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-black hover:bg-gray-50 transition-all active:scale-95 group">
+                    <i data-lucide="arrow-left" class="w-6 h-6 group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none">Finished Goods</h1>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Current Inventory
+                        Levels</p>
+                </div>
+            </div>
+
+            <% if (!locals.finishedGoods || finishedGoods.length===0) { %>
+                <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                    <i data-lucide="package" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">No Finished Goods</h3>
+                    <p class="text-gray-500 font-medium">Ensure products are categorized as "Finished Good" in the
+                        system.</p>
+                </div>
+                <% } else { %>
+                    <div
+                        class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-100">
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Product Name</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                            Packaging</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                            Available Stock</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                            Buffer Level</th>
+                                        <th
+                                            class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
+                                            Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    <% finishedGoods.forEach(function(product) { %>
+                                        <% const isLow=(product.availableQty || 0) < (product.bufferQty || 0); %>
+                                            <tr class="hover:bg-gray-50/80 transition-colors group">
+                                                <td class="px-6 py-4">
+                                                    <div
+                                                        class="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors uppercase">
+                                                        <%= product.productName %>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span
+                                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                        <%= product.packaging || '-' %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-right tabular-nums">
+                                                    <span class="text-lg font-black text-indigo-700">
+                                                        <%= (product.availableQty || 0).toFixed(0) %>
+                                                    </span>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                        <%= product.uom %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-right tabular-nums">
+                                                    <span class="text-sm font-black text-gray-600">
+                                                        <%= (product.bufferQty || 0).toFixed(0) %>
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <% if (isLow) { %>
+                                                        <span
+                                                            class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[9px] font-black rounded-lg uppercase tracking-widest">
+                                                            <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                                            Low Stock
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span
+                                                                class="px-2 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded-lg uppercase tracking-widest">
+                                                                Healthy
+                                                            </span>
+                                                            <% } %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <% } %>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    });
+                </script>

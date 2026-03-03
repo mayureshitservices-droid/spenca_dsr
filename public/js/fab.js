@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const fabMenu = document.getElementById('fabMenu');
     const fabBackdrop = document.getElementById('fabBackdrop');
     const fabIcon = document.getElementById('fabIcon');
-    const fabMinis = document.querySelectorAll('#fabMenu a');
+    const fabMinis = document.querySelectorAll('#fabMenu a, #fabMenu button');
 
     let isOpen = false;
 

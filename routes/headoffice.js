@@ -25,6 +25,9 @@ const isHeadOffice = (req, res, next) => {
 router.use(isHeadOffice);
 
 router.get('/dashboard', headofficeController.getDashboard);
+router.get('/stock/raw-materials', headofficeController.getRawMaterialStock);
+router.get('/stock/finished-goods', headofficeController.getFinishedGoodsStock);
+router.get('/production-history', headofficeController.getProductionHistory);
 router.get('/ims', headofficeController.getIMS);
 router.get('/download-report', headofficeController.downloadDailyReport);
 router.get('/telecrm', headofficeController.getTeleCRM);

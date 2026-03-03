@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar', { user, userRole }) %>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Header -->
+            <div class="flex items-center gap-6 mb-12">
+                <a href="/factory-incharge/stock/raw-materials"
+                    class="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-lg flex items-center justify-center text-black hover:bg-gray-50 transition-all active:scale-95 group">
+                    <i data-lucide="arrow-left" class="w-6 h-6 group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none">Finished Goods</h1>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Current Inventory
+                        Levels</p>
+                </div>
+            </div>
+
+            <% if (!locals.finishedGoods || finishedGoods.length===0) { %>
+                <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                    <i data-lucide="package" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">No Finished Goods</h3>
+                    <p class="text-gray-500 font-medium">Ensure products are categorized as "Finished Good" in the
+                        system.</p>
+                </div>
+                <% } else { %>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        <% finishedGoods.forEach(function(product) { %>
+                            <% const isLow=(product.availableQty || 0) < (product.bufferQty || 0); %>
+                                <div
+                                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-indigo-500' %>">
+                                    <div class="p-6 flex flex-col flex-grow">
+                                        <div class="flex justify-between items-start mb-4">
+                                            <div class="flex-1">
+                                                <h5
+                                                    class="text-xl font-black text-gray-900 leading-none tracking-tight uppercase">
+                                                    <%= product.productName %>
+                                                </h5>
+                                                <p
+                                                    class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mt-2">
+                                                    <%= product.packaging %>
+                                                </p>
+                                            </div>
+                                            <span
+                                                class="text-[10px] font-black px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg uppercase">FG</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-3 mt-auto">
+                                            <div class="bg-indigo-50/30 rounded-xl p-3 border border-indigo-100/50">
+                                                <span
+                                                    class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Available</span>
+                                                <span class="text-2xl font-black text-indigo-700">
+                                                    <%= (product.availableQty || 0).toFixed(0) %>
+                                                </span>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                    <%= product.uom %>
+                                                </span>
+                                            </div>
+                                            <div class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
+                                                <span
+                                                    class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
+                                                <span class="text-2xl font-black text-amber-700">
+                                                    <%= (product.bufferQty || 0).toFixed(0) %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <% if (isLow) { %>
+                                            <div class="mt-3 flex items-center gap-2 text-amber-600">
+                                                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                                <span class="text-[10px] font-black uppercase tracking-widest">Low Stock
+                                                    Alert</span>
+                                            </div>
+                                            <% } %>
+                                    </div>
+                                </div>
+                                <% }); %>
+                    </div>
+                    <% } %>
+        </div>
+
+        <%- include('../partials/fab', { user, userRole }) %>
+            <%- include('../partials/footer') %>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    });
+                </script>

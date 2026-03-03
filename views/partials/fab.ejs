@@ -96,21 +96,38 @@
                                         <span class="text-sm">TeleCRM</span>
                                         <i data-lucide="smartphone" class="w-5 h-5"></i>
                                     </a>
+
+                                    <a href="/headoffice/ims"
+                                        class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                        <span class="text-sm">IMS Management</span>
+                                        <i data-lucide="box" class="w-5 h-5"></i>
+                                    </a>
+
                                     <a href="/headoffice/dashboard"
                                         class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                         <span class="text-sm">Dashboard</span>
                                         <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                                     </a>
                                     <% } else if (userRole==='factory_incharge' ) { %>
-                                        <a href="/factory-incharge/dashboard"
+                                        <a href="/factory-incharge/stock/raw-materials"
+                                            class="flex items-center gap-3 bg-white hover:bg-emerald-600 text-emerald-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                            <span class="text-sm">Raw Material Stock</span>
+                                            <i data-lucide="layer-group" class="w-5 h-5"></i>
+                                        </a>
+                                        <a href="/factory-incharge/stock/finished-goods"
                                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
-                                            <span class="text-sm">Inventory</span>
-                                            <i data-lucide="box" class="w-5 h-5"></i>
+                                            <span class="text-sm">Finished Goods Stock</span>
+                                            <i data-lucide="package" class="w-5 h-5"></i>
                                         </a>
                                         <a href="/factory-incharge/inward"
                                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
                                             <span class="text-sm">Inward History</span>
                                             <i data-lucide="download" class="w-5 h-5"></i>
+                                        </a>
+                                        <a href="/factory-incharge/production"
+                                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
+                                            <span class="text-sm">Production History</span>
+                                            <i data-lucide="factory" class="w-5 h-5"></i>
                                         </a>
                                         <a href="/factory-incharge/dispatch"
                                             class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group">
@@ -120,18 +137,20 @@
                                         <% } %>
                                             <% } %>
                                                 <!-- Extra Page Specific Items -->
-                                                <% if (typeof extraFabItems !=='undefined' && extraFabItems.length> 0) {
-                                                    %>
+                                                <% if (locals.extraFabItems && Array.isArray(extraFabItems) &&
+                                                    extraFabItems.length> 0) { %>
                                                     <% extraFabItems.forEach(function(item) { %>
-                                                        <button onclick="<%- item.onClick %>"
-                                                            class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group border border-gray-200">
-                                                            <span class="text-sm font-black">
-                                                                <%= item.label %>
-                                                            </span>
-                                                            <i data-lucide="<%= item.icon %>" class="w-5 h-5"></i>
-                                                        </button>
-                                                        <% }); %>
+                                                        <% if (item && item.label && item.icon) { %>
+                                                            <button onclick="<%- item.onClick || '' %>"
+                                                                class="flex items-center gap-3 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white px-5 py-3 rounded-2xl shadow-xl transition-all font-bold group border border-gray-200">
+                                                                <span class="text-sm font-black">
+                                                                    <%= item.label %>
+                                                                </span>
+                                                                <i data-lucide="<%= item.icon %>" class="w-5 h-5"></i>
+                                                            </button>
                                                             <% } %>
+                                                                <% }); %>
+                                                                    <% } %>
         </div>
 
         <!-- Main FAB Button -->

@@ -16,6 +16,7 @@ router.get('/suppliers/search', factoryInchargeController.searchSuppliers);
 router.get('/raw-materials/search', factoryInchargeController.searchRawMaterials);
 router.get('/finished-goods/search', factoryInchargeController.searchFinishedGoods);
 router.get('/factory-incharge/customers/search', factoryInchargeController.searchCustomers);
+router.get('/factory-incharge/products/search-fg', factoryInchargeController.searchFinishedGoods);
 
 // Owner stats API (accessible by owner)
 router.get('/owner/stats/total-orders', checkRole(['owner']), ownerController.getTotalOrders);

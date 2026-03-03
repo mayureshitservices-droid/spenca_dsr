@@ -26,7 +26,9 @@ const isFactoryIncharge = (req, res, next) => {
 
 router.use(isFactoryIncharge);
 
-router.get('/dashboard', factoryInchargeController.getDashboard);
+// router.get('/dashboard', factoryInchargeController.getDashboard);
+router.get('/stock/raw-materials', factoryInchargeController.getRawMaterialStock);
+router.get('/stock/finished-goods', factoryInchargeController.getFinishedGoodsStock);
 router.get('/inward', factoryInchargeController.getInwardList);
 router.get('/inward/new', factoryInchargeController.getInwardForm);
 router.post('/inward', upload.single('invoicePhoto'), factoryInchargeController.createInward);
@@ -34,5 +36,9 @@ router.post('/inward', upload.single('invoicePhoto'), factoryInchargeController.
 router.get('/dispatch', factoryInchargeController.getDispatchList);
 router.get('/dispatch/new', factoryInchargeController.getDispatchForm);
 router.post('/dispatch', upload.single('invoicePhoto'), factoryInchargeController.createDispatch);
+
+router.get('/production', factoryInchargeController.getProductionList);
+router.get('/production/new', factoryInchargeController.getProductionForm);
+router.post('/production', factoryInchargeController.createProduction);
 
 module.exports = router;

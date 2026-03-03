@@ -3,6 +3,9 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const Customer = require('../models/Customer');
 const Supplier = require('../models/Supplier');
+const Production = require('../models/Production');
+const Inward = require('../models/Inward');
+const Dispatch = require('../models/Dispatch');
 const ExcelJS = require('exceljs');
 
 // GET /headoffice/dashboard
@@ -321,9 +324,13 @@ const getIMS = async (req, res) => {
         const Customer = require('../models/Customer');
         const Inward = require('../models/Inward');
         const Dispatch = require('../models/Dispatch');
+        const Production = require('../models/Production');
 
         // Fetch raw materials for stock view
         const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
+
+        // Fetch finished goods for stock view
+        const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
 
         // Fetch customers
         const customers = await Customer.find().sort({ customerName: 1 });
@@ -341,14 +348,21 @@ const getIMS = async (req, res) => {
             .populate('productId')
             .sort({ dispatchDate: -1 });
 
+        // Fetch Production History
+        const productionRecords = await Production.find()
+            .populate('productId')
+            .sort({ createdAt: -1 });
+
         res.render('headoffice/ims', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             rawMaterials,
+            finishedGoods,
             suppliers,
             customers,
             inwardTransactions,
-            dispatchTransactions
+            dispatchTransactions,
+            productionRecords
         });
     } catch (error) {
         console.error('IMS Dashboard error:', error);
@@ -411,7 +425,6 @@ const createCustomer = async (req, res) => {
     }
 };
 
-// GET /headoffice/telecrm/campaigns
 const getCampaigns = async (req, res) => {
     try {
         const Campaign = require('../models/Campaign');
@@ -455,6 +468,54 @@ const getCampaigns = async (req, res) => {
     }
 };
 
+const getRawMaterialStock = async (req, res) => {
+    try {
+        const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
+        res.render('headoffice/raw-material-stock', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            rawMaterials,
+            title: 'Raw Material Stock'
+        });
+    } catch (error) {
+        console.error('HeadOffice RM Stock error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+const getFinishedGoodsStock = async (req, res) => {
+    try {
+        const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
+        res.render('headoffice/finished-goods-stock', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            finishedGoods,
+            title: 'Finished Goods Stock'
+        });
+    } catch (error) {
+        console.error('HeadOffice FG Stock error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+const getProductionHistory = async (req, res) => {
+    try {
+        const productionRecords = await Production.find()
+            .populate('productId')
+            .sort({ createdAt: -1 })
+            .limit(100);
+        res.render('headoffice/production-history', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            productionRecords,
+            title: 'Production History'
+        });
+    } catch (error) {
+        console.error('HeadOffice Production History error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
     getIMS,
@@ -463,5 +524,8 @@ module.exports = {
     exportTeleCRM,
     createSupplier,
     createCustomer,
-    getCampaigns
+    getCampaigns,
+    getRawMaterialStock,
+    getFinishedGoodsStock,
+    getProductionHistory
 };

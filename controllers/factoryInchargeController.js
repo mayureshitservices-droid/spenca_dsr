@@ -3,39 +3,17 @@ const Supplier = require('../models/Supplier');
 const Inward = require('../models/Inward');
 const Dispatch = require('../models/Dispatch');
 const Customer = require('../models/Customer');
+const Production = require('../models/Production');
 const ociService = require('../services/ociService');
 const path = require('path');
 
 // GET /factory-incharge/dashboard
 const getDashboard = async (req, res) => {
     try {
-        // Fetch raw materials for stock view
-        const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
-
-        // Fetch all active suppliers for inward form autocomplete
-        const suppliers = await Supplier.find({ status: 'Active' }).sort({ supplierName: 1 });
-
-        // Calculate Stats
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const [inwardToday, dispatchToday] = await Promise.all([
-            Inward.find({ createdAt: { $gte: today } }),
-            Dispatch.find({ createdAt: { $gte: today } })
-        ]);
-
-        const stats = {
-            totalInwardToday: inwardToday.reduce((acc, curr) => acc + (curr.quantity || 0), 0),
-            totalDispatchToday: dispatchToday.reduce((acc, curr) => acc + (curr.quantity || 0), 0),
-            lowStockCount: rawMaterials.filter(m => (m.availableQty || 0) < (m.bufferQty || 0)).length
-        };
-
         res.render('factoryIncharge/dashboard', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            rawMaterials,
-            suppliers,
-            stats,
+            title: 'Factory Dashboard',
             success: req.query.success,
             error: req.query.error
         });
@@ -270,66 +248,39 @@ const createDispatch = async (req, res) => {
             return res.redirect('/factory-incharge/dispatch/new?error=No products added');
         }
 
-        // --- Phase 1: Validate Raw Material Stock ---
-        const rmRequirements = new Map(); // Map<string, number> where string is RM ID
-        const productsMap = new Map(); // Cache products to avoid re-fetching
-
+        // Cache products to avoid re-fetching in the save loop
+        const productsMap = new Map();
         for (const item of dispatchItems) {
+            if (!item.productId) continue;
             const product = await Product.findById(item.productId);
-            if (!product) continue;
-            productsMap.set(item.productId, product);
-
-            const qty = parseFloat(item.quantity) || 0;
-            if (qty <= 0) continue;
-
-            // Calculate RM requirements based on BoM
-            if (product.components && product.components.length > 0) {
-                for (const comp of product.components) {
-                    // Check if component has valid ID and quantity
-                    if (comp.productId && comp.quantity) {
-                        const currentReq = rmRequirements.get(comp.productId.toString()) || 0;
-                        const reqQty = qty * parseFloat(comp.quantity);
-                        rmRequirements.set(comp.productId.toString(), currentReq + reqQty);
-                    }
-                }
+            if (product) {
+                productsMap.set(item.productId.toString(), product);
             }
-        }
-
-        // Check stock availability for all required RMs
-        const missingRMs = [];
-        for (const [rmId, requiredQty] of rmRequirements.entries()) {
-            const rm = await Product.findById(rmId);
-            if (!rm) {
-                console.warn(`Raw Material ID ${rmId} not found in database.`);
-                continue;
-            }
-
-            if (rm.availableQty < requiredQty) {
-                missingRMs.push(`${rm.productName} (Required: ${requiredQty.toFixed(2)} ${rm.uom}, Available: ${rm.availableQty.toFixed(2)} ${rm.uom})`);
-            }
-        }
-
-        if (missingRMs.length > 0) {
-            const errorMsg = `Insufficient Raw Material Stock: ${missingRMs.join(', ')}`;
-            return res.redirect(`/factory-incharge/dispatch/new?error=${encodeURIComponent(errorMsg)}`);
         }
 
         // --- Phase 2: Deduct Stock & Create Records ---
 
-        // 1. Deduct Raw Material Stock
-        for (const [rmId, requiredQty] of rmRequirements.entries()) {
-            await Product.findByIdAndUpdate(rmId, { $inc: { availableQty: -requiredQty } });
+        // 1. Deduct Finished Good Stock
+        // New logic: Dispatch only deducts Finished Goods. Raw Materials were deducted during Production.
+        for (const item of dispatchItems) {
+            const qty = parseFloat(item.quantity) || 0;
+            if (qty > 0) {
+                const result = await Product.findByIdAndUpdate(
+                    item.productId,
+                    { $inc: { availableQty: -qty } },
+                    { new: true }
+                );
+                console.log(`[Dispatch Stock] Deducted ${qty} from product ${item.productId}. New availableQty: ${result ? result.availableQty : 'PRODUCT NOT FOUND'}`);
+            }
         }
 
-        // 2. Create Dispatch Records (Finished Goods)
+        // 2. Create Dispatch Records
         for (const item of dispatchItems) {
-            const product = productsMap.get(item.productId);
+            const product = productsMap.get(item.productId.toString());
             if (!product) continue;
 
             const qty = parseFloat(item.quantity) || 0;
             if (qty <= 0) continue;
-
-            // Note: We explicitly DO NOT deduct Finished Good stock here, as per user request.
 
             const dispatch = new Dispatch({
                 productId: item.productId,
@@ -349,10 +300,148 @@ const createDispatch = async (req, res) => {
             await dispatch.save();
         }
 
-        res.redirect('/factory-incharge/dispatch?success=Dispatch transactions recorded and Raw Material stock updated successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
+        res.redirect('/factory-incharge/dispatch?success=Dispatch transactions recorded and Finished Good stock updated successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
     } catch (error) {
         console.error('Create Dispatch error:', error);
         res.redirect('/factory-incharge/dispatch/new?error=Server error during dispatch');
+    }
+};
+
+// GET /factory-incharge/production
+const getProductionList = async (req, res) => {
+    try {
+        const productionRecords = await Production.find()
+            .populate('productId')
+            .sort({ createdAt: -1 })
+            .limit(50);
+        res.render('factoryIncharge/production', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            productionRecords,
+            title: 'Production History'
+        });
+    } catch (error) {
+        console.error('Get Production List error:', error);
+        res.redirect('/factory-incharge/dashboard?error=Failed to load production records');
+    }
+};
+
+// GET /factory-incharge/production/new
+const getProductionForm = async (req, res) => {
+    try {
+        const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
+        res.render('factoryIncharge/production-new', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            finishedGoods,
+            title: 'Record Production'
+        });
+    } catch (error) {
+        console.error('Get Production Form error:', error);
+        res.redirect('/factory-incharge/production?error=Failed to load form');
+    }
+};
+
+// POST /factory-incharge/production
+const createProduction = async (req, res) => {
+    try {
+        const { shift, items } = req.body;
+
+        if (!shift) {
+            return res.redirect('/factory-incharge/production/new?error=Please select a shift');
+        }
+
+        // Parse items - array of { productId, quantity, batchNo, remarks }
+        let productionItems = [];
+        try {
+            productionItems = JSON.parse(items);
+        } catch (e) {
+            return res.redirect('/factory-incharge/production/new?error=Invalid form data');
+        }
+
+        // Filter only items with qty > 0
+        productionItems = productionItems.filter(item => parseFloat(item.quantity) > 0);
+
+        if (productionItems.length === 0) {
+            return res.redirect('/factory-incharge/production/new?error=Please enter quantity for at least one product');
+        }
+
+        // Validate batchNo for all included items
+        const missingBatch = productionItems.filter(item => !item.batchNo || !item.batchNo.trim());
+        if (missingBatch.length > 0) {
+            return res.redirect('/factory-incharge/production/new?error=Please enter a Batch No for each product you are recording');
+        }
+
+        // Process each product
+        const errors = [];
+        let recorded = 0;
+
+        for (const item of productionItems) {
+            const qty = parseFloat(item.quantity);
+            const batchNo = item.batchNo.trim();
+
+            // 1. Fetch Finished Good
+            const finishedGood = await Product.findById(item.productId);
+            if (!finishedGood || finishedGood.productType !== 'Finished Good') {
+                errors.push(`Invalid product: ${item.productId}`);
+                continue;
+            }
+
+            // 2. Calculate RM requirements
+            const rmRequirements = new Map();
+            if (finishedGood.components && finishedGood.components.length > 0) {
+                finishedGood.components.forEach(comp => {
+                    const prev = rmRequirements.get(comp.productId.toString()) || 0;
+                    rmRequirements.set(comp.productId.toString(), prev + comp.quantity * qty);
+                });
+            }
+
+            // 3. Validate RM Stock
+            const missingRMs = [];
+            for (const [rmId, requiredQty] of rmRequirements.entries()) {
+                const rm = await Product.findById(rmId);
+                if (!rm) continue;
+                if (rm.availableQty < requiredQty) {
+                    missingRMs.push(`${rm.productName} (Need: ${requiredQty.toFixed(2)}, Have: ${rm.availableQty.toFixed(2)})`);
+                }
+            }
+
+            if (missingRMs.length > 0) {
+                errors.push(`${finishedGood.productName}: Low RM - ${missingRMs.join(', ')}`);
+                continue;
+            }
+
+            // 4. Deduct Raw Materials
+            for (const [rmId, requiredQty] of rmRequirements.entries()) {
+                await Product.findByIdAndUpdate(rmId, { $inc: { availableQty: -requiredQty } });
+            }
+
+            // 5. Increment Finished Good Stock
+            await Product.findByIdAndUpdate(item.productId, { $inc: { availableQty: qty } });
+
+            // 6. Create Production Record
+            const production = new Production({
+                productId: item.productId,
+                productName: finishedGood.productName,
+                quantity: qty,
+                batchNo,
+                shift,
+                remarks: item.remarks || '',
+                recordedBy: req.session.userId
+            });
+            await production.save();
+            recorded++;
+        }
+
+        if (errors.length > 0 && recorded === 0) {
+            return res.redirect(`/factory-incharge/production/new?error=${encodeURIComponent(errors.join(' | '))}`);
+        }
+
+        const successMsg = `${recorded} product(s) recorded successfully` + (errors.length > 0 ? ` (${errors.length} skipped: ${errors.join(', ')})` : '');
+        res.redirect(`/factory-incharge/production?success=${encodeURIComponent(successMsg)}`);
+    } catch (error) {
+        console.error('Create Production error:', error);
+        res.redirect('/factory-incharge/production/new?error=Server error during production recording');
     }
 };
 
@@ -386,8 +475,40 @@ const searchCustomers = async (req, res) => {
     }
 };
 
+const getRawMaterialStock = async (req, res) => {
+    try {
+        const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
+        res.render('factoryIncharge/raw-material-stock', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            rawMaterials,
+            title: 'Raw Material Stock'
+        });
+    } catch (error) {
+        console.error('Get RM Stock error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+const getFinishedGoodsStock = async (req, res) => {
+    try {
+        const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
+        res.render('factoryIncharge/finished-goods-stock', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            finishedGoods,
+            title: 'Finished Goods Stock'
+        });
+    } catch (error) {
+        console.error('Get FG Stock error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
+    getRawMaterialStock,
+    getFinishedGoodsStock,
     getInwardList,
     getInwardForm,
     createInward,
@@ -397,5 +518,8 @@ module.exports = {
     searchSuppliers,
     searchRawMaterials,
     searchFinishedGoods,
-    searchCustomers
+    searchCustomers,
+    getProductionList,
+    getProductionForm,
+    createProduction
 };
