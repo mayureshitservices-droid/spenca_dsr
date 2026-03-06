@@ -124,6 +124,8 @@ const createInward = async (req, res) => {
                 quantity: quantity,
                 price: price,
                 gstPercentage: gstPercentage,
+                inwardUnit: item.inwardUnit || 'nos',
+                inwardQty: parseFloat(item.inwardQty) || quantity,
                 conditionConfirmed: true,
                 invoiceNo: invoiceNo || null,
                 invoiceDate: invoiceDate ? new Date(invoiceDate) : null,
@@ -260,8 +262,7 @@ const createDispatch = async (req, res) => {
 
         // --- Phase 2: Deduct Stock & Create Records ---
 
-        // 1. Deduct Finished Good Stock
-        // New logic: Dispatch only deducts Finished Goods. Raw Materials were deducted during Production.
+        // 1. Deduct Finished Good Stock (in Boxes)
         for (const item of dispatchItems) {
             const qty = parseFloat(item.quantity) || 0;
             if (qty > 0) {
@@ -270,7 +271,7 @@ const createDispatch = async (req, res) => {
                     { $inc: { availableQty: -qty } },
                     { new: true }
                 );
-                console.log(`[Dispatch Stock] Deducted ${qty} from product ${item.productId}. New availableQty: ${result ? result.availableQty : 'PRODUCT NOT FOUND'}`);
+                console.log(`[Dispatch Stock] Deducted ${qty} boxes from product ${item.productId}. New availableQty: ${result ? result.availableQty : 'PRODUCT NOT FOUND'}`);
             }
         }
 
@@ -387,12 +388,16 @@ const createProduction = async (req, res) => {
                 continue;
             }
 
-            // 2. Calculate RM requirements
+            // 2. Calculate RM requirements (qty is in Boxes)
+            const unitsPerBox = parseFloat(finishedGood.packaging) || 1;
+            const totalUnits = qty * unitsPerBox;
+            console.log(`[Production] Processing ${qty} boxes of ${finishedGood.productName}. Multiplier: ${unitsPerBox}, Total Units: ${totalUnits}`);
+
             const rmRequirements = new Map();
             if (finishedGood.components && finishedGood.components.length > 0) {
                 finishedGood.components.forEach(comp => {
                     const prev = rmRequirements.get(comp.productId.toString()) || 0;
-                    rmRequirements.set(comp.productId.toString(), prev + comp.quantity * qty);
+                    rmRequirements.set(comp.productId.toString(), prev + comp.quantity * totalUnits);
                 });
             }
 
@@ -416,14 +421,14 @@ const createProduction = async (req, res) => {
                 await Product.findByIdAndUpdate(rmId, { $inc: { availableQty: -requiredQty } });
             }
 
-            // 5. Increment Finished Good Stock
+            // 5. Increment Finished Good Stock (in Boxes)
             await Product.findByIdAndUpdate(item.productId, { $inc: { availableQty: qty } });
 
             // 6. Create Production Record
             const production = new Production({
                 productId: item.productId,
                 productName: finishedGood.productName,
-                quantity: qty,
+                quantity: qty, // Quantity stored in Boxes
                 batchNo,
                 shift,
                 remarks: item.remarks || '',
@@ -452,7 +457,7 @@ const searchFinishedGoods = async (req, res) => {
         const products = await Product.find({
             productName: { $regex: query, $options: 'i' },
             productType: 'Finished Good'
-        }).limit(10);
+        }).populate('brandedCustomerId', 'customerName').limit(20);
         res.json(products);
     } catch (error) {
         console.error('Search finished goods error:', error);

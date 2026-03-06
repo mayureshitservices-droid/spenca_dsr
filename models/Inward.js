@@ -25,6 +25,14 @@ const inwardSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    inwardUnit: {
+        type: String,
+        enum: ['nos', 'bags', 'boxes'],
+        default: 'nos'
+    },
+    inwardQty: {
+        type: Number
+    },
     conditionConfirmed: {
         type: Boolean,
         default: false,

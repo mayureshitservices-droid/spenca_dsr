@@ -9,6 +9,19 @@
                     Levels</p>
             </div>
 
+            <!-- Search Bar -->
+            <div class="mb-8">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <i data-lucide="search"
+                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                    </div>
+                    <input type="text" id="rmSearch" placeholder="Search by material name or specification..."
+                        style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                        class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                </div>
+            </div>
+
             <% if (!locals.rawMaterials || rawMaterials.length===0) { %>
                 <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                     <i data-lucide="box" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -16,11 +29,12 @@
                     <p class="text-gray-500 font-medium">No raw materials are currently assigned to the factory.</p>
                 </div>
                 <% } else { %>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <!-- Mobile View (Cards) -->
+                    <div id="cardsView" class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
                         <% rawMaterials.forEach(function(material) { %>
                             <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
                                 <div
-                                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-emerald-500' %>">
+                                    class="material-card bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-emerald-500' %>">
                                     <div class="p-6 flex flex-col flex-grow">
                                         <div class="flex justify-between items-start mb-4">
                                             <h5
@@ -33,44 +47,128 @@
 
                                         <% if (material.specification) { %>
                                             <div
-                                                class="text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-widest leading-relaxed">
+                                                class="spec-text text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-widest leading-relaxed">
                                                 <%= material.specification %>
                                             </div>
-                                            <% } %>
+                                            <% } else { %>
+                                                <div class="spec-text hidden"></div>
+                                                <% } %>
 
-                                                <div class="grid grid-cols-2 gap-3 mt-auto">
-                                                    <div
-                                                        class="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
-                                                        <span
-                                                            class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Stock</span>
-                                                        <span class="text-2xl font-black text-emerald-700">
-                                                            <%= (material.availableQty || 0).toFixed(2) %>
-                                                        </span>
-                                                        <span
-                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
-                                                            <%= material.uom %>
-                                                        </span>
+                                                    <div class="grid grid-cols-2 gap-3 mt-auto">
+                                                        <div
+                                                            class="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
+                                                            <span
+                                                                class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Stock</span>
+                                                            <span class="text-2xl font-black text-emerald-700">
+                                                                <%= (material.availableQty || 0).toFixed(2) %>
+                                                            </span>
+                                                            <span
+                                                                class="text-[10px] font-bold text-gray-400 uppercase ml-1">
+                                                                <%= material.uom %>
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
+                                                            <span
+                                                                class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
+                                                            <span class="text-2xl font-black text-amber-700">
+                                                                <%= (material.bufferQty || 0).toFixed(2) %>
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div
-                                                        class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
-                                                        <span
-                                                            class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
-                                                        <span class="text-2xl font-black text-amber-700">
-                                                            <%= (material.bufferQty || 0).toFixed(2) %>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <% if (isLow) { %>
-                                                    <div class="mt-3 flex items-center gap-2 text-amber-600">
-                                                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                                                        <span
-                                                            class="text-[10px] font-black uppercase tracking-widest">Low
-                                                            Stock Alert</span>
-                                                    </div>
-                                                    <% } %>
+                                                    <% if (isLow) { %>
+                                                        <div class="mt-3 flex items-center gap-2 text-amber-600">
+                                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                                            <span
+                                                                class="text-[10px] font-black uppercase tracking-widest">Low
+                                                                Stock Alert</span>
+                                                        </div>
+                                                        <% } %>
                                     </div>
                                 </div>
                                 <% }); %>
+                    </div>
+
+                    <!-- Desktop View (Table) -->
+                    <div id="tableView"
+                        class="hidden md:block overflow-x-auto shadow-around-lg rounded-3xl bg-white/95 backdrop-blur-md border border-gray-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 border-b border-gray-100">
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Material Name</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Specification</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
+                                        Available Qty</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
+                                        Buffer Qty</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
+                                        Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% rawMaterials.forEach(function(material) { %>
+                                    <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
+                                        <tr class="material-row hover:bg-gray-50/50 transition-colors group">
+                                            <td class="px-8 py-6">
+                                                <p class="text-sm font-black text-gray-900 uppercase tracking-tight">
+                                                    <%= material.productName %>
+                                                </p>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <p
+                                                    class="spec-text-td text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+                                                    <%= material.specification || 'N/A' %>
+                                                </p>
+                                            </td>
+                                            <td class="px-8 py-6 text-right">
+                                                <div class="flex items-baseline justify-end gap-1">
+                                                    <span class="text-lg font-black text-gray-900">
+                                                        <%= (material.availableQty || 0).toFixed(2) %>
+                                                    </span>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                                        <%= material.uom %>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-6 text-right">
+                                                <span class="text-lg font-black text-gray-500">
+                                                    <%= (material.bufferQty || 0).toFixed(2) %>
+                                                </span>
+                                            </td>
+                                            <td class="px-8 py-6 text-center">
+                                                <% if (isLow) { %>
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                                        Low Stock
+                                                    </span>
+                                                    <% } else { %>
+                                                        <span
+                                                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                                                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                            Healthy
+                                                        </span>
+                                                        <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- No Results Message -->
+                    <div id="noResults"
+                        class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Materials</h3>
+                        <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
                     </div>
                     <% } %>
         </div>
@@ -81,5 +179,67 @@
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                        const searchInput = document.getElementById('rmSearch');
+                        const noResults = document.getElementById('noResults');
+                        const cardElements = document.querySelectorAll('.material-card');
+                        const rowElements = document.querySelectorAll('.material-row');
+
+                        if (searchInput) {
+                            searchInput.addEventListener('input', function (e) {
+                                const searchTerm = e.target.value.toLowerCase().trim();
+                                let visibleCount = 0;
+
+                                // Filter Cards (Mobile)
+                                cardElements.forEach(card => {
+                                    const name = card.querySelector('h5').textContent.toLowerCase();
+                                    const spec = card.querySelector('.spec-text').textContent.toLowerCase();
+                                    const matches = name.includes(searchTerm) || spec.includes(searchTerm);
+                                    card.style.display = matches ? '' : 'none';
+                                    if (matches) visibleCount++;
+                                });
+
+                                // Filter Rows (Desktop)
+                                rowElements.forEach(row => {
+                                    const name = row.querySelector('td p').textContent.toLowerCase();
+                                    const spec = row.querySelector('.spec-text-td').textContent.toLowerCase();
+                                    const matches = name.includes(searchTerm) || spec.includes(searchTerm);
+                                    row.style.display = matches ? '' : 'none';
+                                    if (matches && window.innerWidth >= 768) visibleCount++; // Only count table rows if in desktop view
+                                });
+
+                                // Dynamic view toggle based on count
+                                const isDesktop = window.innerWidth >= 768;
+                                const cardsView = document.getElementById('cardsView');
+                                const tableView = document.getElementById('tableView');
+
+                                if (visibleCount === 0 && searchTerm !== '') {
+                                    if (cardsView) cardsView.classList.add('hidden');
+                                    if (tableView) tableView.classList.add('hidden');
+                                    noResults.classList.remove('hidden');
+                                } else {
+                                    if (isDesktop) {
+                                        if (tableView) tableView.classList.remove('hidden');
+                                        if (cardsView) cardsView.classList.add('hidden');
+                                    } else {
+                                        if (cardsView) cardsView.classList.remove('hidden');
+                                        if (tableView) tableView.classList.add('hidden');
+                                    }
+                                    noResults.classList.add('hidden');
+                                }
+                            });
+                        }
+
+                        // Blue focus border for search input
+                        if (searchInput) {
+                            searchInput.addEventListener('focus', function () {
+                                this.style.borderColor = '#6366f1';
+                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                            });
+                            searchInput.addEventListener('blur', function () {
+                                this.style.borderColor = '';
+                                this.style.boxShadow = '';
+                            });
+                        }
                     });
                 </script>

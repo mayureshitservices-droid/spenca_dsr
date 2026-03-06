@@ -15,6 +15,19 @@
                 </div>
             </div>
 
+            <!-- Search Bar -->
+            <div class="mb-8">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <i data-lucide="search"
+                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                    </div>
+                    <input type="text" id="fgSearch" placeholder="Search by product name or packaging..."
+                        style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                        class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                </div>
+            </div>
+
             <% if (!locals.finishedGoods || finishedGoods.length===0) { %>
                 <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                     <i data-lucide="package" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -23,11 +36,12 @@
                         system.</p>
                 </div>
                 <% } else { %>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <!-- Mobile View (Cards) -->
+                    <div id="fgCardsView" class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
                         <% finishedGoods.forEach(function(product) { %>
                             <% const isLow=(product.availableQty || 0) < (product.bufferQty || 0); %>
                                 <div
-                                    class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-indigo-500' %>">
+                                    class="fg-card bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-indigo-500' %>">
                                     <div class="p-6 flex flex-col flex-grow">
                                         <div class="flex justify-between items-start mb-4">
                                             <div class="flex-1">
@@ -74,6 +88,87 @@
                                 </div>
                                 <% }); %>
                     </div>
+
+                    <!-- Desktop View (Table) -->
+                    <div id="fgTableView"
+                        class="hidden md:block overflow-x-auto shadow-around-lg rounded-3xl bg-white/95 backdrop-blur-md border border-gray-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 border-b border-gray-100">
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Product Name</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Packaging</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
+                                        Available Boxes</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
+                                        Buffer Boxes</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
+                                        Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% finishedGoods.forEach(function(product) { %>
+                                    <% const isLow=(product.availableQty || 0) < (product.bufferQty || 0); %>
+                                        <tr class="fg-row hover:bg-gray-50/50 transition-colors group">
+                                            <td class="px-8 py-6">
+                                                <p class="text-sm font-black text-gray-900 uppercase tracking-tight">
+                                                    <%= product.productName %>
+                                                </p>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <p
+                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+                                                    <%= product.packaging %>
+                                                </p>
+                                            </td>
+                                            <td class="px-8 py-6 text-right">
+                                                <div class="flex items-baseline justify-end gap-1">
+                                                    <span class="text-lg font-black text-gray-900">
+                                                        <%= (product.availableQty || 0).toFixed(0) %>
+                                                    </span>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                                        <%= product.uom %>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-8 py-6 text-right">
+                                                <span class="text-lg font-black text-gray-500">
+                                                    <%= (product.bufferQty || 0).toFixed(0) %>
+                                                </span>
+                                            </td>
+                                            <td class="px-8 py-6 text-center">
+                                                <% if (isLow) { %>
+                                                    <span
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                                        Low Stock
+                                                    </span>
+                                                    <% } else { %>
+                                                        <span
+                                                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest border border-indigo-100">
+                                                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                            Healthy
+                                                        </span>
+                                                        <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- No Results Message -->
+                    <div id="fgNoResults"
+                        class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Products</h3>
+                        <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                    </div>
                     <% } %>
         </div>
 
@@ -83,5 +178,67 @@
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                        const searchInput = document.getElementById('fgSearch');
+                        const noResults = document.getElementById('fgNoResults');
+                        const cardElements = document.querySelectorAll('.fg-card');
+                        const rowElements = document.querySelectorAll('.fg-row');
+
+                        if (searchInput) {
+                            // Blue focus border
+                            searchInput.addEventListener('focus', function () {
+                                this.style.borderColor = '#6366f1';
+                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                            });
+                            searchInput.addEventListener('blur', function () {
+                                this.style.borderColor = '';
+                                this.style.boxShadow = '';
+                            });
+
+                            searchInput.addEventListener('input', function (e) {
+                                const searchTerm = e.target.value.toLowerCase().trim();
+                                let visibleCount = 0;
+
+                                // Filter Cards (Mobile)
+                                cardElements.forEach(card => {
+                                    const productName = card.querySelector('h5')?.textContent.toLowerCase() || '';
+                                    const packaging = card.querySelector('p.text-indigo-600')?.textContent.toLowerCase() || '';
+
+                                    const matches = productName.includes(searchTerm) || packaging.includes(searchTerm);
+                                    card.style.display = matches ? '' : 'none';
+                                    if (matches) visibleCount++;
+                                });
+
+                                // Filter Rows (Desktop)
+                                rowElements.forEach(row => {
+                                    const cells = row.querySelectorAll('td');
+                                    const productName = cells[0]?.textContent.toLowerCase() || '';
+                                    const packaging = cells[1]?.textContent.toLowerCase() || '';
+
+                                    const matches = productName.includes(searchTerm) || packaging.includes(searchTerm);
+                                    row.style.display = matches ? '' : 'none';
+                                    if (matches && window.innerWidth >= 768) visibleCount++;
+                                });
+
+                                const isDesktop = window.innerWidth >= 768;
+                                const cardsView = document.getElementById('fgCardsView');
+                                const tableView = document.getElementById('fgTableView');
+
+                                if (visibleCount === 0 && searchTerm !== '') {
+                                    if (cardsView) cardsView.classList.add('hidden');
+                                    if (tableView) tableView.classList.add('hidden');
+                                    noResults.classList.remove('hidden');
+                                } else {
+                                    if (isDesktop) {
+                                        if (tableView) tableView.classList.remove('hidden');
+                                        if (cardsView) cardsView.classList.add('hidden');
+                                    } else {
+                                        if (cardsView) cardsView.classList.remove('hidden');
+                                        if (tableView) tableView.classList.add('hidden');
+                                    }
+                                    noResults.classList.add('hidden');
+                                }
+                            });
+                        }
                     });
                 </script>

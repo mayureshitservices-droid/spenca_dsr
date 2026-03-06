@@ -90,10 +90,9 @@
                                                         </div>
                                                     </div>
 
-                                                    <!-- Quantity -->
                                                     <div class="md:col-span-5 lg:col-span-3 space-y-2">
                                                         <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Qty
+                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes
                                                             *</label>
                                                         <input type="number" step="0.01" id="quantity_1" required
                                                             class="input-field shadow-sm item-quantity" placeholder="0">
@@ -231,15 +230,28 @@
                             input: productInput,
                             suggestions: productSuggestions,
                             url: '/api/factory-incharge/products/search-fg',
-                            formatResult: (item) => `
-                        <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-black text-gray-900 uppercase text-xs">${item.productName}</span>
-                                <span class="text-[10px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md uppercase tracking-widest">${item.packaging || ''}</span>
-                            </div>
-                            <div class="text-[10px] font-bold text-gray-400 uppercase">Stock: ${(item.availableQty || 0).toFixed(0)} ${item.uom || ''}</div>
-                        </div>
-                    `,
+                            formatResult: (item) => {
+                                const brandingTag = item.isBranded && item.brandedCustomerId
+                                    ? `<span class="text-[9px] font-black bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md uppercase tracking-widest border border-purple-100/50">Branded: ${item.brandedCustomerId.customerName}</span>`
+                                    : `<span class="text-[9px] font-black bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md uppercase tracking-widest border border-emerald-100/50">Regular Product</span>`;
+
+                                return `
+                                    <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="flex flex-col gap-1">
+                                                <span class="font-black text-gray-900 uppercase text-xs">${item.productName}</span>
+                                                ${brandingTag}
+                                            </div>
+                                            <div class="flex flex-col items-end gap-1">
+                                                <span class="text-[10px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md uppercase tracking-widest">${item.packaging || '1'} nos/box</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Curr. Stock: ${(item.availableQty || 0).toFixed(0)} Boxes</div>
+                                        </div>
+                                    </div>
+                                `;
+                            },
                             onSelect: (item) => {
                                 document.getElementById(`productInput_${id}`).value = item.productName;
                                 document.getElementById(`selectedProductId_${id}`).value = item._id;
@@ -269,7 +281,7 @@
                         </div>
 
                         <div class="md:col-span-5 lg:col-span-3 space-y-2">
-                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Qty *</label>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes *</label>
                             <input type="number" step="0.01" id="quantity_${rowCount}" required
                                 class="input-field shadow-sm item-quantity" placeholder="0">
                         </div>
@@ -334,7 +346,7 @@
                                     row.classList.add('border-red-200', 'bg-red-50/30');
                                 } else if (!quantity || parseFloat(quantity) <= 0) {
                                     isValid = false;
-                                    errorMsg = 'Please enter a valid quantity.';
+                                    errorMsg = 'Please enter a valid number of boxes.';
                                     row.classList.add('border-red-200', 'bg-red-50/30');
                                 } else if (!batchNo || batchNo.trim() === '') {
                                     isValid = false;

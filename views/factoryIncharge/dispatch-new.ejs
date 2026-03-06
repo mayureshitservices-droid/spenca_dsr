@@ -95,7 +95,7 @@
                                                         <!-- Quantity -->
                                                         <div class="md:col-span-3 space-y-2">
                                                             <label
-                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Qty
+                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes
                                                                 *</label>
                                                             <input type="number" step="0.01" id="quantity_1" required
                                                                 class="input-field shadow-sm item-quantity"
@@ -258,7 +258,7 @@
                                     </div>
                                 </div>
                                 <div class="md:col-span-3 space-y-2">
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Qty *</label>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes *</label>
                                     <input type="number" step="0.01" id="quantity_${rowCount}" required
                                         class="input-field shadow-sm item-quantity" placeholder="0.00">
                                 </div>
@@ -292,13 +292,24 @@
                             suggestions: document.getElementById(`productSuggestions_${id}`),
                             hiddenInput: document.getElementById(`selectedProductId_${id}`),
                             url: '/api/finished-goods/search',
-                            formatResult: (item) => `
-                                <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
-                                    <div class="font-black text-gray-900 uppercase text-xs">${item.productName}</div>
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">${item.packaging} | ${item.uom}</div>
-                                    <div class="text-[10px] font-black text-emerald-600 uppercase mt-1">Stock: ${item.availableQty || 0} ${item.uom}</div>
-                                </div>
-                            `,
+                            formatResult: (item) => {
+                                const brandingTag = item.isBranded && item.brandedCustomerId
+                                    ? `<span class="text-[9px] font-bold bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded uppercase tracking-tighter">Branded: ${item.brandedCustomerId.customerName}</span>`
+                                    : `<span class="text-[9px] font-bold bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded uppercase tracking-tighter">Regular</span>`;
+
+                                return `
+                                    <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <div class="flex flex-col gap-0.5">
+                                                <div class="font-black text-gray-900 uppercase text-xs">${item.productName}</div>
+                                                ${brandingTag}
+                                            </div>
+                                            <div class="text-[10px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded uppercase tracking-widest">${item.packaging || '1'} nos/box</div>
+                                        </div>
+                                        <div class="text-[10px] font-black text-emerald-600 uppercase mt-1">Stock: ${(item.availableQty || 0).toFixed(0)} Boxes</div>
+                                    </div>
+                                `;
+                            },
                             onSelect: (item) => {
                                 document.getElementById(`productInput_${id}`).value = item.productName;
                             }

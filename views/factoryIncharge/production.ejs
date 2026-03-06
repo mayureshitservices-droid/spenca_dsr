@@ -17,6 +17,19 @@
                 </a>
             </div>
 
+            <!-- Search Bar -->
+            <div class="mb-8">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <i data-lucide="search"
+                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                    </div>
+                    <input type="text" id="prodSearch" placeholder="Search by product name or batch number..."
+                        style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                        class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                </div>
+            </div>
+
             <!-- Transactions Grid -->
             <% if (productionRecords.length===0) { %>
                 <div
@@ -35,10 +48,11 @@
                     </div>
                 </div>
                 <% } else { %>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Mobile View (Cards) -->
+                    <div id="prodCardsView" class="grid grid-cols-1 md:hidden gap-6">
                         <% productionRecords.forEach(record=> { %>
                             <div
-                                class="glass-card p-6 flex flex-col group transition-all hover:shadow-2xl hover:-translate-y-2">
+                                class="prod-card glass-card p-6 flex flex-col group transition-all hover:shadow-2xl hover:-translate-y-2">
                                 <!-- Top Meta: Date & Shift -->
                                 <div class="mb-6 pb-4 border-b border-gray-50 flex justify-between items-center">
                                     <div class="flex flex-col">
@@ -103,8 +117,158 @@
                             </div>
                             <% }) %>
                     </div>
+
+                    <!-- Desktop View (Table) -->
+                    <div id="prodTableView"
+                        class="hidden md:block overflow-x-auto shadow-around-lg rounded-3xl bg-white/95 backdrop-blur-md border border-gray-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 border-b border-gray-100">
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Date & Shift</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Batch #</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Finished Good</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
+                                        Quantity</th>
+                                    <th
+                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                        Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% productionRecords.forEach(record=> { %>
+                                    <tr class="prod-row hover:bg-gray-50/50 transition-colors group">
+                                        <td class="px-8 py-6">
+                                            <p class="text-sm font-black text-gray-900 leading-tight">
+                                                <%= new Date(record.createdAt).toLocaleDateString('en-IN', {
+                                                    day: '2-digit' , month: 'short' , year: 'numeric' }) %>
+                                            </p>
+                                            <span
+                                                class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
+                                                <%= record.shift %> SHIFT
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <span
+                                                class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-full uppercase tracking-widest border border-indigo-100">
+                                                <%= record.batchNo %>
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <p class="text-sm font-black text-gray-900 uppercase tracking-tight">
+                                                <%= record.productName %>
+                                            </p>
+                                            <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">
+                                                <%= record.productId ? record.productId.packaging : '' %>
+                                            </p>
+                                        </td>
+                                        <td class="px-8 py-6 text-right">
+                                            <div class="flex items-baseline justify-end gap-1">
+                                                <span class="text-lg font-black text-gray-900">
+                                                    <%= record.quantity %>
+                                                </span>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                                    <%= record.productId ? record.productId.uom : 'Units' %>
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6">
+                                            <% if (record.remarks) { %>
+                                                <p class="text-[10px] font-medium text-gray-500 max-w-xs truncate"
+                                                    title="<%= record.remarks %>">
+                                                    <%= record.remarks %>
+                                                </p>
+                                                <% } else { %>
+                                                    <span class="text-gray-300 text-[10px] italic">No remarks</span>
+                                                    <% } %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- No Results Message -->
+                    <div id="prodNoResults"
+                        class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Records</h3>
+                        <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                    </div>
                     <% } %>
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
             <%- include('../partials/footer') %>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                        const searchInput = document.getElementById('prodSearch');
+                        const noResults = document.getElementById('prodNoResults');
+                        const cardElements = document.querySelectorAll('.prod-card');
+                        const rowElements = document.querySelectorAll('.prod-row');
+
+                        if (searchInput) {
+                            // Blue focus border
+                            searchInput.addEventListener('focus', function () {
+                                this.style.borderColor = '#6366f1';
+                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                            });
+                            searchInput.addEventListener('blur', function () {
+                                this.style.borderColor = '';
+                                this.style.boxShadow = '';
+                            });
+
+                            searchInput.addEventListener('input', function (e) {
+                                const searchTerm = e.target.value.toLowerCase().trim();
+                                let visibleCount = 0;
+
+                                // Filter Cards (Mobile)
+                                cardElements.forEach(card => {
+                                    const productName = card.querySelector('p.text-lg')?.textContent.toLowerCase() || '';
+                                    const batchEl = card.querySelector('span.px-3.py-1');
+                                    const batch = batchEl ? batchEl.textContent.toLowerCase() : '';
+                                    const matches = productName.includes(searchTerm) || batch.includes(searchTerm);
+                                    card.style.display = matches ? '' : 'none';
+                                    if (matches) visibleCount++;
+                                });
+
+                                // Filter Rows (Desktop)
+                                rowElements.forEach(row => {
+                                    const cells = row.querySelectorAll('td');
+                                    const productName = cells[2]?.querySelector('p')?.textContent.toLowerCase() || '';
+                                    const batch = cells[1]?.querySelector('span')?.textContent.toLowerCase() || '';
+                                    const matches = productName.includes(searchTerm) || batch.includes(searchTerm);
+                                    row.style.display = matches ? '' : 'none';
+                                    if (matches && window.innerWidth >= 768) visibleCount++;
+                                });
+
+                                const isDesktop = window.innerWidth >= 768;
+                                const cardsView = document.getElementById('prodCardsView');
+                                const tableView = document.getElementById('prodTableView');
+
+                                if (visibleCount === 0 && searchTerm !== '') {
+                                    if (cardsView) cardsView.classList.add('hidden');
+                                    if (tableView) tableView.classList.add('hidden');
+                                    noResults.classList.remove('hidden');
+                                } else {
+                                    if (isDesktop) {
+                                        if (tableView) tableView.classList.remove('hidden');
+                                        if (cardsView) cardsView.classList.add('hidden');
+                                    } else {
+                                        if (cardsView) cardsView.classList.remove('hidden');
+                                        if (tableView) tableView.classList.add('hidden');
+                                    }
+                                    noResults.classList.add('hidden');
+                                }
+                            });
+                        }
+                    });
+                </script>
