@@ -370,6 +370,9 @@
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Address</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
+                                                Type</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
@@ -386,6 +389,12 @@
                                                 </td>
                                                 <td class="px-6 py-4 text-sm font-medium text-gray-600">
                                                     <%= customer.address || '-' %>
+                                                </td>
+                                                <td class="px-6 py-4 text-center">
+                                                    <span
+                                                        class="px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest <%= customer.customerType === 'Branded' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700' %>">
+                                                        <%= customer.customerType || 'Regular' %>
+                                                    </span>
                                                 </td>
                                             </tr>
                                             <% }); %>
@@ -785,6 +794,16 @@
                                     Terms</label>
                                 <input type="text" name="paymentTerms" class="input-field"
                                     placeholder="e.g., 30 Days Net">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer
+                                    Type</label>
+                                <select name="customerType" class="input-field">
+                                    <option value="Regular">Regular</option>
+                                    <option value="Branded">Branded</option>
+                                </select>
                             </div>
 
                             <div class="space-y-2">

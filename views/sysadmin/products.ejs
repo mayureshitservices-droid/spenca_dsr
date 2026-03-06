@@ -112,85 +112,101 @@
                                                             </div>
                                                             <% } %>
 
-                                                                <div class="mb-4 space-y-2">
+                                                                <% if (p.isBranded && p.brandedCustomerId &&
+                                                                    p.brandedCustomerId.customerName) { %>
                                                                     <div
-                                                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 pl-1">
-                                                                        Required Materials (BOM)</div>
-                                                                    <div
-                                                                        class="bg-gray-50/50 rounded-2xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
-                                                                        <% if (p.components && p.components.length> 0) {
-                                                                            %>
-                                                                            <% p.components.slice(0,
-                                                                                4).forEach(function(comp) { %>
-                                                                                <div
-                                                                                    class="flex items-center justify-between p-2.5">
-                                                                                    <div
-                                                                                        class="flex items-center gap-2">
-                                                                                        <div
-                                                                                            class="w-2 h-2 rounded-full bg-indigo-400">
-                                                                                        </div>
-                                                                                        <span
-                                                                                            class="text-xs font-bold text-gray-700 line-clamp-1">
-                                                                                            <%= comp.productName %>
-                                                                                        </span>
-                                                                                    </div>
-                                                                                    <div
-                                                                                        class="flex items-baseline gap-1">
-                                                                                        <span
-                                                                                            class="text-xs font-black text-indigo-600">
-                                                                                            <%= comp.quantity %>
-                                                                                        </span>
-                                                                                        <span
-                                                                                            class="text-[9px] font-bold text-gray-400 uppercase">
-                                                                                            <%= comp.uom %>
-                                                                                        </span>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <% }); %>
-                                                                                    <% if (p.components.length> 4) { %>
-                                                                                        <div
-                                                                                            class="p-2 text-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50/30">
-                                                                                            + <%= p.components.length -
-                                                                                                4 %> More Materials
-                                                                                        </div>
-                                                                                        <% } %>
-                                                                                            <% } else { %>
-                                                                                                <div
-                                                                                                    class="p-6 text-center">
-                                                                                                    <i data-lucide="info"
-                                                                                                        class="w-5 h-5 text-gray-300 mx-auto mb-1 opacity-50"></i>
-                                                                                                    <p
-                                                                                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                                                                        No BOM Assigned
-                                                                                                    </p>
-                                                                                                </div>
-                                                                                                <% } %>
+                                                                        class="flex items-center gap-2 text-[10px] font-black text-purple-600 mb-2 uppercase tracking-widest">
+                                                                        <i data-lucide="user-check"
+                                                                            class="w-3.5 h-3.5"></i>
+                                                                        Branded: <%= p.brandedCustomerId.customerName %>
                                                                     </div>
-                                                                </div>
-
-                                                                <% if (p.remarks) { %>
-                                                                    <p
-                                                                        class="text-xs font-medium text-gray-400 mb-6 italic line-clamp-1">
-                                                                        "<%= p.remarks %>"</p>
                                                                     <% } %>
 
-                                                                        <div
-                                                                            class="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
-                                                                            <button
-                                                                                onclick="deleteProduct('<%= p._id %>')"
-                                                                                class="inline-flex items-center gap-2 text-sm font-black text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest px-2 py-1 hover:bg-red-50 rounded-lg">
-                                                                                <i data-lucide="trash-2"
-                                                                                    class="w-4 h-4"></i>
-                                                                                Delete
-                                                                            </button>
-                                                                            <button
-                                                                                onclick="openEditBOM('<%= p._id %>')"
-                                                                                class="inline-flex items-center gap-2 text-sm font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-widest px-2 py-1 hover:bg-indigo-50 rounded-lg">
-                                                                                <i data-lucide="settings"
-                                                                                    class="w-4 h-4"></i>
-                                                                                Edit BOM
-                                                                            </button>
+                                                                        <div class="mb-4 space-y-2">
+                                                                            <div
+                                                                                class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 pl-1">
+                                                                                Required Materials (BOM)</div>
+                                                                            <div
+                                                                                class="bg-gray-50/50 rounded-2xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+                                                                                <% if (p.components &&
+                                                                                    p.components.length> 0) {
+                                                                                    %>
+                                                                                    <% p.components.slice(0,
+                                                                                        4).forEach(function(comp) { %>
+                                                                                        <div
+                                                                                            class="flex items-center justify-between p-2.5">
+                                                                                            <div
+                                                                                                class="flex items-center gap-2">
+                                                                                                <div
+                                                                                                    class="w-2 h-2 rounded-full bg-indigo-400">
+                                                                                                </div>
+                                                                                                <span
+                                                                                                    class="text-xs font-bold text-gray-700 line-clamp-1">
+                                                                                                    <%= comp.productName
+                                                                                                        %>
+                                                                                                </span>
+                                                                                            </div>
+                                                                                            <div
+                                                                                                class="flex items-baseline gap-1">
+                                                                                                <span
+                                                                                                    class="text-xs font-black text-indigo-600">
+                                                                                                    <%= comp.quantity %>
+                                                                                                </span>
+                                                                                                <span
+                                                                                                    class="text-[9px] font-bold text-gray-400 uppercase">
+                                                                                                    <%= comp.uom %>
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <% }); %>
+                                                                                            <% if (p.components.length>
+                                                                                                4) { %>
+                                                                                                <div
+                                                                                                    class="p-2 text-center text-[9px] font-black text-gray-400 uppercase tracking-widest bg-gray-50/30">
+                                                                                                    + <%=
+                                                                                                        p.components.length
+                                                                                                        - 4 %> More
+                                                                                                        Materials
+                                                                                                </div>
+                                                                                                <% } %>
+                                                                                                    <% } else { %>
+                                                                                                        <div
+                                                                                                            class="p-6 text-center">
+                                                                                                            <i data-lucide="info"
+                                                                                                                class="w-5 h-5 text-gray-300 mx-auto mb-1 opacity-50"></i>
+                                                                                                            <p
+                                                                                                                class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                                                                                No BOM
+                                                                                                                Assigned
+                                                                                                            </p>
+                                                                                                        </div>
+                                                                                                        <% } %>
+                                                                            </div>
                                                                         </div>
+
+                                                                        <% if (p.remarks) { %>
+                                                                            <p
+                                                                                class="text-xs font-medium text-gray-400 mb-6 italic line-clamp-1">
+                                                                                "<%= p.remarks %>"</p>
+                                                                            <% } %>
+
+                                                                                <div
+                                                                                    class="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
+                                                                                    <button
+                                                                                        onclick="deleteProduct('<%= p._id %>')"
+                                                                                        class="inline-flex items-center gap-2 text-sm font-black text-red-500 hover:text-red-700 transition-colors uppercase tracking-widest px-2 py-1 hover:bg-red-50 rounded-lg">
+                                                                                        <i data-lucide="trash-2"
+                                                                                            class="w-4 h-4"></i>
+                                                                                        Delete
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onclick="openEditBOM('<%= p._id %>')"
+                                                                                        class="inline-flex items-center gap-2 text-sm font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-widest px-2 py-1 hover:bg-indigo-50 rounded-lg">
+                                                                                        <i data-lucide="settings"
+                                                                                            class="w-4 h-4"></i>
+                                                                                        Edit BOM
+                                                                                    </button>
+                                                                                </div>
                                                     </div>
                                                 </div>
                                                 <% }); %>
@@ -235,8 +251,15 @@
                                                                 class="text-xl font-black text-gray-900 leading-tight tracking-tight">
                                                                 <%= p.productName %>
                                                             </h5>
-                                                            <span
-                                                                class="text-[10px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg uppercase">Material</span>
+                                                            <div class="flex flex-col items-end gap-2">
+                                                                <span
+                                                                    class="text-[10px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg uppercase">Material</span>
+                                                                <% if (p.photo) { %>
+                                                                    <img src="<%= p.photo %>"
+                                                                        class="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-100"
+                                                                        alt="<%= p.productName %>">
+                                                                    <% } %>
+                                                            </div>
                                                         </div>
 
                                                         <% if (p.specification) { %>
@@ -372,6 +395,38 @@
                                     class="w-full px-5 py-2.5 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl font-bold text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-indigo-50 file:text-indigo-700">
                             </div>
 
+                            <div
+                                class="col-span-1 md:col-span-2 space-y-4 bg-indigo-50/30 p-6 rounded-2xl border border-indigo-100/50">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-black text-gray-900 tracking-tight">Is this a
+                                        Branded Product?</label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="isBranded" value="true" class="sr-only peer"
+                                            onchange="toggleBranding(this)">
+                                        <div
+                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                        </div>
+                                    </label>
+                                </div>
+                                <div id="brandingCustomerDiv"
+                                    class="hidden animate-in slide-in-from-top-2 duration-200 space-y-2">
+                                    <label
+                                        class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest">Select
+                                        Branded Customer</label>
+                                    <select name="brandedCustomerId" class="input-field">
+                                        <option value="">-- Link to Customer --</option>
+                                        <% if (typeof brandedCustomers !=='undefined' && brandedCustomers.length> 0) {
+                                            %>
+                                            <% brandedCustomers.forEach(function(c) { %>
+                                                <option value="<%= c._id %>">
+                                                    <%= c.customerName %>
+                                                </option>
+                                                <% }); %>
+                                                    <% } %>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="col-span-1 md:col-span-2 space-y-2">
                                 <label
                                     class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Additional
@@ -456,6 +511,13 @@
                                     class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Buffer
                                     Stock</label>
                                 <input type="number" step="0.01" name="bufferQty" class="input-field" value="0.00">
+                            </div>
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Visual
+                                    Identity (Photo)</label>
+                                <input type="file" name="photo" accept="image/*"
+                                    class="w-full px-5 py-2.5 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl font-bold text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-emerald-50 file:text-emerald-700">
                             </div>
                         </div>
 
@@ -593,6 +655,18 @@
                         modal.classList.remove('flex');
                         modal.classList.add('hidden');
                         document.body.style.overflow = '';
+                        // Reset branding visibility
+                        document.getElementById('brandingCustomerDiv').classList.add('hidden');
+                        document.querySelector('input[name="isBranded"]').checked = false;
+                    }
+
+                    function toggleBranding(checkbox) {
+                        const div = document.getElementById('brandingCustomerDiv');
+                        if (checkbox.checked) {
+                            div.classList.remove('hidden');
+                        } else {
+                            div.classList.add('hidden');
+                        }
                     }
 
                     function openAddBOMModal() {

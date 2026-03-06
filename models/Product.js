@@ -31,7 +31,14 @@ const productSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-
+    isBranded: {
+        type: Boolean,
+        default: false
+    },
+    brandedCustomerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Customer'
+    },
     photo: {
         type: String, // File path
         default: null

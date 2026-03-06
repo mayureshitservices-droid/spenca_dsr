@@ -400,7 +400,7 @@ const createSupplier = async (req, res) => {
 // POST /headoffice/customers/create
 const createCustomer = async (req, res) => {
     try {
-        const { customerName, address, mobileNo, category, gstNo, paymentTerms, status } = req.body;
+        const { customerName, address, mobileNo, category, gstNo, paymentTerms, status, customerType } = req.body;
 
         const existingCustomer = await Customer.findOne({ customerName });
         if (existingCustomer) {
@@ -414,7 +414,8 @@ const createCustomer = async (req, res) => {
             category,
             gstNo,
             paymentTerms,
-            status
+            status,
+            customerType
         });
 
         await customer.save();

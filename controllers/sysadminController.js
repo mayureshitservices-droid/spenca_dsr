@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Product = require('../models/Product');
+const Customer = require('../models/Customer');
 const multer = require('multer');
 const path = require('path');
 
@@ -111,17 +112,21 @@ const toggleUserStatus = async (req, res) => {
 // GET /sysadmin/products
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find().sort({ createdAt: -1 });
+        const products = await Product.find().sort({ createdAt: -1 }).populate('brandedCustomerId');
+        const brandedCustomers = await Customer.find({ customerType: 'Branded' }).sort({ customerName: 1 });
 
         // Segregate products for the view - default to Finished Good if not set
         const finishedGoods = products.filter(p => !p.productType || p.productType === 'Finished Good');
         const rawMaterials = products.filter(p => p.productType === 'Raw Material');
+
+        console.log(`[Diagnostic] Found ${products.length} products and ${brandedCustomers.length} branded customers`);
 
         res.render('sysadmin/products', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             finishedGoods,
             rawMaterials,
+            brandedCustomers,
             success: req.query.success,
             error: req.query.error
         });
@@ -134,7 +139,7 @@ const getProducts = async (req, res) => {
 // POST /sysadmin/products/create
 const createProduct = async (req, res) => {
     try {
-        const { productName, productType, packaging, specification, uom, availableQty, bufferQty, remarks } = req.body;
+        const { productName, productType, packaging, specification, uom, availableQty, bufferQty, remarks, isBranded, brandedCustomerId } = req.body;
 
         const newProduct = new Product({
             productName,
@@ -145,7 +150,9 @@ const createProduct = async (req, res) => {
             availableQty: availableQty ? parseFloat(availableQty) : 0,
             bufferQty: bufferQty ? parseFloat(bufferQty) : 0,
             photo: req.file ? '/uploads/' + req.file.filename : null,
-            remarks
+            remarks,
+            isBranded: isBranded === 'true',
+            brandedCustomerId: (isBranded === 'true' && brandedCustomerId) ? brandedCustomerId : null
         });
 
         await newProduct.save();

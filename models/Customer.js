@@ -33,6 +33,11 @@ const customerSchema = new mongoose.Schema({
         type: String,
         enum: ['Active', 'Inactive'],
         default: 'Active'
+    },
+    customerType: {
+        type: String,
+        enum: ['Regular', 'Branded'],
+        default: 'Regular'
     }
 }, {
     timestamps: true
