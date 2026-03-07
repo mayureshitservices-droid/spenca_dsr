@@ -15,6 +15,19 @@
                 </div>
             </div>
 
+            <!-- Search Bar -->
+            <div class="mb-8">
+                <div class="relative group">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <i data-lucide="search"
+                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                    </div>
+                    <input type="text" id="rmSearch" placeholder="Search by material name or specification..."
+                        style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                        class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                </div>
+            </div>
+
             <% if (!locals.rawMaterials || rawMaterials.length===0) { %>
                 <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                     <i data-lucide="box" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -22,7 +35,7 @@
                     <p class="text-gray-500 font-medium">No raw materials are currently assigned to the factory.</p>
                 </div>
                 <% } else { %>
-                    <div
+                    <div id="tableView"
                         class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
@@ -48,7 +61,7 @@
                                 <tbody class="divide-y divide-gray-100">
                                     <% rawMaterials.forEach(function(material) { %>
                                         <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
-                                            <tr class="hover:bg-gray-50/80 transition-colors group">
+                                            <tr class="material-row hover:bg-gray-50/80 transition-colors group">
                                                 <td class="px-6 py-4">
                                                     <div
                                                         class="text-sm font-black text-gray-900 group-hover:text-emerald-600 transition-colors uppercase">
@@ -57,7 +70,7 @@
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <span
-                                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                        class="spec-text text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                                         <%= material.specification || '-' %>
                                                     </span>
                                                 </td>
@@ -94,6 +107,14 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- No Results Message -->
+                    <div id="noResults"
+                        class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                        <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Materials</h3>
+                        <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                    </div>
                     <% } %>
         </div>
 
@@ -103,5 +124,45 @@
                 <script>
                     document.addEventListener('DOMContentLoaded', function () {
                         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                        const searchInput = document.getElementById('rmSearch');
+                        const noResults = document.getElementById('noResults');
+                        const rowElements = document.querySelectorAll('.material-row');
+                        const tableView = document.getElementById('tableView');
+
+                        if (searchInput) {
+                            searchInput.addEventListener('input', function (e) {
+                                const searchTerm = e.target.value.toLowerCase().trim();
+                                let visibleCount = 0;
+
+                                // Filter Rows
+                                rowElements.forEach(row => {
+                                    const name = row.querySelector('td:first-child').textContent.toLowerCase();
+                                    const spec = row.querySelector('.spec-text').textContent.toLowerCase();
+                                    const matches = name.includes(searchTerm) || spec.includes(searchTerm);
+                                    row.style.display = matches ? '' : 'none';
+                                    if (matches) visibleCount++;
+                                });
+
+                                // Handle Visibility
+                                if (visibleCount === 0 && searchTerm !== '') {
+                                    if (tableView) tableView.classList.add('hidden');
+                                    noResults.classList.remove('hidden');
+                                } else {
+                                    if (tableView) tableView.classList.remove('hidden');
+                                    noResults.classList.add('hidden');
+                                }
+                            });
+
+                            // Blue focus border for search input
+                            searchInput.addEventListener('focus', function () {
+                                this.style.borderColor = '#6366f1';
+                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                            });
+                            searchInput.addEventListener('blur', function () {
+                                this.style.borderColor = '';
+                                this.style.boxShadow = '';
+                            });
+                        }
                     });
                 </script>

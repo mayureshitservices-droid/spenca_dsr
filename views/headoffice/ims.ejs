@@ -11,6 +11,19 @@
                         class="px-4 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Inventory</span>
                 </div>
 
+                <!-- Search Bar -->
+                <div class="mb-8">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <i data-lucide="search"
+                                class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                        </div>
+                        <input type="text" id="rmStockSearch" placeholder="Search by material name or specification..."
+                            style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                            class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                    </div>
+                </div>
+
                 <% if (rawMaterials.length===0) { %>
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="box" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -18,7 +31,7 @@
                         <p class="text-gray-500 font-medium">Add raw materials from the Products page.</p>
                     </div>
                     <% } else { %>
-                        <div
+                        <div id="rmStockTableView"
                             class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
@@ -44,7 +57,7 @@
                                     <tbody class="divide-y divide-gray-100">
                                         <% rawMaterials.forEach(function(material) { %>
                                             <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
-                                                <tr class="hover:bg-gray-50/80 transition-colors group">
+                                                <tr class="rm-row hover:bg-gray-50/80 transition-colors group">
                                                     <td class="px-6 py-4">
                                                         <div
                                                             class="text-sm font-black text-gray-900 group-hover:text-emerald-600 transition-colors uppercase">
@@ -91,6 +104,14 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- No Results Message -->
+                        <div id="rmNoResults"
+                            class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Materials</h3>
+                            <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                        </div>
                         <% } %>
             </div>
 
@@ -102,6 +123,19 @@
                         class="px-4 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Inventory</span>
                 </div>
 
+                <!-- Search Bar -->
+                <div class="mb-8">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <i data-lucide="search"
+                                class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                        </div>
+                        <input type="text" id="fgStockSearch" placeholder="Search by product name or packaging..."
+                            style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                            class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                    </div>
+                </div>
+
                 <% if (finishedGoods.length===0) { %>
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="package" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -109,7 +143,7 @@
                         <p class="text-gray-500 font-medium">Manufacturing history will calculate finished stocks.</p>
                     </div>
                     <% } else { %>
-                        <div
+                        <div id="fgStockTableView"
                             class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
@@ -135,7 +169,7 @@
                                     <tbody class="divide-y divide-gray-100">
                                         <% finishedGoods.forEach(function(product) { %>
                                             <% const isLow=(product.availableQty || 0) < (product.bufferQty || 0); %>
-                                                <tr class="hover:bg-gray-50/80 transition-colors group">
+                                                <tr class="fg-row hover:bg-gray-50/80 transition-colors group">
                                                     <td class="px-6 py-4">
                                                         <div
                                                             class="text-sm font-black text-gray-900 group-hover:text-indigo-600 transition-colors uppercase">
@@ -182,6 +216,14 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- No Results Message -->
+                        <div id="fgNoResults"
+                            class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Products</h3>
+                            <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                        </div>
                         <% } %>
             </div>
 
@@ -193,6 +235,19 @@
                         class="px-4 py-1.5 bg-purple-100 text-purple-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Manufacturing</span>
                 </div>
 
+                <!-- Search Bar -->
+                <div class="mb-8">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <i data-lucide="search"
+                                class="w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                        </div>
+                        <input type="text" id="productionSearch" placeholder="Search by product name, batch or shift..."
+                            style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                            class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                    </div>
+                </div>
+
                 <% if (!locals.productionRecords || productionRecords.length===0) { %>
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="factory" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -200,7 +255,7 @@
                         <p class="text-gray-500 font-medium">Production history will appear once recorded.</p>
                     </div>
                     <% } else { %>
-                        <div
+                        <div id="productionTableView"
                             class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
@@ -225,7 +280,8 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         <% productionRecords.forEach(record=> { %>
-                                            <tr class="hover:bg-gray-50/80 transition-colors group text-sm">
+                                            <tr
+                                                class="production-row hover:bg-gray-50/80 transition-colors group text-sm">
                                                 <td class="px-6 py-4 font-bold text-gray-900">
                                                     <%= new Date(record.createdAt).toLocaleDateString('en-IN', {
                                                         day: '2-digit' , month: 'short' }) %>
@@ -256,6 +312,14 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- No Results Message -->
+                        <div id="productionNoResults"
+                            class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Records</h3>
+                            <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                        </div>
                         <% } %>
             </div>
 
@@ -275,6 +339,19 @@
                     </button>
                 </div>
 
+                <!-- Search Bar -->
+                <div class="mb-8">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <i data-lucide="search"
+                                class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                        </div>
+                        <input type="text" id="supplierSearch" placeholder="Search by supplier name, phone or GST..."
+                            style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                            class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                    </div>
+                </div>
+
                 <% if (suppliers.length===0) { %>
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="truck" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -282,7 +359,7 @@
                         <p class="text-gray-500 font-medium">Add your first supplier to get started.</p>
                     </div>
                     <% } else { %>
-                        <div
+                        <div id="supplierTableView"
                             class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
@@ -304,7 +381,7 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         <% suppliers.forEach(function(supplier) { %>
-                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                            <tr class="supplier-row hover:bg-gray-50/80 transition-colors">
                                                 <td class="px-6 py-4 text-sm font-bold text-gray-900">
                                                     <%= supplier.supplierName %>
                                                 </td>
@@ -326,6 +403,14 @@
                                 </table>
                             </div>
                         </div>
+
+                        <!-- No Results Message -->
+                        <div id="supplierNoResults"
+                            class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Suppliers</h3>
+                            <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                        </div>
                         <% } %>
             </div>
 
@@ -345,6 +430,20 @@
                     </button>
                 </div>
 
+                <!-- Search Bar -->
+                <div class="mb-8">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <i data-lucide="search"
+                                class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                        </div>
+                        <input type="text" id="customerSearch"
+                            placeholder="Search by name, category, mobile or address..."
+                            style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                            class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                    </div>
+                </div>
+
                 <% if (customers.length===0) { %>
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="users" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -352,7 +451,7 @@
                         <p class="text-gray-500 font-medium">Customer list is empty.</p>
                     </div>
                     <% } else { %>
-                        <div
+                        <div id="customerTableView"
                             class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
@@ -377,7 +476,7 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         <% customers.forEach(function(customer) { %>
-                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                            <tr class="customer-row hover:bg-gray-50/80 transition-colors">
                                                 <td class="px-6 py-4 text-sm font-bold text-gray-900">
                                                     <%= customer.customerName %>
                                                 </td>
@@ -401,6 +500,14 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+
+                        <!-- No Results Message -->
+                        <div id="customerNoResults"
+                            class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Customers</h3>
+                            <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
                         </div>
                         <% } %>
             </div>
@@ -530,6 +637,20 @@
                         class="px-4 py-1.5 bg-purple-100 text-purple-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Log</span>
                 </div>
 
+                <!-- Search Bar -->
+                <div class="mb-8">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <i data-lucide="search"
+                                class="w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
+                        </div>
+                        <input type="text" id="dispatchSearch"
+                            placeholder="Search by receiver, product, invoice, vehicle or driver..."
+                            style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
+                            class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
+                    </div>
+                </div>
+
                 <% if (dispatchTransactions.length===0) { %>
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="truck" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -537,7 +658,7 @@
                         <p class="text-gray-500 font-medium">No material dispatch history found.</p>
                     </div>
                     <% } else { %>
-                        <div
+                        <div id="dispatchTableView"
                             class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse">
@@ -577,7 +698,7 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         <% dispatchTransactions.forEach(function(item) { %>
-                                            <tr class="hover:bg-gray-50/80 transition-colors">
+                                            <tr class="dispatch-row hover:bg-gray-50/80 transition-colors">
                                                 <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
                                                     <%= item.dispatchDate ? new
                                                         Date(item.dispatchDate).toLocaleDateString('en-IN') : 'N/A' %>
@@ -639,6 +760,14 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+
+                        <!-- No Results Message -->
+                        <div id="dispatchNoResults"
+                            class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Records</h3>
+                            <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
                         </div>
                         <% } %>
             </div>
@@ -829,6 +958,273 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                // 1. Raw Materials Search
+                const rmSearch = document.getElementById('rmStockSearch');
+                const rmNoResults = document.getElementById('rmNoResults');
+                const rmRows = document.querySelectorAll('.rm-row');
+                const rmTable = document.getElementById('rmStockTableView');
+
+                if (rmSearch) {
+                    rmSearch.addEventListener('input', function (e) {
+                        const term = e.target.value.toLowerCase().trim();
+                        let count = 0;
+                        rmRows.forEach(row => {
+                            const name = row.querySelector('td:first-child').textContent.toLowerCase();
+                            const spec = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                            const matches = name.includes(term) || spec.includes(term);
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) count++;
+                        });
+
+                        if (count === 0 && term !== '') {
+                            if (rmTable) rmTable.classList.add('hidden');
+                            rmNoResults.classList.remove('hidden');
+                        } else {
+                            if (rmTable) rmTable.classList.remove('hidden');
+                            rmNoResults.classList.add('hidden');
+                        }
+                    });
+
+                    // Premium focus effect
+                    rmSearch.addEventListener('focus', function () {
+                        this.style.borderColor = '#6366f1';
+                        this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                    });
+                    rmSearch.addEventListener('blur', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+
+                // 2. Customers Search
+                const customerSearch = document.getElementById('customerSearch');
+                const customerNoResults = document.getElementById('customerNoResults');
+                const customerRows = document.querySelectorAll('.customer-row');
+                const customerTable = document.getElementById('customerTableView');
+
+                if (customerSearch) {
+                    customerSearch.addEventListener('input', function (e) {
+                        const term = e.target.value.toLowerCase().trim();
+                        let count = 0;
+                        customerRows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            const name = cells[0].textContent.toLowerCase();
+                            const category = cells[1].textContent.toLowerCase();
+                            const mobile = cells[2].textContent.toLowerCase();
+                            const address = cells[3].textContent.toLowerCase();
+
+                            const matches = name.includes(term) ||
+                                category.includes(term) ||
+                                mobile.includes(term) ||
+                                address.includes(term);
+
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) count++;
+                        });
+
+                        if (count === 0 && term !== '') {
+                            if (customerTable) customerTable.classList.add('hidden');
+                            customerNoResults.classList.remove('hidden');
+                        } else {
+                            if (customerTable) customerTable.classList.remove('hidden');
+                            customerNoResults.classList.add('hidden');
+                        }
+                    });
+
+                    // Premium focus effect
+                    customerSearch.addEventListener('focus', function () {
+                        this.style.borderColor = '#6366f1';
+                        this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                    });
+                    customerSearch.addEventListener('blur', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+
+                // 3. Suppliers Search
+                const supplierSearch = document.getElementById('supplierSearch');
+                const supplierNoResults = document.getElementById('supplierNoResults');
+                const supplierRows = document.querySelectorAll('.supplier-row');
+                const supplierTable = document.getElementById('supplierTableView');
+
+                if (supplierSearch) {
+                    supplierSearch.addEventListener('input', function (e) {
+                        const term = e.target.value.toLowerCase().trim();
+                        let count = 0;
+                        supplierRows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            const name = cells[0].textContent.toLowerCase();
+                            const phone = cells[1].textContent.toLowerCase();
+                            const gst = cells[2].textContent.toLowerCase();
+
+                            const matches = name.includes(term) ||
+                                phone.includes(term) ||
+                                gst.includes(term);
+
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) count++;
+                        });
+
+                        if (count === 0 && term !== '') {
+                            if (supplierTable) supplierTable.classList.add('hidden');
+                            supplierNoResults.classList.remove('hidden');
+                        } else {
+                            if (supplierTable) supplierTable.classList.remove('hidden');
+                            supplierNoResults.classList.add('hidden');
+                        }
+                    });
+
+                    // Premium focus effect
+                    supplierSearch.addEventListener('focus', function () {
+                        this.style.borderColor = '#6366f1';
+                        this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                    });
+                    supplierSearch.addEventListener('blur', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+
+                // 4. Finished Goods Search
+                const fgSearch = document.getElementById('fgStockSearch');
+                const fgNoResults = document.getElementById('fgNoResults');
+                const fgRows = document.querySelectorAll('.fg-row');
+                const fgTable = document.getElementById('fgStockTableView');
+
+                if (fgSearch) {
+                    fgSearch.addEventListener('input', function (e) {
+                        const term = e.target.value.toLowerCase().trim();
+                        let count = 0;
+                        fgRows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            const name = cells[0].textContent.toLowerCase();
+                            const packaging = cells[1].textContent.toLowerCase();
+
+                            const matches = name.includes(term) || packaging.includes(term);
+
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) count++;
+                        });
+
+                        if (count === 0 && term !== '') {
+                            if (fgTable) fgTable.classList.add('hidden');
+                            fgNoResults.classList.remove('hidden');
+                        } else {
+                            if (fgTable) fgTable.classList.remove('hidden');
+                            fgNoResults.classList.add('hidden');
+                        }
+                    });
+
+                    // Premium focus effect
+                    fgSearch.addEventListener('focus', function () {
+                        this.style.borderColor = '#6366f1';
+                        this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                    });
+                    fgSearch.addEventListener('blur', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+
+                // 5. Production Search
+                const prodSearch = document.getElementById('productionSearch');
+                const prodNoResults = document.getElementById('productionNoResults');
+                const prodRows = document.querySelectorAll('.production-row');
+                const prodTable = document.getElementById('productionTableView');
+
+                if (prodSearch) {
+                    prodSearch.addEventListener('input', function (e) {
+                        const term = e.target.value.toLowerCase().trim();
+                        let count = 0;
+                        prodRows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            const shift = cells[1].textContent.toLowerCase();
+                            const product = cells[2].textContent.toLowerCase();
+                            const batch = cells[3].textContent.toLowerCase();
+
+                            const matches = shift.includes(term) ||
+                                product.includes(term) ||
+                                batch.includes(term);
+
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) count++;
+                        });
+
+                        if (count === 0 && term !== '') {
+                            if (prodTable) prodTable.classList.add('hidden');
+                            prodNoResults.classList.remove('hidden');
+                        } else {
+                            if (prodTable) prodTable.classList.remove('hidden');
+                            prodNoResults.classList.add('hidden');
+                        }
+                    });
+
+                    // Premium focus effect
+                    prodSearch.addEventListener('focus', function () {
+                        this.style.borderColor = '#a855f7'; // Purple-500
+                        this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(168,85,247,0.1)';
+                    });
+                    prodSearch.addEventListener('blur', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+
+                // 6. Dispatch Search
+                const dispatchSearchInput = document.getElementById('dispatchSearch');
+                const dispatchNoResults = document.getElementById('dispatchNoResults');
+                const dispatchRows = document.querySelectorAll('.dispatch-row');
+                const dispatchTable = document.getElementById('dispatchTableView');
+
+                if (dispatchSearchInput) {
+                    dispatchSearchInput.addEventListener('input', function (e) {
+                        const term = e.target.value.toLowerCase().trim();
+                        let count = 0;
+                        dispatchRows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            const receiver = cells[1].textContent.toLowerCase();
+                            const product = cells[2].textContent.toLowerCase();
+                            const invoice = cells[4].textContent.toLowerCase();
+                            const vehicle = cells[6].textContent.toLowerCase();
+                            const driver = cells[7].textContent.toLowerCase();
+
+                            const matches = receiver.includes(term) ||
+                                product.includes(term) ||
+                                invoice.includes(term) ||
+                                vehicle.includes(term) ||
+                                driver.includes(term);
+
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) count++;
+                        });
+
+                        if (count === 0 && term !== '') {
+                            if (dispatchTable) dispatchTable.classList.add('hidden');
+                            dispatchNoResults.classList.remove('hidden');
+                        } else {
+                            if (dispatchTable) dispatchTable.classList.remove('hidden');
+                            dispatchNoResults.classList.add('hidden');
+                        }
+                    });
+
+                    // Premium focus effect
+                    dispatchSearchInput.addEventListener('focus', function () {
+                        this.style.borderColor = '#a855f7'; // Purple-500
+                        this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(168,85,247,0.1)';
+                    });
+                    dispatchSearchInput.addEventListener('blur', function () {
+                        this.style.borderColor = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+            });
+        </script>
 
         <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ { label: 'RM Stock' ,
             icon: 'layer-group' , onClick: "showSection('stock-section')" }, { label: 'FG Stock' , icon: 'package' ,
