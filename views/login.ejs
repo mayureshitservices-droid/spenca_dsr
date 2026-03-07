@@ -85,34 +85,40 @@
                             const pwaInstallContainer = document.getElementById('pwa-install-container');
                             const pwaInstallBtn = document.getElementById('pwa-install-btn');
 
+                            // Log for debugging
+                            console.log('PWA Script initialized');
+
                             window.addEventListener('beforeinstallprompt', (e) => {
+                                console.log('beforeinstallprompt event fired');
                                 // Prevent Chrome 67 and earlier from automatically showing the prompt
                                 e.preventDefault();
                                 // Stash the event so it can be triggered later.
                                 deferredPrompt = e;
                                 // Update UI notify the user they can add to home screen
                                 pwaInstallContainer.classList.remove('hidden');
+                                pwaInstallContainer.classList.add('flex');
+                            });
 
-                                pwaInstallBtn.addEventListener('click', (e) => {
-                                    // hide our user interface that shows our A2HS button
-                                    pwaInstallContainer.classList.add('hidden');
-                                    // Show the prompt
-                                    deferredPrompt.prompt();
-                                    // Wait for the user to respond to the prompt
-                                    deferredPrompt.userChoice.then((choiceResult) => {
-                                        if (choiceResult.outcome === 'accepted') {
-                                            console.log('User accepted the A2HS prompt');
-                                        } else {
-                                            console.log('User dismissed the A2HS prompt');
-                                        }
-                                        deferredPrompt = null;
-                                    });
-                                });
+                            pwaInstallBtn.addEventListener('click', async () => {
+                                if (!deferredPrompt) return;
+
+                                // Show the prompt
+                                deferredPrompt.prompt();
+
+                                // Wait for the user to respond to the prompt
+                                const { outcome } = await deferredPrompt.userChoice;
+                                console.log(`User response to install prompt: ${outcome}`);
+
+                                // We've used the prompt, and can't use it again, so throw it away
+                                deferredPrompt = null;
+                                pwaInstallContainer.classList.add('hidden');
+                                pwaInstallContainer.classList.remove('flex');
                             });
 
                             window.addEventListener('appinstalled', (evt) => {
                                 console.log('Spenca was installed.');
                                 pwaInstallContainer.classList.add('hidden');
+                                pwaInstallContainer.classList.remove('flex');
                             });
                         </script>
             </div>

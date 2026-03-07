@@ -2,7 +2,6 @@
     "name": "Spenca DSR",
     "short_name": "Spenca",
     "description": "Spenca Mineral Water - Daily Sales Report System",
-    "id": "/login",
     "start_url": "/login",
     "display": "standalone",
     "background_color": "#ffffff",
