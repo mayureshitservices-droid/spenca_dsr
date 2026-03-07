@@ -34,7 +34,7 @@
   <!-- Custom CSS with Cache Buster -->
   <link rel="stylesheet" href="/css/style.css?v=1.0.4">
 
-  <!-- PWA Service Worker Registration -->
+  <!-- PWA Service Worker Registration & Install Detection -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -43,6 +43,16 @@
           .catch(err => console.log('Service Worker registration failed', err));
       });
     }
+
+    // Capture beforeinstallprompt event as early as possible
+    window.pwaDeferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('beforeinstallprompt event fired in header');
+      e.preventDefault();
+      window.pwaDeferredPrompt = e;
+      // Signal to any waiting UI components
+      window.dispatchEvent(new CustomEvent('pwa-prompt-ready'));
+    });
   </script>
 </head>
 

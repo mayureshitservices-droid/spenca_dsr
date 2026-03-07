@@ -8,6 +8,8 @@ const ASSETS_TO_CACHE = [
   '/js/charts.js',
   '/js/autocomplete.js',
   '/js/gps.js',
+  '/img/icon-192.png',
+  '/img/icon-512.png',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
 ];

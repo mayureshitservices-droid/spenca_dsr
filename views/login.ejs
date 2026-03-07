@@ -81,36 +81,35 @@
                         </div>
 
                         <script>
-                            let deferredPrompt;
                             const pwaInstallContainer = document.getElementById('pwa-install-container');
                             const pwaInstallBtn = document.getElementById('pwa-install-btn');
 
-                            // Log for debugging
-                            console.log('PWA Script initialized');
+                            function showInstallButton() {
+                                if (window.pwaDeferredPrompt) {
+                                    console.log('Showing install button from prompt');
+                                    pwaInstallContainer.classList.remove('hidden');
+                                    pwaInstallContainer.classList.add('flex');
+                                }
+                            }
 
-                            window.addEventListener('beforeinstallprompt', (e) => {
-                                console.log('beforeinstallprompt event fired');
-                                // Prevent Chrome 67 and earlier from automatically showing the prompt
-                                e.preventDefault();
-                                // Stash the event so it can be triggered later.
-                                deferredPrompt = e;
-                                // Update UI notify the user they can add to home screen
-                                pwaInstallContainer.classList.remove('hidden');
-                                pwaInstallContainer.classList.add('flex');
-                            });
+                            // Check immediately
+                            showInstallButton();
+
+                            // Listen for event if it hasn't fired yet
+                            window.addEventListener('pwa-prompt-ready', showInstallButton);
 
                             pwaInstallBtn.addEventListener('click', async () => {
-                                if (!deferredPrompt) return;
+                                if (!window.pwaDeferredPrompt) return;
 
                                 // Show the prompt
-                                deferredPrompt.prompt();
+                                window.pwaDeferredPrompt.prompt();
 
                                 // Wait for the user to respond to the prompt
-                                const { outcome } = await deferredPrompt.userChoice;
+                                const { outcome } = await window.pwaDeferredPrompt.userChoice;
                                 console.log(`User response to install prompt: ${outcome}`);
 
-                                // We've used the prompt, and can't use it again, so throw it away
-                                deferredPrompt = null;
+                                // We've used the prompt, and can't use it again
+                                window.pwaDeferredPrompt = null;
                                 pwaInstallContainer.classList.add('hidden');
                                 pwaInstallContainer.classList.remove('flex');
                             });
