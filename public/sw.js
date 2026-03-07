@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spenca-dsr-v7';
+const CACHE_NAME = 'spenca-dsr-v8';
 
 // Base assets to cache
 const ASSETS_TO_CACHE = [
@@ -15,10 +15,10 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  console.log('SW: Install event');
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Don't fail the whole install if one asset fails
       return Promise.allSettled(
         ASSETS_TO_CACHE.map(url => cache.add(url).catch(err => console.log('Asset cache error:', url, err)))
       );
@@ -27,6 +27,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('SW: Activate event');
   event.waitUntil(
     Promise.all([
       self.clients.claim(),
@@ -34,6 +35,7 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
+              console.log('SW: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             }
           })
@@ -44,21 +46,24 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // We only want to cache GET requests
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
   // 1. Static Assets (CSS, JS, Fonts, Images)
-  // Strategy: Stale-While-Revalidate
   if (url.pathname.match(/\.(css|js|png|jpg|jpeg|svg|woff2?|ttf|eot)$/) || url.hostname === 'fonts.googleapis.com' || url.hostname === 'cdn.jsdelivr.net') {
     event.respondWith(
-      // ignoreSearch: true is critical here so style.css?v=2 still matches the base cached style.css
       caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache)).catch(() => { });
+            try {
+              if (!networkResponse.bodyUsed) {
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache)).catch(err => console.log('SW: Cache put failed', err));
+              }
+            } catch (e) {
+              console.error('SW: Static clone error', e);
+            }
           }
           return networkResponse;
         }).catch(() => { });
@@ -70,21 +75,24 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 2. HTML Pages & API Data Requests
-  // Strategy: Network-First, falling back to Cache
   event.respondWith(
     fetch(event.request).then((networkResponse) => {
       if (networkResponse && networkResponse.status === 200) {
-        // Clone immediately before it's consumed by the browser
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME)
-          .then((cache) => {
-            cache.put(event.request, responseToCache).catch(err => console.log('Cache put error:', err));
-          })
-          .catch(err => console.log('Cache open error:', err));
+        try {
+          if (!networkResponse.bodyUsed) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache).catch(err => console.log('SW: API cache error', err));
+              })
+              .catch(err => console.log('SW: API cache open error', err));
+          }
+        } catch (e) {
+          console.error('SW: API clone error', e);
+        }
       }
       return networkResponse;
     }).catch(() => {
-      // If the network fails (offline), fall back to the cache
       return caches.match(event.request, { ignoreSearch: true });
     })
   );
