@@ -12,221 +12,237 @@
                 <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none">dispatch</h1>
             </div>
 
-            <!-- Alerts -->
-            <% if (typeof success !=='undefined' && success) { %>
-                <div
-                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
-                        <p class="font-bold">
-                            <%= success %>
-                        </p>
-                    </div>
-                </div>
-                <% } %>
 
-                    <% if (typeof error !=='undefined' && error) { %>
+            <div class="glass-card overflow-hidden">
+                <div class="card-header-primary">
+                    <h2 class="text-xl font-black uppercase">Dispatch/Outward</h2>
+                </div>
+
+                <form id="dispatchForm" action="/factory-incharge/dispatch" method="POST" enctype="multipart/form-data"
+                    onsubmit="return collectItems()" class="p-8 space-y-8">
+
+                    <div class="space-y-8">
+                        <!-- Phase 1: Customer Selection -->
+                        <div class="space-y-3">
+                            <label
+                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Customer
+                                Name *</label>
+                            <div class="relative">
+                                <input type="text" id="receiverInput" name="receiverName" required class="input-field"
+                                    placeholder="Search or type customer/destination..." autocomplete="off">
+                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                    id="receiverSuggestions"></div>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100/50">
+
+                        <!-- Phase 2: Products Section -->
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
+                                    Products to Dispatch</h3>
+                            </div>
+
+                            <div id="itemsContainer" class="space-y-6">
+                                <!-- Product Row Template -->
+                                <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
+                                    id="itemRow_1">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                                        <!-- Product Selection -->
+                                        <div class="md:col-span-8 space-y-2">
+                                            <label
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
+                                                Product *</label>
+                                            <div class="relative">
+                                                <input type="text" id="productInput_1" required autocomplete="off"
+                                                    class="input-field shadow-sm"
+                                                    placeholder="Start typing product name...">
+                                                <input type="hidden" id="selectedProductId_1" class="item-product-id">
+                                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                                    id="productSuggestions_1"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Quantity -->
+                                        <div class="md:col-span-3 space-y-2">
+                                            <label
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes
+                                                *</label>
+                                            <input type="number" step="0.01" id="quantity_1" required
+                                                class="input-field shadow-sm item-quantity" placeholder="0.00">
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div class="md:col-span-1">
+                                            <button type="button" onclick="removeItemRow(1)"
+                                                class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
+                                                <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="addItemRow()"
+                                class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
+                                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                Add Another Product
+                            </button>
+                        </div>
+
+                        <hr class="border-gray-100/50">
+
+                        <!-- Phase 3: Secondary Transaction Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                    No</label>
+                                <div class="relative">
+                                    <input type="text" name="invoiceNo" class="input-field" placeholder="INV/2024/001">
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                    Date</label>
+                                <div class="relative">
+                                    <input type="date" name="invoiceDate" class="input-field">
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Vehicle
+                                    No</label>
+                                <div class="relative">
+                                    <input type="text" name="vehicleNo" class="input-field" placeholder="MH-12-AB-1234">
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Driver
+                                    Name</label>
+                                <div class="relative">
+                                    <input type="text" name="driverName" class="input-field" placeholder="Full name">
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Driver
+                                    Mobile</label>
+                                <div class="relative">
+                                    <input type="tel" name="driverMobileNo" class="input-field"
+                                        placeholder="Mobile number">
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 md:col-span-2">
+                                <label
+                                    class="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Invoice
+                                    Photo</label>
+                                <div class="relative group">
+                                    <input type="file" name="invoicePhoto" id="invoicePhoto" accept="image/*"
+                                        class="hidden" onchange="previewImage(this)">
+                                    <label for="invoicePhoto"
+                                        class="flex flex-col items-center justify-center w-full min-h-[160px] px-6 py-8 border-2 border-dashed border-gray-200 rounded-3xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer group/label">
+                                        <div id="uploadPlaceholder" class="flex flex-col items-center">
+                                            <div
+                                                class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover/label:bg-indigo-100 group-hover/label:text-indigo-600 transition-all mb-3">
+                                                <i data-lucide="camera" class="w-6 h-6"></i>
+                                            </div>
+                                            <p
+                                                class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/label:text-indigo-600 transition-colors">
+                                                Click to capture or upload invoice</p>
+                                        </div>
+                                        <div id="imagePreviewContainer" class="hidden w-full h-full relative">
+                                            <img id="imagePreview" src="#" alt="Preview"
+                                                class="max-h-48 rounded-2xl mx-auto shadow-around-sm">
+                                            <div
+                                                class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-indigo-600 shadow-md">
+                                                <i data-lucide="check" class="w-4 h-4"></i>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 md:col-span-2">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Remarks</label>
+                                <div class="relative">
+                                    <input type="text" name="remark" class="input-field"
+                                        placeholder="Any special instructions or notes...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Hidden field for collected items -->
+                    <input type="hidden" name="items" id="itemsData">
+
+                    <!-- Submit -->
+                    <div class="pt-6">
+                        <button type="submit" class="btn-primary w-full py-5 text-lg">
+                            submit
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Alerts (Relocated to bottom) -->
+                <div class="mt-8 space-y-4">
+                    <% if (typeof success !=='undefined' && success) { %>
                         <div
-                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                            class="p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div class="flex items-center gap-3">
-                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-500"></i>
                                 <p class="font-bold">
-                                    <%= error %>
+                                    <%= success %>
                                 </p>
                             </div>
                         </div>
                         <% } %>
 
-                            <div class="glass-card overflow-hidden">
-                                <div class="card-header-primary">
-                                    <h2 class="text-xl font-black uppercase">Dispatch/Outward</h2>
-                                </div>
-
-                                <form id="dispatchForm" action="/factory-incharge/dispatch" method="POST"
-                                    enctype="multipart/form-data" onsubmit="return collectItems()"
-                                    class="p-8 space-y-8">
-
-                                    <div class="space-y-8">
-                                        <!-- Phase 1: Customer Selection -->
-                                        <div class="space-y-3">
-                                            <label
-                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Customer
-                                                Name *</label>
-                                            <div class="relative">
-                                                <input type="text" id="receiverInput" name="receiverName" required
-                                                    class="input-field"
-                                                    placeholder="Search or type customer/destination..."
-                                                    autocomplete="off">
-                                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
-                                                    id="receiverSuggestions"></div>
-                                            </div>
+                            <% if (typeof error !=='undefined' && error) { %>
+                                <div
+                                    class="p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div class="flex items-start gap-4">
+                                        <i data-lucide="alert-octagon" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                        <div class="space-y-1">
+                                            <p class="text-sm font-black uppercase tracking-widest text-red-600">
+                                                Requirement Not Met</p>
+                                            <p class="font-bold text-lg leading-tight">
+                                                <%= error %>
+                                            </p>
                                         </div>
+                                    </div>
+                                </div>
+                                <% } %>
 
-                                        <hr class="border-gray-100/50">
-
-                                        <!-- Phase 2: Products Section -->
-                                        <div class="space-y-6">
-                                            <div class="flex items-center justify-between">
-                                                <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
-                                                    Products to Dispatch</h3>
+                                    <!-- Client-side Error Box -->
+                                    <div id="clientErrorBox"
+                                        class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                        <div class="flex items-start gap-4">
+                                            <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                            <div class="space-y-1">
+                                                <p class="text-sm font-black uppercase tracking-widest text-red-600">
+                                                    Check Input Details</p>
+                                                <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
                                             </div>
-
-                                            <div id="itemsContainer" class="space-y-6">
-                                                <!-- Product Row Template -->
-                                                <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
-                                                    id="itemRow_1">
-                                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-                                                        <!-- Product Selection -->
-                                                        <div class="md:col-span-8 space-y-2">
-                                                            <label
-                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
-                                                                Product *</label>
-                                                            <div class="relative">
-                                                                <input type="text" id="productInput_1" required
-                                                                    autocomplete="off" class="input-field shadow-sm"
-                                                                    placeholder="Start typing product name...">
-                                                                <input type="hidden" id="selectedProductId_1"
-                                                                    class="item-product-id">
-                                                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
-                                                                    id="productSuggestions_1"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Quantity -->
-                                                        <div class="md:col-span-3 space-y-2">
-                                                            <label
-                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes
-                                                                *</label>
-                                                            <input type="number" step="0.01" id="quantity_1" required
-                                                                class="input-field shadow-sm item-quantity"
-                                                                placeholder="0.00">
-                                                        </div>
-
-                                                        <!-- Actions -->
-                                                        <div class="md:col-span-1">
-                                                            <button type="button" onclick="removeItemRow(1)"
-                                                                class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
-                                                                <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <button type="button" onclick="addItemRow()"
-                                                class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
-                                                <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                                                Add Another Product
+                                            <button type="button"
+                                                onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
+                                                class="ml-auto text-red-400 hover:text-red-600">
+                                                <i data-lucide="x" class="w-5 h-5"></i>
                                             </button>
                                         </div>
-
-                                        <hr class="border-gray-100/50">
-
-                                        <!-- Phase 3: Secondary Transaction Info -->
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div class="space-y-3">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                                    No</label>
-                                                <div class="relative">
-                                                    <input type="text" name="invoiceNo" class="input-field"
-                                                        placeholder="INV/2024/001">
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                                    Date</label>
-                                                <div class="relative">
-                                                    <input type="date" name="invoiceDate" class="input-field">
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Vehicle
-                                                    No</label>
-                                                <div class="relative">
-                                                    <input type="text" name="vehicleNo" class="input-field"
-                                                        placeholder="MH-12-AB-1234">
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Driver
-                                                    Name</label>
-                                                <div class="relative">
-                                                    <input type="text" name="driverName" class="input-field"
-                                                        placeholder="Full name">
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Driver
-                                                    Mobile</label>
-                                                <div class="relative">
-                                                    <input type="tel" name="driverMobileNo" class="input-field"
-                                                        placeholder="Mobile number">
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3 md:col-span-2">
-                                                <label
-                                                    class="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Invoice
-                                                    Photo</label>
-                                                <div class="relative group">
-                                                    <input type="file" name="invoicePhoto" id="invoicePhoto"
-                                                        accept="image/*" class="hidden" onchange="previewImage(this)">
-                                                    <label for="invoicePhoto"
-                                                        class="flex flex-col items-center justify-center w-full min-h-[160px] px-6 py-8 border-2 border-dashed border-gray-200 rounded-3xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer group/label">
-                                                        <div id="uploadPlaceholder" class="flex flex-col items-center">
-                                                            <div
-                                                                class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover/label:bg-indigo-100 group-hover/label:text-indigo-600 transition-all mb-3">
-                                                                <i data-lucide="camera" class="w-6 h-6"></i>
-                                                            </div>
-                                                            <p
-                                                                class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/label:text-indigo-600 transition-colors">
-                                                                Click to capture or upload invoice</p>
-                                                        </div>
-                                                        <div id="imagePreviewContainer"
-                                                            class="hidden w-full h-full relative">
-                                                            <img id="imagePreview" src="#" alt="Preview"
-                                                                class="max-h-48 rounded-2xl mx-auto shadow-around-sm">
-                                                            <div
-                                                                class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-indigo-600 shadow-md">
-                                                                <i data-lucide="check" class="w-4 h-4"></i>
-                                                            </div>
-                                                        </div>
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <div class="space-y-3 md:col-span-2">
-                                                <label
-                                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Remarks</label>
-                                                <div class="relative">
-                                                    <input type="text" name="remark" class="input-field"
-                                                        placeholder="Any special instructions or notes...">
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
-
-
-                                    <!-- Hidden field for collected items -->
-                                    <input type="hidden" name="items" id="itemsData">
-
-                                    <!-- Submit -->
-                                    <div class="pt-6">
-                                        <button type="submit" class="btn-primary w-full py-5 text-lg">
-                                            submit
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                </div>
+            </div>
         </div>
 
 
@@ -316,30 +332,63 @@
                         });
                     }
 
+                    function showClientError(msg) {
+                        const errorBox = document.getElementById('clientErrorBox');
+                        const errorText = document.getElementById('clientErrorText');
+                        if (errorBox && errorText) {
+                            errorText.textContent = msg;
+                            errorBox.classList.remove('hidden');
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+
                     function collectItems() {
+                        // Reset client error box
+                        const errorBox = document.getElementById('clientErrorBox');
+                        if (errorBox) errorBox.classList.add('hidden');
+
                         const items = [];
                         const rows = document.querySelectorAll('[id^="itemRow_"]');
                         let isValid = true;
+                        let errorMsg = '';
 
                         rows.forEach(row => {
                             const id = row.id.split('_')[1];
                             const productId = document.getElementById(`selectedProductId_${id}`).value;
+                            const productName = document.getElementById(`productInput_${id}`).value;
                             const quantity = document.getElementById(`quantity_${id}`).value;
 
-                            if (!productId || !quantity) {
-                                isValid = false;
-                                row.classList.add('border-red-200', 'bg-red-50/30');
-                                setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
-                            } else {
-                                items.push({
-                                    productId,
-                                    quantity
-                                });
+                            // Remove previous error styling
+                            row.classList.remove('border-red-200', 'bg-red-50/30');
+
+                            if (productName || quantity) { // Only validate if user has interacted with the row
+                                if (!productId) {
+                                    isValid = false;
+                                    errorMsg = 'Please select a valid product from the suggestions for all product rows.';
+                                    row.classList.add('border-red-200', 'bg-red-50/30');
+                                } else if (!quantity || parseFloat(quantity) <= 0) {
+                                    isValid = false;
+                                    errorMsg = 'Please enter a valid quantity (greater than 0) for all selected products.';
+                                    row.classList.add('border-red-200', 'bg-red-50/30');
+                                } else {
+                                    items.push({
+                                        productId,
+                                        quantity
+                                    });
+                                }
                             }
                         });
 
                         if (!isValid) {
-                            alert('Please fill all required fields for each product and select products from the suggestions.');
+                            showClientError(errorMsg);
+                            return false;
+                        }
+
+                        if (items.length === 0) {
+                            showClientError('Please add at least one item with valid details to dispatch.');
                             return false;
                         }
 

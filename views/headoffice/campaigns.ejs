@@ -276,9 +276,42 @@
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
+
+            <!-- Client-side Error Box -->
+            <div class="max-w-4xl mx-auto px-4 pb-10">
+                <div id="clientErrorBox"
+                    class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest text-red-600">Requirement Not Met</p>
+                            <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
+                        </div>
+                        <button type="button"
+                            onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
+                            class="ml-auto text-red-400 hover:text-red-600">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <%- include('../partials/footer') %>
 
                 <script>
+                    function showClientError(msg) {
+                        const errorBox = document.getElementById('clientErrorBox');
+                        const errorText = document.getElementById('clientErrorText');
+                        if (errorBox && errorText) {
+                            errorText.textContent = msg;
+                            errorBox.classList.remove('hidden');
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+
                     function openCampaignModal() {
                         const modal = document.getElementById('campaignModal');
                         const container = document.getElementById('modalContainer');
@@ -329,14 +362,13 @@
                             const data = await response.json();
 
                             if (data.success) {
-                                alert('Campaign created successfully!');
                                 window.location.reload();
                             } else {
                                 throw new Error(data.error || 'Failed to create campaign');
                             }
                         } catch (error) {
                             console.error('Submission error:', error);
-                            alert('Error: ' + error.message);
+                            showClientError('Error: ' + error.message);
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = originalBtnHTML;
                         }

@@ -112,15 +112,24 @@
                                             <div class="text-right">
                                                 <label
                                                     class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Qty</label>
-                                                <div class="flex items-baseline justify-end gap-1">
-                                                    <span class="text-xl font-black text-black leading-none">
-                                                        <%= (item.quantity || 0).toFixed(2) %>
-                                                    </span>
-                                                    <span class="text-[10px] font-bold text-gray-400 uppercase">
-                                                        <%= item.productId ? item.productId.uom : '' %>
-                                                    </span>
+                                                <div class="flex flex-col items-end">
+                                                    <div class="flex items-baseline justify-end gap-1">
+                                                        <span class="text-xl font-black text-black leading-none">
+                                                            <%= (item.quantity || 0).toFixed(0) %>
+                                                        </span>
+                                                        <span class="text-[10px] font-bold text-gray-400 uppercase">
+                                                            <%= item.productId ? item.productId.uom : '' %>
+                                                        </span>
+                                                    </div>
+                                                    <% if (item.inwardWeight) { %>
+                                                        <span
+                                                            class="text-[10px] font-black text-indigo-600 uppercase mt-1">
+                                                            <%= item.inwardWeight %> KG
+                                                        </span>
+                                                        <% } %>
                                                 </div>
-                                                <% if (item.inwardUnit && item.inwardUnit !=='nos' ) { %>
+                                                <% if (item.inwardUnit && item.inwardUnit !=='nos' && item.inwardUnit
+                                                    !=='kg' ) { %>
                                                     <p class="text-[9px] font-black text-primary-600 uppercase mt-1">
                                                         Entry: <%= item.inwardQty %>
                                                             <%= item.inwardUnit %>
@@ -151,8 +160,11 @@
                                         class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
                                         Invoice</th>
                                     <th
-                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
-                                        Quantity</th>
+                                        class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                        Qty (Nos)</th>
+                                    <th
+                                        class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
+                                        Weight (KG)</th>
                                     <th
                                         class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                                         Entry Info</th>
@@ -215,12 +227,15 @@
                                         <td class="px-8 py-6 text-right">
                                             <div class="flex items-baseline justify-end gap-1">
                                                 <span class="text-lg font-black text-gray-900">
-                                                    <%= (item.quantity || 0).toFixed(2) %>
+                                                    <%= (item.quantity || 0).toFixed(0) %>
                                                 </span>
                                                 <span class="text-[10px] font-bold text-gray-400 uppercase">
                                                     <%= item.productId ? item.productId.uom : '' %>
                                                 </span>
                                             </div>
+                                        </td>
+                                        <td class="px-8 py-6 text-right font-black text-indigo-600">
+                                            <%= item.inwardWeight ? item.inwardWeight + ' KG' : '-' %>
                                         </td>
                                         <td class="px-8 py-6 text-center">
                                             <% if (item.inwardUnit && item.inwardUnit !=='nos' ) { %>

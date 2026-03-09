@@ -27,8 +27,11 @@ const inwardSchema = new mongoose.Schema({
     },
     inwardUnit: {
         type: String,
-        enum: ['nos', 'bags', 'boxes'],
+        enum: ['nos', 'bags', 'boxes', 'kg'],
         default: 'nos'
+    },
+    inwardWeight: {
+        type: Number
     },
     inwardQty: {
         type: Number

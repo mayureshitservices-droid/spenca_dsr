@@ -32,7 +32,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <!-- Custom CSS with Cache Buster -->
-  <link rel="stylesheet" href="/css/style.css?v=1.0.4">
+  <link rel="stylesheet" href="/css/style.css?v=1.0.6">
 
   <!-- PWA Service Worker Registration & Install Detection -->
   <script>
@@ -47,11 +47,18 @@
     // Capture beforeinstallprompt event as early as possible
     window.pwaDeferredPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('beforeinstallprompt event fired in header');
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
+      // Stash the event so it can be triggered later.
       window.pwaDeferredPrompt = e;
+      console.log('PWA: beforeinstallprompt captured');
       // Signal to any waiting UI components
       window.dispatchEvent(new CustomEvent('pwa-prompt-ready'));
+    });
+
+    window.addEventListener('appinstalled', (evt) => {
+      console.log('PWA: App installed successfully');
+      window.pwaDeferredPrompt = null;
     });
   </script>
 </head>

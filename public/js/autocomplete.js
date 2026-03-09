@@ -2,6 +2,19 @@
 let customerTimeout;
 let selectedCustomer = null;
 
+function showClientError(msg) {
+    const errorBox = document.getElementById('clientErrorBox');
+    const errorText = document.getElementById('clientErrorText');
+    if (errorBox && errorText) {
+        errorText.textContent = msg;
+        errorBox.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        alert(msg);
+    }
+}
+
 function setupCustomerAutocomplete() {
     const customerInput = document.getElementById('customerName');
     const suggestionsDiv = document.getElementById('customerSuggestions');
@@ -201,8 +214,8 @@ function addProductRow() {
                     class="w-full px-5 py-3 bg-white border-2 border-transparent rounded-2xl focus:border-purple-500 transition-all outline-none font-black text-gray-900 shadow-sm text-center">
             </div>
             <div class="md:col-span-3 space-y-2">
-                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantity</label>
-                <input type="number" id="quantity_${productRows}" min="1" value="1"
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantity (Boxes)</label>
+                <input type="number" id="quantity_${productRows}" min="1" value="1" placeholder="Enter Boxes"
                     class="w-full px-5 py-3 bg-white border-2 border-transparent rounded-2xl focus:border-purple-500 transition-all outline-none font-black text-gray-900 shadow-sm text-center">
             </div>
             <div class="md:col-span-1">
@@ -365,6 +378,10 @@ function handleOrderStatusChange() {
 
 // Collect products before form submission
 function collectProducts() {
+    // Reset client error box
+    const errorBox = document.getElementById('clientErrorBox');
+    if (errorBox) errorBox.classList.add('hidden');
+
     const orderStatus = document.getElementById('orderStatus').value;
     const submitBtn = document.getElementById('submitBtn');
 
@@ -374,17 +391,19 @@ function collectProducts() {
         // Disable and show loading
         submitBtn.disabled = true;
         submitBtn.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Processing...
-        `;
+             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+             </svg>
+             Processing...
+         `;
         return true;
     }
 
     const products = [];
     const productRowsList = document.querySelectorAll('.group[id^="productRow_"]');
+    let isValid = true;
+    let errorMsg = '';
 
     productRowsList.forEach(row => {
         const rowId = row.id.split('_')[1];
@@ -393,18 +412,40 @@ function collectProducts() {
         const quantity = document.getElementById(`quantity_${rowId}`).value;
         const rate = document.getElementById(`rate_${rowId}`).value;
 
-        if (productName && quantity && rate) {
-            products.push({
-                productId: productId || null,
-                productName,
-                quantity: parseInt(quantity),
-                rate: parseFloat(rate)
-            });
+        // Remove previous error styling
+        row.classList.remove('border-red-200', 'bg-red-50/30');
+
+        if (productName || quantity !== "1" || rate) { // Basic check if row was touched
+            if (!productId) {
+                isValid = false;
+                errorMsg = 'Please select products from the catalog suggestions.';
+                row.classList.add('border-red-200', 'bg-red-50/30');
+            } else if (!quantity || parseInt(quantity) <= 0) {
+                isValid = false;
+                errorMsg = 'Please enter a valid quantity for all items.';
+                row.classList.add('border-red-200', 'bg-red-50/30');
+            } else if (!rate || parseFloat(rate) <= 0) {
+                isValid = false;
+                errorMsg = 'Please enter a valid rate for all items.';
+                row.classList.add('border-red-200', 'bg-red-50/30');
+            } else {
+                products.push({
+                    productId: productId,
+                    productName,
+                    quantity: parseInt(quantity),
+                    rate: parseFloat(rate)
+                });
+            }
         }
     });
 
+    if (!isValid) {
+        showClientError(errorMsg);
+        return false;
+    }
+
     if (products.length === 0) {
-        alert('Action Required: Please specify at least one product to fulfill this confirmed order.');
+        showClientError('Action Required: Please specify at least one product to fulfill this confirmed order.');
         return false;
     }
 
@@ -413,12 +454,12 @@ function collectProducts() {
     // Disable and show loading
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
-        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Processing...
-    `;
+         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+         </svg>
+         Processing...
+     `;
 
     return true;
 }

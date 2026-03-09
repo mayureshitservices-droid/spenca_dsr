@@ -231,9 +231,42 @@
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
+
+            <!-- Client-side Error Box -->
+            <div class="max-w-4xl mx-auto px-4 pb-10">
+                <div id="clientErrorBox"
+                    class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest text-red-600">Requirement Not Met</p>
+                            <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
+                        </div>
+                        <button type="button"
+                            onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
+                            class="ml-auto text-red-400 hover:text-red-600">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <%- include('../partials/footer') %>
 
                 <script>
+                    function showClientError(msg) {
+                        const errorBox = document.getElementById('clientErrorBox');
+                        const errorText = document.getElementById('clientErrorText');
+                        if (errorBox && errorText) {
+                            errorText.textContent = msg;
+                            errorBox.classList.remove('hidden');
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+
                     // Data passed from server - URI encoded to satisfy IDE and avoid quote issues
                     const devices = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(devices)) %>'));
 
@@ -472,7 +505,7 @@
                         const end = document.getElementById('rangeEndDate').value;
 
                         if (!start || !end) {
-                            alert('Action Required: Please select both start and end dates to generate the report.');
+                            showClientError('Please select both start and end dates to generate the report.');
                             return;
                         }
 
@@ -485,7 +518,7 @@
                         const newName = input.value.trim();
 
                         if (!newName) {
-                            alert('Telecaller name cannot be empty');
+                            showClientError('Telecaller name cannot be empty');
                             return;
                         }
 
@@ -524,7 +557,7 @@
                             })
                             .catch(error => {
                                 console.error('Update error:', error);
-                                alert('Error saving telecaller name: ' + error.message);
+                                showClientError('Error saving telecaller name: ' + error.message);
                                 input.value = originalName;
                                 device.telecaller = originalName;
                                 btn.innerHTML = originalBtnHTML;

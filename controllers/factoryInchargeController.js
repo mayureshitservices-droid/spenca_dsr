@@ -126,6 +126,7 @@ const createInward = async (req, res) => {
                 gstPercentage: gstPercentage,
                 inwardUnit: item.inwardUnit || 'nos',
                 inwardQty: parseFloat(item.inwardQty) || quantity,
+                inwardWeight: item.inwardWeight ? parseFloat(item.inwardWeight) : null,
                 conditionConfirmed: true,
                 invoiceNo: invoiceNo || null,
                 invoiceDate: invoiceDate ? new Date(invoiceDate) : null,
@@ -319,7 +320,9 @@ const getProductionList = async (req, res) => {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             productionRecords,
-            title: 'Production History'
+            title: 'Production History',
+            successMessage: req.query.success,
+            errorMessage: req.query.error
         });
     } catch (error) {
         console.error('Get Production List error:', error);
@@ -331,11 +334,14 @@ const getProductionList = async (req, res) => {
 const getProductionForm = async (req, res) => {
     try {
         const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
+
         res.render('factoryIncharge/production-new', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             finishedGoods,
-            title: 'Record Production'
+            title: 'Record Production',
+            successMessage: req.query.success,
+            errorMessage: req.query.error
         });
     } catch (error) {
         console.error('Get Production Form error:', error);
@@ -347,6 +353,7 @@ const getProductionForm = async (req, res) => {
 const createProduction = async (req, res) => {
     try {
         const { shift, items } = req.body;
+        console.log(`[Production] Submission received - Shift: ${shift}, Items length: ${items ? items.length : 'N/A'}`);
 
         if (!shift) {
             return res.redirect('/factory-incharge/production/new?error=Please select a shift');
@@ -412,7 +419,7 @@ const createProduction = async (req, res) => {
             }
 
             if (missingRMs.length > 0) {
-                errors.push(`${finishedGood.productName}: Low RM - ${missingRMs.join(', ')}`);
+                errors.push(`[${finishedGood.productName}] Low Stock: ${missingRMs.join(' | ')}`);
                 continue;
             }
 
@@ -439,6 +446,7 @@ const createProduction = async (req, res) => {
         }
 
         if (errors.length > 0 && recorded === 0) {
+            console.log('[Production] All items failed:', errors);
             return res.redirect(`/factory-incharge/production/new?error=${encodeURIComponent(errors.join(' | '))}`);
         }
 

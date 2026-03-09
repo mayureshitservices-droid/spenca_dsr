@@ -16,129 +16,156 @@
                 </div>
             </div>
 
-            <!-- Alerts -->
-            <% if (locals.success) { %>
-                <div
-                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center gap-3 rounded-r-xl backdrop-blur-md">
-                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0"></i>
-                    <p class="font-bold">
-                        <%= success %>
-                    </p>
-                </div>
-                <% } %>
-                    <% if (locals.error) { %>
-                        <div
-                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-800 flex items-center gap-3 rounded-r-xl backdrop-blur-md">
-                            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500 shrink-0"></i>
-                            <p class="font-bold">
-                                <%= error %>
-                            </p>
+
+            <form id="productionForm" action="/factory-incharge/production" method="POST"
+                onsubmit="return collectItems()">
+                <div class="glass-card p-8 mb-8 space-y-10">
+
+                    <!-- Phase 1: Shift Selection -->
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">Shift
+                                Details</h3>
                         </div>
-                        <% } %>
+                        <div class="space-y-3">
+                            <label
+                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Production
+                                Shift *</label>
+                            <select name="shift" required class="input-field">
+                                <option value="" disabled selected>Select Shift</option>
+                                <option value="1st">1st Shift (Day)</option>
+                                <option value="2nd">2nd Shift (Evening)</option>
+                                <option value="3rd">3rd Shift (Night)</option>
+                            </select>
+                        </div>
+                    </div>
 
-                            <form id="productionForm" action="/factory-incharge/production" method="POST"
-                                onsubmit="return collectItems()">
-                                <div class="glass-card p-8 mb-8 space-y-10">
+                    <hr class="border-gray-100/50">
 
-                                    <!-- Phase 1: Shift Selection -->
-                                    <div class="space-y-6">
-                                        <div class="flex items-center justify-between">
-                                            <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">Shift
-                                                Details</h3>
-                                        </div>
-                                        <div class="space-y-3">
-                                            <label
-                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Production
-                                                Shift *</label>
-                                            <select name="shift" required class="input-field">
-                                                <option value="" disabled selected>Select Shift</option>
-                                                <option value="1st">1st Shift (Day)</option>
-                                                <option value="2nd">2nd Shift (Evening)</option>
-                                                <option value="3rd">3rd Shift (Night)</option>
-                                            </select>
+                    <!-- Phase 2: Products Section -->
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
+                                Products Manufactured</h3>
+                        </div>
+
+                        <div id="itemsContainer" class="space-y-6">
+                            <!-- Product Row Template -->
+                            <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
+                                id="itemRow_1">
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+
+                                    <!-- Product Selection -->
+                                    <div class="md:col-span-12 lg:col-span-5 space-y-2">
+                                        <label
+                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
+                                            Product *</label>
+                                        <div class="relative">
+                                            <input type="text" id="productInput_1" required autocomplete="off"
+                                                class="input-field shadow-sm" placeholder="Start typing...">
+                                            <input type="hidden" id="selectedProductId_1" class="item-product-id">
+                                            <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden items-suggestions"
+                                                id="productSuggestions_1"></div>
                                         </div>
                                     </div>
 
-                                    <hr class="border-gray-100/50">
+                                    <div class="md:col-span-5 lg:col-span-3 space-y-2">
+                                        <label
+                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes
+                                            *</label>
+                                        <input type="number" step="0.01" id="quantity_1" required
+                                            class="input-field shadow-sm item-quantity" placeholder="0">
+                                    </div>
 
-                                    <!-- Phase 2: Products Section -->
-                                    <div class="space-y-6">
-                                        <div class="flex items-center justify-between">
-                                            <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
-                                                Products Manufactured</h3>
-                                        </div>
+                                    <!-- Batch No -->
+                                    <div class="md:col-span-5 lg:col-span-3 space-y-2">
+                                        <label
+                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Batch
+                                            No *</label>
+                                        <input type="text" id="batchNo_1" required
+                                            class="input-field shadow-sm item-batch" placeholder="Ex: B-001">
+                                    </div>
 
-                                        <div id="itemsContainer" class="space-y-6">
-                                            <!-- Product Row Template -->
-                                            <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
-                                                id="itemRow_1">
-                                                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-
-                                                    <!-- Product Selection -->
-                                                    <div class="md:col-span-12 lg:col-span-5 space-y-2">
-                                                        <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
-                                                            Product *</label>
-                                                        <div class="relative">
-                                                            <input type="text" id="productInput_1" required
-                                                                autocomplete="off" class="input-field shadow-sm"
-                                                                placeholder="Start typing...">
-                                                            <input type="hidden" id="selectedProductId_1"
-                                                                class="item-product-id">
-                                                            <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden items-suggestions"
-                                                                id="productSuggestions_1"></div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="md:col-span-5 lg:col-span-3 space-y-2">
-                                                        <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Boxes
-                                                            *</label>
-                                                        <input type="number" step="0.01" id="quantity_1" required
-                                                            class="input-field shadow-sm item-quantity" placeholder="0">
-                                                    </div>
-
-                                                    <!-- Batch No -->
-                                                    <div class="md:col-span-5 lg:col-span-3 space-y-2">
-                                                        <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Batch
-                                                            No *</label>
-                                                        <input type="text" id="batchNo_1" required
-                                                            class="input-field shadow-sm item-batch"
-                                                            placeholder="Ex: B-001">
-                                                    </div>
-
-                                                    <!-- Actions -->
-                                                    <div class="md:col-span-2 lg:col-span-1 flex justify-end pb-1">
-                                                        <button type="button" onclick="removeItemRow(1)"
-                                                            class="w-12 h-12 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors bg-white rounded-2xl shadow-sm border border-gray-100">
-                                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <button type="button" onclick="addItemRow()"
-                                            class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
-                                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                                            Add Another Product
+                                    <!-- Actions -->
+                                    <div class="md:col-span-2 lg:col-span-1 flex justify-end pb-1">
+                                        <button type="button" onclick="removeItemRow(1)"
+                                            class="w-12 h-12 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors bg-white rounded-2xl shadow-sm border border-gray-100">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- Hidden items field -->
-                                <input type="hidden" name="items" id="itemsData">
+                        <button type="button" onclick="addItemRow()"
+                            class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                            Add Another Product
+                        </button>
+                    </div>
+                </div>
 
-                                <!-- Submit -->
-                                <div class="pt-2">
-                                    <button type="submit"
-                                        class="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3">
-                                        <i data-lucide="factory" class="w-6 h-6"></i>
-                                        Submit
-                                    </button>
+                <!-- Hidden items field -->
+                <input type="hidden" name="items" id="itemsData">
+
+                <!-- Submit -->
+                <div class="pt-2">
+                    <button type="submit"
+                        class="btn-primary w-full py-5 text-lg flex items-center justify-center gap-3">
+                        <i data-lucide="factory" class="w-6 h-6"></i>
+                        Submit
+                    </button>
+                </div>
+            </form>
+
+            <!-- Alerts (Relocated to bottom) -->
+            <div class="mt-8 space-y-4">
+                <% if (typeof successMessage !=='undefined' && successMessage) { %>
+                    <div
+                        class="p-4 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 rounded-lg shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
+                            <p class="font-bold">
+                                <%= successMessage %>
+                            </p>
+                        </div>
+                    </div>
+                    <% } %>
+
+                        <% if (typeof errorMessage !=='undefined' && errorMessage) { %>
+                            <div
+                                class="p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div class="flex items-start gap-4">
+                                    <i data-lucide="alert-octagon" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-black uppercase tracking-widest text-red-600">Requirement
+                                            Not Met</p>
+                                        <p class="font-bold text-lg leading-tight">
+                                            <%= errorMessage %>
+                                        </p>
+                                    </div>
                                 </div>
-                            </form>
+                            </div>
+                            <% } %>
+
+                                <!-- Client-side Error Box -->
+                                <div id="clientErrorBox"
+                                    class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <div class="flex items-start gap-4">
+                                        <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                        <div class="space-y-1">
+                                            <p class="text-sm font-black uppercase tracking-widest text-red-600">Check
+                                                Input Details</p>
+                                            <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
+                                        </div>
+                                        <button type="button"
+                                            onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
+                                            class="ml-auto text-red-400 hover:text-red-600">
+                                            <i data-lucide="x" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+            </div>
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
@@ -325,57 +352,93 @@
                         }
                     }
 
+                    function showClientError(msg) {
+                        const errorBox = document.getElementById('clientErrorBox');
+                        const errorText = document.getElementById('clientErrorText');
+                        if (errorBox && errorText) {
+                            errorText.textContent = msg;
+                            errorBox.classList.remove('hidden');
+                            // Ensure icons are created for the dynamic content
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+
                     function collectItems() {
-                        const items = [];
-                        const rows = document.querySelectorAll('[id^="itemRow_"]');
-                        let isValid = true;
-                        let errorMsg = '';
+                        try {
+                            console.log('Production: collectItems() called');
+                            // Reset client error box
+                            const errorBox = document.getElementById('clientErrorBox');
+                            if (errorBox) errorBox.classList.add('hidden');
 
-                        rows.forEach(row => {
-                            const id = row.id.split('_')[1];
-                            const productId = document.getElementById(`selectedProductId_${id}`).value;
-                            const productName = document.getElementById(`productInput_${id}`).value;
-                            const quantity = document.getElementById(`quantity_${id}`).value;
-                            const batchNo = document.getElementById(`batchNo_${id}`).value;
+                            const items = [];
+                            const rows = document.querySelectorAll('[id^="itemRow_"]');
+                            let isValid = true;
+                            let errorMsg = '';
 
-                            // If row has some data but not all
-                            if (productName || quantity || batchNo) {
-                                if (!productId) {
-                                    isValid = false;
-                                    errorMsg = 'Please select a valid product from the dropdown suggestions.';
-                                    row.classList.add('border-red-200', 'bg-red-50/30');
-                                } else if (!quantity || parseFloat(quantity) <= 0) {
-                                    isValid = false;
-                                    errorMsg = 'Please enter a valid number of boxes.';
-                                    row.classList.add('border-red-200', 'bg-red-50/30');
-                                } else if (!batchNo || batchNo.trim() === '') {
-                                    isValid = false;
-                                    errorMsg = 'Please enter a batch number.';
-                                    row.classList.add('border-red-200', 'bg-red-50/30');
-                                } else {
-                                    items.push({
-                                        productId,
-                                        quantity: parseFloat(quantity),
-                                        batchNo: batchNo.trim(),
-                                        remarks: '' // Added for compatibility with controller
-                                    });
-                                    row.classList.remove('border-red-200', 'bg-red-50/30');
+                            rows.forEach(row => {
+                                const id = row.id.split('_')[1];
+                                const productIdEl = document.getElementById(`selectedProductId_${id}`);
+                                const productNameEl = document.getElementById(`productInput_${id}`);
+                                const quantityEl = document.getElementById(`quantity_${id}`);
+                                const batchNoEl = document.getElementById(`batchNo_${id}`);
+
+                                if (!productIdEl || !productNameEl || !quantityEl || !batchNoEl) {
+                                    console.error(`Row components not found for ID: ${id}`);
+                                    return;
                                 }
+
+                                const productId = productIdEl.value;
+                                const productName = productNameEl.value;
+                                const quantity = quantityEl.value;
+                                const batchNo = batchNoEl.value;
+
+                                // If row has some data but not all
+                                if (productName || quantity || batchNo) {
+                                    if (!productId) {
+                                        isValid = false;
+                                        errorMsg = 'Please select a valid product from the dropdown suggestions.';
+                                        row.classList.add('border-red-200', 'bg-red-50/30');
+                                    } else if (!quantity || parseFloat(quantity) <= 0) {
+                                        isValid = false;
+                                        errorMsg = 'Please enter a valid number of boxes.';
+                                        row.classList.add('border-red-200', 'bg-red-50/30');
+                                    } else if (!batchNo || batchNo.trim() === '') {
+                                        isValid = false;
+                                        errorMsg = 'Please enter a batch number.';
+                                        row.classList.add('border-red-200', 'bg-red-50/30');
+                                    } else {
+                                        items.push({
+                                            productId,
+                                            quantity: parseFloat(quantity),
+                                            batchNo: batchNo.trim(),
+                                            remarks: ''
+                                        });
+                                        row.classList.remove('border-red-200', 'bg-red-50/30');
+                                    }
+                                }
+                            });
+
+                            if (!isValid) {
+                                showClientError(errorMsg);
+                                return false;
                             }
-                        });
 
-                        if (!isValid) {
-                            alert(errorMsg);
+                            if (items.length === 0) {
+                                showClientError('Please add at least one product with valid details.');
+                                return false;
+                            }
+
+                            document.getElementById('itemsData').value = JSON.stringify(items);
+                            console.log('Production: Data collected successfully', items);
+                            return true;
+                        } catch (err) {
+                            console.error('JS Error in collectItems:', err);
+                            showClientError('An internal error occurred. Please check console.');
                             return false;
                         }
-
-                        if (items.length === 0) {
-                            alert('Please add at least one product with valid details.');
-                            return false;
-                        }
-
-                        document.getElementById('itemsData').value = JSON.stringify(items);
-                        return true;
                     }
 
                     document.addEventListener('DOMContentLoaded', () => {

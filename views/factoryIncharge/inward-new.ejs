@@ -12,234 +12,248 @@
                 <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none">Record Inward</h1>
             </div>
 
-            <!-- Alerts -->
-            <% if (typeof success !=='undefined' && success) { %>
-                <div
-                    class="mb-8 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
-                        <p class="font-bold">
-                            <%= success %>
-                        </p>
-                    </div>
+            <div class="glass-card overflow-hidden">
+                <div class="card-header-primary">
+                    <h2 class="text-xl font-black">Entry Details</h2>
                 </div>
-                <% } %>
 
-                    <% if (typeof error !=='undefined' && error) { %>
+                <form id="inwardForm" action="/factory-incharge/inward" method="POST" enctype="multipart/form-data"
+                    onsubmit="return collectItems()" class="p-8 space-y-8">
+
+                    <!-- Header Info: Supplier & Invoice -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Supplier Selection -->
+                        <div class="md:col-span-2 space-y-3">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Select
+                                Supplier *</label>
+                            <div class="relative">
+                                <input type="text" id="supplierInput" required autocomplete="off" class="input-field"
+                                    placeholder="Start typing supplier name...">
+                                <input type="hidden" id="selectedSupplierId" name="supplierId">
+                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                    id="supplierSuggestions"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                No</label>
+                            <div class="relative">
+                                <input type="text" name="invoiceNo" class="input-field" placeholder="INV/2024/001">
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                Date</label>
+                            <div class="relative">
+                                <input type="date" name="invoiceDate" class="input-field">
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2 space-y-3">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                Photo</label>
+                            <div class="relative group">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex-1">
+                                        <label for="invoicePhoto"
+                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer bg-gray-50 hover:bg-gray-100/50 hover:border-primary-400 transition-all group-hover:shadow-sm">
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <i data-lucide="image"
+                                                    class="w-8 h-8 text-gray-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400"
+                                                    id="photoStatusText">Click to upload invoice photo
+                                                </p>
+                                            </div>
+                                            <input type="file" name="invoicePhoto" id="invoicePhoto" class="hidden"
+                                                accept="image/*" onchange="updatePhotoLabel(this)">
+                                        </label>
+                                    </div>
+                                    <div id="photoPreview" class="hidden">
+                                        <img id="previewImg"
+                                            class="w-32 h-32 object-cover rounded-3xl border-2 border-gray-100 shadow-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- Items Section -->
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
+                                Material Items</h3>
+                        </div>
+
+                        <div id="itemsContainer" class="space-y-6">
+                            <!-- Item Row Template -->
+                            <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
+                                id="itemRow_1">
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+                                    <!-- Material Selection -->
+                                    <div class="md:col-span-5 space-y-2">
+                                        <label
+                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
+                                            Material *</label>
+                                        <div class="relative">
+                                            <input type="text" id="materialInput_1" required autocomplete="off"
+                                                class="input-field shadow-sm"
+                                                placeholder="Start typing material name...">
+                                            <input type="hidden" id="selectedProductId_1" class="item-product-id">
+                                            <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
+                                                id="materialSuggestions_1"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quantity / Unit Type Selection -->
+                                    <div class="md:col-span-3 space-y-2">
+                                        <div class="flex items-center justify-between ml-1">
+                                            <label
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty
+                                                *</label>
+                                            <div id="unitBadgeContainer_1" class="hidden">
+                                                <span
+                                                    class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">Weight
+                                                    (KG)</span>
+                                                <input type="hidden" id="unitType_1" value="nos">
+                                            </div>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="number" step="0.01" id="quantity_1" required
+                                                class="input-field shadow-sm item-quantity" placeholder="0.00"
+                                                oninput="calculateTotalNos(1)">
+                                            <div id="conversionText_1"
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary-600 uppercase hidden">
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="totalNos_1" class="calculated-nos">
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="md:col-span-2 space-y-2">
+                                        <label
+                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Price
+                                            / Unit *</label>
+                                        <input type="number" step="0.01" id="price_1" required
+                                            class="input-field shadow-sm item-price" placeholder="0.00">
+                                    </div>
+
+                                    <!-- GST -->
+                                    <div class="md:col-span-2 space-y-2">
+                                        <label
+                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">GST
+                                            %</label>
+                                        <select id="gstPercentage_1" required class="input-field shadow-sm item-gst">
+                                            <option value="0">0%</option>
+                                            <option value="5">5%</option>
+                                            <option value="12">12%</option>
+                                            <option value="18" selected>18%</option>
+                                            <option value="28">28%</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="md:col-span-1">
+                                        <button type="button" onclick="removeItemRow(1)"
+                                            class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
+                                            <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="addItemRow()"
+                            class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                            Add Another Material
+                        </button>
+                    </div>
+
+                    <!-- Hidden field for collected items -->
+                    <input type="hidden" name="items" id="itemsData">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Condition Confirmation -->
+                        <div class="md:col-span-2 pt-6">
+                            <label class="flex items-start gap-4 cursor-pointer group">
+                                <div class="relative flex items-center justify-center shrink-0 mt-1">
+                                    <input type="checkbox" name="conditionConfirmed" required
+                                        class="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-gray-200 bg-gray-50 checked:bg-primary-600 checked:border-primary-600 transition-all">
+                                    <i data-lucide="check"
+                                        class="absolute h-4 w-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none stroke-[4]"></i>
+                                </div>
+                                <div class="space-y-0.5">
+                                    <span
+                                        class="text-sm font-black text-gray-900 group-hover:text-primary-600 transition-colors">I
+                                        confirm material condition is OK *</span>
+                                    <p class="text-xs font-bold text-gray-400">Material has been
+                                        verified for quantity and quality standards.</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="md:col-span-2 pt-6">
+                            <button type="submit" class="btn-primary w-full py-5 text-lg">
+                                submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Alerts (Relocated to bottom) -->
+                <div class="mt-8 space-y-4">
+                    <% if (typeof success !=='undefined' && success) { %>
                         <div
-                            class="mb-8 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md">
+                            class="p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div class="flex items-center gap-3">
-                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+                                <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-500"></i>
                                 <p class="font-bold">
-                                    <%= error %>
+                                    <%= success %>
                                 </p>
                             </div>
                         </div>
                         <% } %>
 
-                            <div class="glass-card overflow-hidden">
-                                <div class="card-header-primary">
-                                    <h2 class="text-xl font-black">Entry Details</h2>
+                            <% if (typeof error !=='undefined' && error) { %>
+                                <div
+                                    class="p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div class="flex items-start gap-4">
+                                        <i data-lucide="alert-octagon" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                        <div class="space-y-1">
+                                            <p class="text-sm font-black uppercase tracking-widest text-red-600">
+                                                Requirement Not Met</p>
+                                            <p class="font-bold text-lg leading-tight">
+                                                <%= error %>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
+                                <% } %>
 
-                                <form id="inwardForm" action="/factory-incharge/inward" method="POST"
-                                    enctype="multipart/form-data" onsubmit="return collectItems()"
-                                    class="p-8 space-y-8">
-
-                                    <!-- Header Info: Supplier & Invoice -->
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <!-- Supplier Selection -->
-                                        <div class="md:col-span-2 space-y-3">
-                                            <label
-                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Select
-                                                Supplier *</label>
-                                            <div class="relative">
-                                                <input type="text" id="supplierInput" required autocomplete="off"
-                                                    class="input-field" placeholder="Start typing supplier name...">
-                                                <input type="hidden" id="selectedSupplierId" name="supplierId">
-                                                <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
-                                                    id="supplierSuggestions"></div>
+                                    <!-- Client-side Error Box -->
+                                    <div id="clientErrorBox"
+                                        class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                        <div class="flex items-start gap-4">
+                                            <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                            <div class="space-y-1">
+                                                <p class="text-sm font-black uppercase tracking-widest text-red-600">
+                                                    Check Input Details</p>
+                                                <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
                                             </div>
-                                        </div>
-
-                                        <div class="space-y-3">
-                                            <label
-                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                                No</label>
-                                            <div class="relative">
-                                                <input type="text" name="invoiceNo" class="input-field"
-                                                    placeholder="INV/2024/001">
-                                            </div>
-                                        </div>
-
-                                        <div class="space-y-3">
-                                            <label
-                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                                Date</label>
-                                            <div class="relative">
-                                                <input type="date" name="invoiceDate" class="input-field">
-                                            </div>
-                                        </div>
-
-                                        <div class="md:col-span-2 space-y-3">
-                                            <label
-                                                class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                                Photo</label>
-                                            <div class="relative group">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="flex-1">
-                                                        <label for="invoicePhoto"
-                                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer bg-gray-50 hover:bg-gray-100/50 hover:border-primary-400 transition-all group-hover:shadow-sm">
-                                                            <div
-                                                                class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                <i data-lucide="image"
-                                                                    class="w-8 h-8 text-gray-400 mb-2 group-hover:scale-110 transition-transform"></i>
-                                                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400"
-                                                                    id="photoStatusText">Click to upload invoice photo
-                                                                </p>
-                                                            </div>
-                                                            <input type="file" name="invoicePhoto" id="invoicePhoto"
-                                                                class="hidden" accept="image/*"
-                                                                onchange="updatePhotoLabel(this)">
-                                                        </label>
-                                                    </div>
-                                                    <div id="photoPreview" class="hidden">
-                                                        <img id="previewImg"
-                                                            class="w-32 h-32 object-cover rounded-3xl border-2 border-gray-100 shadow-sm">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <hr class="border-gray-100">
-
-                                    <!-- Items Section -->
-                                    <div class="space-y-6">
-                                        <div class="flex items-center justify-between">
-                                            <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">
-                                                Material Items</h3>
-                                        </div>
-
-                                        <div id="itemsContainer" class="space-y-6">
-                                            <!-- Item Row Template -->
-                                            <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
-                                                id="itemRow_1">
-                                                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-                                                    <!-- Material Selection -->
-                                                    <div class="md:col-span-5 space-y-2">
-                                                        <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
-                                                            Material *</label>
-                                                        <div class="relative">
-                                                            <input type="text" id="materialInput_1" required
-                                                                autocomplete="off" class="input-field shadow-sm"
-                                                                placeholder="Start typing material name...">
-                                                            <input type="hidden" id="selectedProductId_1"
-                                                                class="item-product-id">
-                                                            <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
-                                                                id="materialSuggestions_1"></div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Quantity / Unit Type Selection -->
-                                                    <div class="md:col-span-3 space-y-2">
-                                                        <div class="flex items-center justify-between ml-1">
-                                                            <label
-                                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty
-                                                                *</label>
-                                                            <div id="unitBadgeContainer_1" class="hidden">
-                                                                <span
-                                                                    class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 border border-amber-200">Bags
-                                                                    Only</span>
-                                                                <input type="hidden" id="unitType_1" value="nos">
-                                                            </div>
-                                                        </div>
-                                                        <div class="relative">
-                                                            <input type="number" step="0.01" id="quantity_1" required
-                                                                class="input-field shadow-sm item-quantity"
-                                                                placeholder="0.00" oninput="calculateTotalNos(1)">
-                                                            <div id="conversionText_1"
-                                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary-600 uppercase hidden">
-                                                            </div>
-                                                        </div>
-                                                        <input type="hidden" id="totalNos_1" class="calculated-nos">
-                                                    </div>
-
-                                                    <!-- Price -->
-                                                    <div class="md:col-span-2 space-y-2">
-                                                        <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Price
-                                                            / Unit *</label>
-                                                        <input type="number" step="0.01" id="price_1" required
-                                                            class="input-field shadow-sm item-price" placeholder="0.00">
-                                                    </div>
-
-                                                    <!-- GST -->
-                                                    <div class="md:col-span-2 space-y-2">
-                                                        <label
-                                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">GST
-                                                            %</label>
-                                                        <select id="gstPercentage_1" required
-                                                            class="input-field shadow-sm item-gst">
-                                                            <option value="0">0%</option>
-                                                            <option value="5">5%</option>
-                                                            <option value="12">12%</option>
-                                                            <option value="18" selected>18%</option>
-                                                            <option value="28">28%</option>
-                                                        </select>
-                                                    </div>
-
-                                                    <!-- Actions -->
-                                                    <div class="md:col-span-1">
-                                                        <button type="button" onclick="removeItemRow(1)"
-                                                            class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
-                                                            <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <button type="button" onclick="addItemRow()"
-                                            class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
-                                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                                            Add Another Material
-                                        </button>
-                                    </div>
-
-                                    <!-- Hidden field for collected items -->
-                                    <input type="hidden" name="items" id="itemsData">
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <!-- Condition Confirmation -->
-                                        <div class="md:col-span-2 pt-6">
-                                            <label class="flex items-start gap-4 cursor-pointer group">
-                                                <div class="relative flex items-center justify-center shrink-0 mt-1">
-                                                    <input type="checkbox" name="conditionConfirmed" required
-                                                        class="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-gray-200 bg-gray-50 checked:bg-primary-600 checked:border-primary-600 transition-all">
-                                                    <i data-lucide="check"
-                                                        class="absolute h-4 w-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none stroke-[4]"></i>
-                                                </div>
-                                                <div class="space-y-0.5">
-                                                    <span
-                                                        class="text-sm font-black text-gray-900 group-hover:text-primary-600 transition-colors">I
-                                                        confirm material condition is OK *</span>
-                                                    <p class="text-xs font-bold text-gray-400">Material has been
-                                                        verified for quantity and quality standards.</p>
-                                                </div>
-                                            </label>
-                                        </div>
-
-                                        <!-- Submit -->
-                                        <div class="md:col-span-2 pt-6">
-                                            <button type="submit" class="btn-primary w-full py-5 text-lg">
-                                                submit
+                                            <button type="button"
+                                                onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
+                                                class="ml-auto text-red-400 hover:text-red-600">
+                                                <i data-lucide="x" class="w-5 h-5"></i>
                                             </button>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
+                </div>
+            </div>
         </div>
 
 
@@ -270,11 +284,11 @@
                                             id="materialSuggestions_${rowCount}"></div>
                                     </div>
                                 </div>
-                                <div class="md:col-span-2 space-y-2">
+                                <div class="md:col-span-3 space-y-2">
                                     <div class="flex items-center justify-between ml-1">
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty *</label>
                                         <div id="unitBadgeContainer_${rowCount}" class="hidden">
-                                            <span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 border border-amber-200">Bags Only</span>
+                                            <span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">Weight (KG)</span>
                                             <input type="hidden" id="unitType_${rowCount}" value="nos">
                                         </div>
                                     </div>
@@ -354,7 +368,7 @@
 
                                 if (isPreform) {
                                     if (badge) badge.classList.remove('hidden');
-                                    toggleUnit(id, 'bags'); // Force Bags
+                                    toggleUnit(id, 'kg'); // Force KG
                                     // Extract weight from name (e.g. "32 gm Preform" -> 32)
                                     const match = item.productName.match(/(\d+\.?\d*)\s*gm/i);
                                     if (match) {
@@ -385,7 +399,9 @@
 
                         if (unitType) unitType.value = unit;
 
-                        if (unit === 'bags') {
+                        if (unit === 'kg') {
+                            if (quantityInput) quantityInput.placeholder = "Enter Weight (KG)";
+                        } else if (unit === 'bags') {
                             if (quantityInput) quantityInput.placeholder = "Enter Bags";
                         } else {
                             if (quantityInput) quantityInput.placeholder = "0.00";
@@ -400,7 +416,13 @@
                         const totalNosInput = document.getElementById(`totalNos_${id}`);
                         const conversionText = document.getElementById(`conversionText_${id}`);
 
-                        if (unitType === 'bags' && weight && preformConversions[weight]) {
+                        if (unitType === 'kg' && weight) {
+                            // Pieces = (KG * 1000) / Gram Weight
+                            const total = Math.round((quantity * 1000) / parseFloat(weight));
+                            totalNosInput.value = total;
+                            conversionText.innerText = `= ${total} Nos`;
+                            conversionText.classList.remove('hidden');
+                        } else if (unitType === 'bags' && weight && preformConversions[weight]) {
                             const multiplier = preformConversions[weight];
                             const total = Math.round(quantity * multiplier);
                             totalNosInput.value = total;
@@ -412,36 +434,78 @@
                         }
                     }
 
+                    function showClientError(msg) {
+                        const errorBox = document.getElementById('clientErrorBox');
+                        const errorText = document.getElementById('clientErrorText');
+                        if (errorBox && errorText) {
+                            errorText.textContent = msg;
+                            errorBox.classList.remove('hidden');
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+
                     function collectItems() {
+                        // Reset client error box
+                        const errorBox = document.getElementById('clientErrorBox');
+                        if (errorBox) errorBox.classList.add('hidden');
+
                         const items = [];
                         const rows = document.querySelectorAll('[id^="itemRow_"]');
                         let isValid = true;
+                        let errorMsg = '';
 
                         rows.forEach(row => {
                             const id = row.id.split('_')[1];
                             const productId = document.getElementById(`selectedProductId_${id}`).value;
-                            const quantity = document.getElementById(`quantity_${id}`).value;
-                            const price = document.getElementById(`price_${id}`).value;
+                            const materialName = document.getElementById(`materialInput_${id}`).value;
+                            const quantity = parseFloat(document.getElementById(`quantity_${id}`).value);
+                            const price = parseFloat(document.getElementById(`price_${id}`).value);
                             const gstPercentage = document.getElementById(`gstPercentage_${id}`).value;
+                            const unitType = document.getElementById(`unitType_${id}`) ? document.getElementById(`unitType_${id}`).value : 'nos';
+                            const totalNos = parseFloat(document.getElementById(`totalNos_${id}`).value);
 
-                            if (!productId || !quantity || !price) {
+                            // Check if the row has any input, if not, skip it (e.g., empty added row)
+                            if (!materialName && isNaN(quantity) && isNaN(price)) {
+                                row.classList.remove('border-red-200', 'bg-red-50/30');
+                                return; // Skip this row if it's completely empty
+                            }
+
+                            if (!productId) {
                                 isValid = false;
+                                errorMsg = 'Please select a valid material from the suggestions for all items.';
                                 row.classList.add('border-red-200', 'bg-red-50/30');
-                                setTimeout(() => row.classList.remove('border-red-200', 'bg-red-50/30'), 2000);
+                            } else if (isNaN(quantity) || quantity <= 0) {
+                                isValid = false;
+                                errorMsg = 'Please enter a valid quantity (greater than 0) for all items.';
+                                row.classList.add('border-red-200', 'bg-red-50/30');
+                            } else if (isNaN(price) || price <= 0) {
+                                isValid = false;
+                                errorMsg = 'Please enter a valid price per unit (greater than 0) for all items.';
+                                row.classList.add('border-red-200', 'bg-red-50/30');
                             } else {
                                 items.push({
                                     productId,
-                                    quantity: document.getElementById(`totalNos_${id}`).value,
+                                    quantity: totalNos, // This is the calculated 'nos' quantity
                                     price,
                                     gstPercentage,
-                                    inwardUnit: document.getElementById(`unitType_${id}`) ? document.getElementById(`unitType_${id}`).value : 'nos',
-                                    inwardQty: quantity // Original value entered (could be bags)
+                                    inwardUnit: unitType,
+                                    inwardQty: quantity, // Original value entered by user
+                                    inwardWeight: unitType === 'kg' ? quantity : null
                                 });
+                                row.classList.remove('border-red-200', 'bg-red-50/30');
                             }
                         });
 
                         if (!isValid) {
-                            alert('Please fill all required fields for each item and select materials from the suggestions.');
+                            showClientError(errorMsg);
+                            return false;
+                        }
+
+                        if (items.length === 0) {
+                            showClientError('Please add at least one material with valid details.');
                             return false;
                         }
 
