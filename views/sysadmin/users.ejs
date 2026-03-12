@@ -155,6 +155,16 @@
                                     <option value="factory_incharge">Factory Incharge (Stock Access)</option>
                                 </select>
                             </div>
+                            <div class="space-y-2" id="factoryField" style="display: none;">
+                                <label
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest">Assigned
+                                    Factory</label>
+                                <select name="factory" class="input-field">
+                                    <option value="">Choose Factory Location</option>
+                                    <option value="indapur">Indapur</option>
+                                    <option value="shirapur">Shirapur</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-4 border-t border-gray-100 pt-8">
@@ -249,6 +259,18 @@
                         modal.classList.add('hidden');
                         document.body.style.overflow = '';
                     }
+
+                    // Show/Hide Factory Field based on Role
+                    document.querySelector('select[name="role"]').addEventListener('change', function () {
+                        const factoryField = document.getElementById('factoryField');
+                        if (this.value === 'factory_incharge') {
+                            factoryField.style.display = 'block';
+                            factoryField.querySelector('select').setAttribute('required', 'required');
+                        } else {
+                            factoryField.style.display = 'none';
+                            factoryField.querySelector('select').removeAttribute('required');
+                        }
+                    });
 
                     function toggleStatus(userId) {
                         if (!confirm('Are you sure you want to toggle this user\'s status?')) return;

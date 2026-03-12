@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
         enum: ['sysadmin', 'sales_head', 'owner', 'salesperson', 'headoffice', 'factory_incharge'],
         required: [true, 'Role is required']
     },
+    factory: {
+        type: String,
+        enum: ['indapur', 'shirapur'],
+        required: function() { return this.role === 'factory_incharge'; }
+    },
     activeStatus: {
         type: Boolean,
         default: true

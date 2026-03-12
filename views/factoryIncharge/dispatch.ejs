@@ -7,7 +7,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                 <div class="space-y-2">
                     <h1 class="text-4xl font-black text-black tracking-tight uppercase leading-none">
-                        Dispatch History
+                        Dispatch
                     </h1>
                 </div>
 
@@ -21,7 +21,7 @@
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                         <i data-lucide="search"
-                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                            class="w-5 h-5 text-gray-400 group-focus-within:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-500 transition-colors"></i>
                     </div>
                     <input type="text" id="dispatchSearch" placeholder="Search by receiver, product, or vehicle..."
                         style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
@@ -30,291 +30,191 @@
             </div>
 
             <!-- Transactions Grid -->
-            <% if (dispatchTransactions.length===0) { %>
-                <div
-                    class="bg-white/95 backdrop-blur-md rounded-3xl p-20 text-center shadow-around-lg border border-gray-100">
+            <% if (dispatchTransactions.length === 0) { %>
+                <div class="bg-white/95 backdrop-blur-md rounded-3xl p-20 text-center shadow-around-lg border border-gray-100">
                     <div class="flex flex-col items-center gap-6">
-                        <div
-                            class="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                        <div class="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                            <i data-lucide="package-x" class="w-10 h-10 text-gray-300"></i>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest">No Dispatches
-                                Recorded</h3>
-                            <p class="text-sm font-medium text-gray-400">Your outgoing material history will appear
-                                here.</p>
+                            <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest">No Dispatches Recorded</h3>
+                            <p class="text-sm font-medium text-gray-400">Your outgoing material history will appear here.</p>
                         </div>
                     </div>
                 </div>
-                <% } else { %>
-                    <% if (dispatchTransactions.length===0) { %>
-                        <div
-                            class="bg-white/95 backdrop-blur-md rounded-3xl p-20 text-center shadow-around-lg border border-gray-100">
-                            <div class="flex flex-col items-center gap-6">
-                                <div
-                                    class="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-                                </div>
-                                <div class="space-y-2">
-                                    <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest">No Dispatches
-                                        Recorded</h3>
-                                    <p class="text-sm font-medium text-gray-400">Your outgoing material history will
-                                        appear
-                                        here.</p>
-                                </div>
+            <% } else { %>
+                <!-- Mobile View (Cards) -->
+                <div id="dispatchCardsView" class="grid grid-cols-1 md:hidden gap-6">
+                    <% dispatchTransactions.forEach(item => { %>
+                        <div class="dispatch-card glass-card p-6 flex flex-col group transition-all hover:shadow-2xl hover:-translate-y-2">
+                            <!-- Top Meta: Just the Date -->
+                            <div class="mb-6 pb-4 border-b border-gray-50 flex justify-between items-center">
+                                <p class="text-sm font-black text-gray-900">
+                                    <%= new Date(item.dispatchDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                                </p>
+                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
+                                    <%= new Date(item.dispatchDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %>
+                                </span>
                             </div>
-                        </div>
-                        <% } else { %>
-                            <!-- Mobile View (Cards) -->
-                            <div id="dispatchCardsView" class="grid grid-cols-1 md:hidden gap-6">
-                                <% dispatchTransactions.forEach(item=> { %>
-                                    <div
-                                        class="dispatch-card glass-card p-6 flex flex-col group transition-all hover:shadow-2xl hover:-translate-y-2">
-                                        <!-- Top Meta: Just the Date -->
-                                        <div
-                                            class="mb-6 pb-4 border-b border-gray-50 flex justify-between items-center">
-                                            <p class="text-sm font-black text-gray-900">
-                                                <%= new Date(item.dispatchDate).toLocaleDateString('en-IN', {
-                                                    day: '2-digit' , month: 'short' , year: 'numeric' }) %>
-                                            </p>
-                                            <span
-                                                class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                                                <%= new Date(item.dispatchDate).toLocaleTimeString('en-IN', {
-                                                    hour: '2-digit' , minute: '2-digit' }) %>
-                                            </span>
-                                        </div>
 
-                                        <!-- Main Content -->
-                                        <div class="space-y-6 flex-grow">
-                                            <!-- Receiver -->
-                                            <p
-                                                class="text-base font-black text-gray-900 uppercase group-hover:text-indigo-600 transition-colors tracking-tight leading-none">
-                                                <%= item.receiverName %>
+                            <!-- Main Content -->
+                            <div class="space-y-6 flex-grow">
+                                <!-- Receiver -->
+                                <p class="text-base font-black text-gray-900 uppercase group-hover:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 transition-colors tracking-tight leading-none">
+                                    <%= item.receiverName %>
+                                </p>
+                            </div>
+
+                            <% if (item.dcNo || item.vehicleNo) { %>
+                                <div class="flex flex-wrap gap-x-8 gap-y-4 pt-4 border-t border-gray-50">
+                                    <% if (item.dcNo) { %>
+                                        <div class="leading-tight">
+                                            <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">DC</label>
+                                            <p class="text-[10px] font-black text-gray-900 uppercase">
+                                                #<%= item.dcNo %>
+                                                <span class="text-gray-400 mx-1">|</span>
+                                                <%= item.dcDate ? new Date(item.dcDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'N/A' %>
                                             </p>
                                         </div>
+                                    <% } %>
 
-                                        <% if (item.invoiceNo || item.vehicleNo) { %>
-                                            <div class="flex flex-wrap gap-x-8 gap-y-4 pt-4 border-t border-gray-50">
-                                                <% if (item.invoiceNo) { %>
-                                                    <div class="leading-tight">
-                                                        <label
-                                                            class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Invoice</label>
-                                                        <p class="text-[10px] font-black text-gray-900 uppercase">#<%=
-                                                                item.invoiceNo %>
-                                                                <span class="text-gray-400 mx-1">|</span>
-                                                                <%= item.invoiceDate ? new
-                                                                    Date(item.invoiceDate).toLocaleDateString('en-IN', {
-                                                                    day: '2-digit' , month: 'short' }) : 'N/A' %>
-                                                        </p>
-                                                    </div>
-                                                    <% } %>
+                                    <% if (item.vehicleNo) { %>
+                                        <div class="leading-tight">
+                                            <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Vehicle</label>
+                                            <p class="text-[10px] font-black text-gray-900 uppercase"><%= item.vehicleNo %></p>
+                                        </div>
+                                    <% } %>
 
-                                                        <% if (item.vehicleNo) { %>
-                                                            <div class="leading-tight">
-                                                                <label
-                                                                    class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Vehicle</label>
-                                                                <p
-                                                                    class="text-[10px] font-black text-gray-900 uppercase">
-                                                                    <%= item.vehicleNo %>
-                                                                </p>
-                                                            </div>
-                                                            <% } %>
+                                    <% if (item.driverName) { %>
+                                        <div class="leading-tight">
+                                            <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Driver</label>
+                                            <p class="text-[10px] font-black text-gray-900 uppercase">
+                                                <%= item.driverName %>
+                                                <%= item.driverMobileNo ? '(' + item.driverMobileNo + ')' : '' %>
+                                            </p>
+                                        </div>
+                                    <% } %>
 
-                                                                <% if (item.driverName) { %>
-                                                                    <div class="leading-tight">
-                                                                        <label
-                                                                            class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Driver</label>
-                                                                        <p
-                                                                            class="text-[10px] font-black text-gray-900 uppercase">
-                                                                            <%= item.driverName %>
-                                                                                <%= item.driverMobileNo ? '(' +
-                                                                                    item.driverMobileNo + ')' : '' %>
-                                                                        </p>
-                                                                    </div>
-                                                                    <% } %>
-
-                                                                        <% if (item.invoicePhoto) { %>
-                                                                            <div class="leading-tight">
-                                                                                <label
-                                                                                    class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Photo</label>
-                                                                                <a href="<%= item.invoicePhoto %>"
-                                                                                    target="_blank"
-                                                                                    class="flex items-center gap-1 text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-tight">
-                                                                                    <i data-lucide="image"
-                                                                                        class="w-3 h-3"></i>
-                                                                                    View Photo
-                                                                                </a>
-                                                                            </div>
-                                                                            <% } %>
-                                            </div>
-                                            <% } %>
-
-                                                <!-- Material & Quantity in Same Row -->
-                                                <div
-                                                    class="flex items-start justify-between gap-4 pt-6 border-t border-gray-50">
-                                                    <div class="leading-tight">
-                                                        <label
-                                                            class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Finished
-                                                            Good</label>
-                                                        <p
-                                                            class="text-base font-black text-gray-900 uppercase leading-none">
-                                                            <%= item.productName %>
-                                                        </p>
-                                                        <p
-                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mt-1">
-                                                            <%= item.productId ? item.productId.packaging : '' %>
-                                                        </p>
-                                                    </div>
-
-                                                    <div class="text-right">
-                                                        <label
-                                                            class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Qty</label>
-                                                        <div class="flex items-baseline justify-end gap-1">
-                                                            <span class="text-xl font-black text-black leading-none">
-                                                                <%= (item.quantity || 0).toFixed(2) %>
-                                                            </span>
-                                                            <span class="text-[10px] font-bold text-gray-400 uppercase">
-                                                                <%= item.productId ? item.productId.uom : '' %>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <% if (item.remark) { %>
-                                                    <div
-                                                        class="mt-4 p-3 bg-gray-50/50 rounded-xl border border-gray-100">
-                                                        <label
-                                                            class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Notes</label>
-                                                        <p class="text-[10px] font-medium text-gray-600">
-                                                            <%= item.remark %>
-                                                        </p>
-                                                    </div>
-                                                    <% } %>
-                                    </div>
-                                    <% }) %>
-                            </div>
-
-                            <!-- Desktop View (Table) -->
-                            <div id="dispatchTableView"
-                                class="hidden md:block overflow-x-auto shadow-around-lg rounded-3xl bg-white/95 backdrop-blur-md border border-gray-100">
-                                <table class="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr class="bg-gray-50/50 border-b border-gray-100">
-                                            <th
-                                                class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                Date</th>
-                                            <th
-                                                class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                Receiver</th>
-                                            <th
-                                                class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                Product</th>
-                                            <th
-                                                class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                Logistics</th>
-                                            <th
-                                                class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
-                                                Quantity</th>
-                                            <th
-                                                class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                                                Remarks</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-50">
-                                        <% dispatchTransactions.forEach(item=> { %>
-                                            <tr class="dispatch-row hover:bg-gray-50/50 transition-colors group">
-                                                <td class="px-8 py-6">
-                                                    <p class="text-sm font-black text-gray-900 leading-tight">
-                                                        <%= new Date(item.dispatchDate).toLocaleDateString('en-IN', {
-                                                            day: '2-digit' , month: 'short' , year: 'numeric' }) %>
-                                                    </p>
-                                                    <span
-                                                        class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
-                                                        <%= new Date(item.dispatchDate).toLocaleTimeString('en-IN', {
-                                                            hour: '2-digit' , minute: '2-digit' }) %>
-                                                    </span>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <p
-                                                        class="text-sm font-black text-gray-900 uppercase tracking-tight">
-                                                        <%= item.receiverName %>
-                                                    </p>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <p
-                                                        class="text-sm font-black text-gray-900 uppercase tracking-tight">
-                                                        <%= item.productName %>
-                                                    </p>
-                                                    <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">
-                                                        <%= item.productId ? item.productId.packaging : '' %>
-                                                    </p>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <div class="space-y-1">
-                                                        <% if (item.vehicleNo) { %>
-                                                            <p class="text-[10px] font-black text-gray-700 uppercase">
-                                                                Vehicle: <%= item.vehicleNo %>
-                                                            </p>
-                                                            <% } %>
-                                                                <% if (item.driverName) { %>
-                                                                    <p
-                                                                        class="text-[9px] font-bold text-gray-400 uppercase truncate">
-                                                                        <%= item.driverName %>
-                                                                            <%= item.driverMobileNo ? '(' +
-                                                                                item.driverMobileNo + ')' : '' %>
-                                                                    </p>
-                                                                    <% } %>
-                                                                        <% if (item.invoiceNo) { %>
-                                                                            <div class="flex items-center gap-2 mt-1">
-                                                                                <span
-                                                                                    class="text-[9px] font-black text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">#
-                                                                                    <%= item.invoiceNo %>
-                                                                                </span>
-                                                                                <% if (item.invoicePhoto) { %>
-                                                                                    <a href="<%= item.invoicePhoto %>"
-                                                                                        target="_blank"
-                                                                                        class="text-indigo-400 hover:text-indigo-600">
-                                                                                        <i data-lucide="image"
-                                                                                            class="w-3.5 h-3.5"></i>
-                                                                                    </a>
-                                                                                    <% } %>
-                                                                            </div>
-                                                                            <% } %>
-                                                    </div>
-                                                </td>
-                                                <td class="px-8 py-6 text-right">
-                                                    <div class="flex items-baseline justify-end gap-1">
-                                                        <span class="text-lg font-black text-gray-900">
-                                                            <%= (item.quantity || 0).toFixed(2) %>
-                                                        </span>
-                                                        <span class="text-[10px] font-bold text-gray-400 uppercase">
-                                                            <%= item.productId ? item.productId.uom : '' %>
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <% if (item.remark) { %>
-                                                        <p class="text-[10px] font-medium text-gray-500 max-w-xs truncate"
-                                                            title="<%= item.remark %>">
-                                                            <%= item.remark %>
-                                                        </p>
-                                                        <% } else { %>
-                                                            <span class="text-gray-300 text-[10px] italic">No
-                                                                notes</span>
-                                                            <% } %>
-                                                </td>
-                                            </tr>
-                                            <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- No Results Message -->
-                            <div id="dispatchNoResults"
-                                class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
-                                <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Records</h3>
-                                <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
-                            </div>
+                                    <% if (item.dcPhoto) { %>
+                                        <div class="leading-tight">
+                                            <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Photo</label>
+                                            <a href="<%= item.dcPhoto %>" target="_blank" class="flex items-center gap-1 text-[10px] font-black text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 hover:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-700 uppercase tracking-tight">
+                                                <i data-lucide="image" class="w-3 h-3"></i> View DC Photo
+                                            </a>
+                                        </div>
+                                    <% } %>
+                                </div>
                             <% } %>
-                                <% } %>
+
+                            <!-- Material & Quantity in Same Row -->
+                            <div class="flex items-start justify-between gap-4 pt-6 border-t border-gray-50">
+                                <div class="leading-tight">
+                                    <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Finished Good</label>
+                                    <p class="text-base font-black text-gray-900 uppercase leading-none"><%= item.productName %></p>
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mt-1"><%= item.productId ? item.productId.packaging : '' %></p>
+                                </div>
+
+                                <div class="text-right">
+                                    <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Qty</label>
+                                    <div class="flex items-baseline justify-end gap-1">
+                                        <span class="text-xl font-black text-black leading-none"><%= (item.quantity || 0).toFixed(2) %></span>
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase"><%= item.productId ? item.productId.uom : '' %></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% if (item.remark) { %>
+                                <div class="mt-4 p-3 bg-gray-50/50 rounded-xl border border-gray-100">
+                                    <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Notes</label>
+                                    <p class="text-[10px] font-medium text-gray-600"><%= item.remark %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- Desktop View (Table) -->
+                <div id="dispatchTableView" class="hidden md:block overflow-x-auto shadow-around-lg rounded-3xl bg-white/95 backdrop-blur-md border border-gray-100">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50/50 border-b border-gray-100">
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Date</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Receiver</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Product</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Logistics</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Quantity</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <% dispatchTransactions.forEach(item => { %>
+                                <tr class="dispatch-row hover:bg-gray-50/50 transition-colors group">
+                                    <td class="px-8 py-6">
+                                        <p class="text-sm font-black text-gray-900 leading-tight">
+                                            <%= new Date(item.dispatchDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                                        </p>
+                                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">
+                                            <%= new Date(item.dispatchDate).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <p class="text-sm font-black text-gray-900 uppercase tracking-tight"><%= item.receiverName %></p>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <p class="text-sm font-black text-gray-900 uppercase tracking-tight"><%= item.productName %></p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5"><%= item.productId ? item.productId.packaging : '' %></p>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="space-y-1">
+                                            <% if (item.vehicleNo) { %>
+                                                <p class="text-[10px] font-black text-gray-700 uppercase">Vehicle: <%= item.vehicleNo %></p>
+                                            <% } %>
+                                            <% if (item.driverName) { %>
+                                                <p class="text-[9px] font-bold text-gray-400 uppercase truncate">
+                                                    <%= item.driverName %>
+                                                    <%= item.driverMobileNo ? '(' + item.driverMobileNo + ')' : '' %>
+                                                </p>
+                                            <% } %>
+                                            <% if (item.dcNo) { %>
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <span class="text-[9px] font-black text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-5; px-1.5 py-0.5 rounded">#<%= item.dcNo %></span>
+                                                    <% if (item.dcPhoto) { %>
+                                                        <a href="<%= item.dcPhoto %>" target="_blank" class="text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-400 hover:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600">
+                                                            <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                                                        </a>
+                                                    <% } %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex items-baseline justify-end gap-1">
+                                            <span class="text-lg font-black text-gray-900"><%= (item.quantity || 0).toFixed(2) %></span>
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase"><%= item.productId ? item.productId.uom : '' %></span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <% if (item.remark) { %>
+                                            <p class="text-[10px] font-medium text-gray-500 max-w-xs truncate" title="<%= item.remark %>">
+                                                <%= item.remark %>
+                                            </p>
+                                        <% } else { %>
+                                            <span class="text-gray-300 text-[10px] italic">No notes</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- No Results Message -->
+                <div id="dispatchNoResults" class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
+                    <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">No Matching Records</h3>
+                    <p class="text-gray-500 font-medium">Try adjusting your search terms.</p>
+                </div>
+            <% } %>
         </div>
 
         <%- include('../partials/fab', { user, userRole }) %>
@@ -330,10 +230,12 @@
                         const rowElements = document.querySelectorAll('.dispatch-row');
 
                         if (searchInput) {
-                            // Blue focus border
+                            // Theme focus border
                             searchInput.addEventListener('focus', function () {
-                                this.style.borderColor = '#6366f1';
-                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                                const themeColor = '<%= (factory === "indapur") ? "#6366f1" : "#a855f7" %>';
+                                const themeShadow = '<%= (factory === "indapur") ? "rgba(99,102,241,0.1)" : "rgba(168,85,247,0.1)" %>';
+                                this.style.borderColor = themeColor;
+                                this.style.boxShadow = `0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px ${themeShadow}`;
                             });
                             searchInput.addEventListener('blur', function () {
                                 this.style.borderColor = '';

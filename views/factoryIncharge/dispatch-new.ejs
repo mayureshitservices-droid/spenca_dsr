@@ -97,19 +97,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-3">
                                 <label
-                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">DC
                                     No</label>
                                 <div class="relative">
-                                    <input type="text" name="invoiceNo" class="input-field" placeholder="INV/2024/001">
+                                    <input type="text" name="dcNo" class="input-field" placeholder="DC/2024/001">
                                 </div>
                             </div>
 
                             <div class="space-y-3">
                                 <label
-                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
+                                    class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">DC
                                     Date</label>
                                 <div class="relative">
-                                    <input type="date" name="invoiceDate" class="input-field">
+                                    <input type="date" name="dcDate" class="input-field">
                                 </div>
                             </div>
 
@@ -143,12 +143,12 @@
 
                             <div class="space-y-3 md:col-span-2">
                                 <label
-                                    class="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Invoice
+                                    class="block text-xs font-black text-gray-400 uppercase tracking-[0.2em] ml-1">DC
                                     Photo</label>
                                 <div class="relative group">
-                                    <input type="file" name="invoicePhoto" id="invoicePhoto" accept="image/*"
+                                    <input type="file" name="dcPhoto" id="dcPhoto" accept="image/*"
                                         class="hidden" onchange="previewImage(this)">
-                                    <label for="invoicePhoto"
+                                    <label for="dcPhoto"
                                         class="flex flex-col items-center justify-center w-full min-h-[160px] px-6 py-8 border-2 border-dashed border-gray-200 rounded-3xl hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer group/label">
                                         <div id="uploadPlaceholder" class="flex flex-col items-center">
                                             <div
@@ -157,7 +157,7 @@
                                             </div>
                                             <p
                                                 class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/label:text-indigo-600 transition-colors">
-                                                Click to capture or upload invoice</p>
+                                                Click to capture or upload DC photo</p>
                                         </div>
                                         <div id="imagePreviewContainer" class="hidden w-full h-full relative">
                                             <img id="imagePreview" src="#" alt="Preview"

@@ -37,6 +37,7 @@ const postLogin = async (req, res) => {
         req.session.userId = user._id;
         req.session.userRole = user.role;
         req.session.userName = user.fullName;
+        req.session.factory = user.factory; // Added factory to session
 
         // Redirect to role-based dashboard
         res.redirect(getDashboardRoute(user.role));

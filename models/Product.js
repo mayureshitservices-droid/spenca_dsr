@@ -23,9 +23,9 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    bufferQty: {
-        type: Number,
-        default: 0
+    factoryStock: {
+        indapur: { type: Number, default: 0 },
+        shirapur: { type: Number, default: 0 }
     },
     packaging: {
         type: String,
@@ -55,6 +55,12 @@ const productSchema = new mongoose.Schema({
     }]
 }, {
     timestamps: true
+});
+
+// Sync availableQty with the sum of factoryStock
+productSchema.pre('save', function (next) {
+    this.availableQty = (this.factoryStock.indapur || 0) + (this.factoryStock.shirapur || 0);
+    next();
 });
 
 module.exports = mongoose.model('Product', productSchema);

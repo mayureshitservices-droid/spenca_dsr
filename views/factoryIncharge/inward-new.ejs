@@ -155,6 +155,21 @@
                                         </select>
                                     </div>
 
+                                    <!-- Rejection Fields -->
+                                    <div class="md:col-span-3 space-y-2">
+                                        <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejected Qty</label>
+                                        <div class="relative">
+                                            <input type="number" step="0.01" id="rejectedQuantity_1" class="input-field shadow-sm item-rejected-qty border-red-50 focus:border-red-200" placeholder="0.00" oninput="calculateTotalNos(1)">
+                                            <div id="rejectedConversionText_1" class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-500 uppercase hidden"></div>
+                                        </div>
+                                        <input type="hidden" id="rejectedNos_1" class="calculated-rejected-nos">
+                                    </div>
+
+                                    <div class="md:col-span-8 space-y-2">
+                                        <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejection Reason</label>
+                                        <input type="text" id="rejectionReason_1" class="input-field shadow-sm item-rejection-reason border-red-50 focus:border-red-200" placeholder="Reason for rejection (if any)">
+                                    </div>
+
                                     <!-- Actions -->
                                     <div class="md:col-span-1">
                                         <button type="button" onclick="removeItemRow(1)"
@@ -177,25 +192,6 @@
                     <input type="hidden" name="items" id="itemsData">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Condition Confirmation -->
-                        <div class="md:col-span-2 pt-6">
-                            <label class="flex items-start gap-4 cursor-pointer group">
-                                <div class="relative flex items-center justify-center shrink-0 mt-1">
-                                    <input type="checkbox" name="conditionConfirmed" required
-                                        class="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-gray-200 bg-gray-50 checked:bg-primary-600 checked:border-primary-600 transition-all">
-                                    <i data-lucide="check"
-                                        class="absolute h-4 w-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none stroke-[4]"></i>
-                                </div>
-                                <div class="space-y-0.5">
-                                    <span
-                                        class="text-sm font-black text-gray-900 group-hover:text-primary-600 transition-colors">I
-                                        confirm material condition is OK *</span>
-                                    <p class="text-xs font-bold text-gray-400">Material has been
-                                        verified for quantity and quality standards.</p>
-                                </div>
-                            </label>
-                        </div>
-
                         <!-- Submit -->
                         <div class="md:col-span-2 pt-6">
                             <button type="submit" class="btn-primary w-full py-5 text-lg">
@@ -314,6 +310,18 @@
                                         <option value="28">28%</option>
                                     </select>
                                 </div>
+                                <div class="md:col-span-3 space-y-2">
+                                    <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejected Qty</label>
+                                    <div class="relative">
+                                        <input type="number" step="0.01" id="rejectedQuantity_${rowCount}" class="input-field shadow-sm item-rejected-qty border-red-50 focus:border-red-200" placeholder="0.00" oninput="calculateTotalNos(${rowCount})">
+                                        <div id="rejectedConversionText_${rowCount}" class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-500 uppercase hidden"></div>
+                                    </div>
+                                    <input type="hidden" id="rejectedNos_${rowCount}" class="calculated-rejected-nos">
+                                </div>
+                                <div class="md:col-span-8 space-y-2">
+                                    <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejection Reason</label>
+                                    <input type="text" id="rejectionReason_${rowCount}" class="input-field shadow-sm item-rejection-reason border-red-50 focus:border-red-200" placeholder="Reason for rejection (if any)">
+                                </div>
                                 <div class="md:col-span-1">
                                     <button type="button" onclick="removeItemRow(${rowCount})" class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
                                         <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
@@ -388,7 +396,7 @@
                     const preformConversions = {
                         '32': 625,
                         '20': 1000,
-                        '13.5': 1481,
+                        '12.8': 1563,
                         '11.5': 1739,
                         '7.5': 2666
                     };
@@ -411,10 +419,15 @@
 
                     function calculateTotalNos(id) {
                         const quantity = parseFloat(document.getElementById(`quantity_${id}`).value) || 0;
+                        const rejectedQty = parseFloat(document.getElementById(`rejectedQuantity_${id}`).value) || 0;
                         const unitType = document.getElementById(`unitType_${id}`).value;
                         const weight = document.getElementById(`materialInput_${id}`).dataset.weight;
+                        
                         const totalNosInput = document.getElementById(`totalNos_${id}`);
                         const conversionText = document.getElementById(`conversionText_${id}`);
+                        
+                        const rejectedNosInput = document.getElementById(`rejectedNos_${id}`);
+                        const rejectedConversionText = document.getElementById(`rejectedConversionText_${id}`);
 
                         if (unitType === 'kg' && weight) {
                             // Pieces = (KG * 1000) / Gram Weight
@@ -422,15 +435,28 @@
                             totalNosInput.value = total;
                             conversionText.innerText = `= ${total} Nos`;
                             conversionText.classList.remove('hidden');
+
+                            const rejected = Math.round((rejectedQty * 1000) / parseFloat(weight));
+                            rejectedNosInput.value = rejected;
+                            rejectedConversionText.innerText = `= ${rejected} Nos`;
+                            rejectedConversionText.classList.remove('hidden');
                         } else if (unitType === 'bags' && weight && preformConversions[weight]) {
                             const multiplier = preformConversions[weight];
                             const total = Math.round(quantity * multiplier);
                             totalNosInput.value = total;
                             conversionText.innerText = `= ${total} Nos`;
                             conversionText.classList.remove('hidden');
+
+                            const rejected = Math.round(rejectedQty * multiplier);
+                            rejectedNosInput.value = rejected;
+                            rejectedConversionText.innerText = `= ${rejected} Nos`;
+                            rejectedConversionText.classList.remove('hidden');
                         } else {
                             totalNosInput.value = quantity;
                             conversionText.classList.add('hidden');
+                            
+                            rejectedNosInput.value = rejectedQty;
+                            rejectedConversionText.classList.add('hidden');
                         }
                     }
 
@@ -493,7 +519,10 @@
                                     gstPercentage,
                                     inwardUnit: unitType,
                                     inwardQty: quantity, // Original value entered by user
-                                    inwardWeight: unitType === 'kg' ? quantity : null
+                                    inwardWeight: unitType === 'kg' ? quantity : null,
+                                    rejectedQuantity: parseFloat(document.getElementById(`rejectedNos_${id}`).value) || 0,
+                                    rejectedInwardQty: parseFloat(document.getElementById(`rejectedQuantity_${id}`).value) || 0,
+                                    rejectionReason: document.getElementById(`rejectionReason_${id}`).value
                                 });
                                 row.classList.remove('border-red-200', 'bg-red-50/30');
                             }

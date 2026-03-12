@@ -64,7 +64,7 @@ const getUsers = async (req, res) => {
 // POST /sysadmin/users/create
 const createUser = async (req, res) => {
     try {
-        const { fullName, region, contactNo, email, password, role } = req.body;
+        const { fullName, region, contactNo, email, password, role, factory } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -79,6 +79,7 @@ const createUser = async (req, res) => {
             email,
             password,
             role,
+            factory: role === 'factory_incharge' ? factory : null,
             activeStatus: true
         });
 
@@ -139,7 +140,7 @@ const getProducts = async (req, res) => {
 // POST /sysadmin/products/create
 const createProduct = async (req, res) => {
     try {
-        const { productName, productType, packaging, specification, uom, availableQty, bufferQty, remarks, isBranded, brandedCustomerId } = req.body;
+        const { productName, productType, packaging, specification, uom, availableQty, remarks, isBranded, brandedCustomerId } = req.body;
 
         const newProduct = new Product({
             productName,
@@ -148,7 +149,6 @@ const createProduct = async (req, res) => {
             specification,
             uom,
             availableQty: availableQty ? parseFloat(availableQty) : 0,
-            bufferQty: bufferQty ? parseFloat(bufferQty) : 0,
             photo: req.file ? '/uploads/' + req.file.filename : null,
             remarks,
             isBranded: isBranded === 'true',

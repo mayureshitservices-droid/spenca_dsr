@@ -26,7 +26,8 @@ const getDashboard = async (req, res) => {
 // GET /factory-incharge/inward
 const getInwardList = async (req, res) => {
     try {
-        const inwardTransactions = await Inward.find()
+        const factory = req.session.factory;
+        const inwardTransactions = await Inward.find({ factory })
             .sort({ createdAt: -1 })
             .populate('supplierId', 'supplierName')
             .populate('productId', 'productName packaging uom');
@@ -35,6 +36,7 @@ const getInwardList = async (req, res) => {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             inwardTransactions,
+            factory: factory,
             success: req.query.success,
             error: req.query.error
         });
@@ -62,11 +64,7 @@ const getInwardForm = async (req, res) => {
 // POST /factory-incharge/inward
 const createInward = async (req, res) => {
     try {
-        const { supplierId, items, conditionConfirmed, invoiceNo, invoiceDate } = req.body;
-
-        if (!conditionConfirmed) {
-            return res.redirect('/factory-incharge/inward/new?error=Please confirm the material condition');
-        }
+        const { supplierId, items, invoiceNo, invoiceDate } = req.body;
 
         const supplier = await Supplier.findById(supplierId);
         if (!supplier) {
@@ -109,11 +107,14 @@ const createInward = async (req, res) => {
             const product = await Product.findById(item.productId);
             if (!product) continue;
 
-            const quantity = parseFloat(item.quantity) || 0;
+            const totalQuantity = parseFloat(item.quantity) || 0;
+            const rejectedQuantity = parseFloat(item.rejectedQuantity) || 0;
+            const acceptedQuantity = Math.max(0, totalQuantity - rejectedQuantity);
+
             const price = parseFloat(item.price) || 0;
             const gstPercentage = parseFloat(item.gstPercentage) || 0;
 
-            if (quantity <= 0) continue;
+            if (totalQuantity <= 0) continue;
 
             // Create inward record
             const inward = new Inward({
@@ -121,24 +122,34 @@ const createInward = async (req, res) => {
                 supplierName: supplier.supplierName,
                 productId: item.productId,
                 productName: product.productName,
-                quantity: quantity,
+                quantity: totalQuantity,
+                rejectedQuantity: rejectedQuantity,
+                rejectedInwardQty: parseFloat(item.rejectedInwardQty) || 0,
+                rejectionReason: item.rejectionReason || null,
                 price: price,
                 gstPercentage: gstPercentage,
                 inwardUnit: item.inwardUnit || 'nos',
-                inwardQty: parseFloat(item.inwardQty) || quantity,
+                inwardQty: parseFloat(item.inwardQty) || totalQuantity,
                 inwardWeight: item.inwardWeight ? parseFloat(item.inwardWeight) : null,
                 conditionConfirmed: true,
                 invoiceNo: invoiceNo || null,
                 invoiceDate: invoiceDate ? new Date(invoiceDate) : null,
                 invoicePhoto: invoicePhotoUrl,
-                recordedBy: req.session.userId
+                recordedBy: req.session.userId,
+                factory: req.session.factory
             });
 
             await inward.save();
 
-            // Update product stock
-            product.availableQty = (product.availableQty || 0) + quantity;
-            await product.save();
+            // Update product stock with Accepted quantity only
+            const factory = req.session.factory;
+            const update = {
+                $inc: {
+                    availableQty: acceptedQuantity,
+                    [`factoryStock.${factory}`]: acceptedQuantity
+                }
+            };
+            await Product.findByIdAndUpdate(item.productId, update);
         }
 
         res.redirect('/factory-incharge/inward?success=Inward transactions recorded successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
@@ -183,7 +194,8 @@ const searchRawMaterials = async (req, res) => {
 // Dispatch Flow
 const getDispatchList = async (req, res) => {
     try {
-        const dispatchTransactions = await Dispatch.find()
+        const factory = req.session.factory;
+        const dispatchTransactions = await Dispatch.find({ factory })
             .sort({ createdAt: -1 })
             .populate('productId', 'productName packaging uom');
 
@@ -191,6 +203,7 @@ const getDispatchList = async (req, res) => {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             dispatchTransactions,
+            factory: factory,
             success: req.query.success,
             error: req.query.error
         });
@@ -217,15 +230,15 @@ const getDispatchForm = async (req, res) => {
 // POST /factory-incharge/dispatch
 const createDispatch = async (req, res) => {
     try {
-        const { receiverName, items, invoiceNo, invoiceDate, vehicleNo, driverName, driverMobileNo, remark } = req.body;
+        const { receiverName, items, dcNo, dcDate, vehicleNo, driverName, driverMobileNo, remark } = req.body;
 
-        // Handle Invoice Photo Upload
-        let invoicePhotoUrl = null;
+        // Handle DC Photo Upload
+        let dcPhotoUrl = null;
         if (req.file) {
             try {
                 const fileName = `dispatch_${Date.now()}_${req.file.originalname}`;
-                invoicePhotoUrl = await ociService.uploadToOCI(req.file.buffer, fileName, req.file.mimetype);
-                console.log('Dispatch Invoice Photo uploaded:', invoicePhotoUrl);
+                dcPhotoUrl = await ociService.uploadToOCI(req.file.buffer, fileName, req.file.mimetype);
+                console.log('Dispatch DC Photo uploaded:', dcPhotoUrl);
             } catch (ociError) {
                 console.error('OCI Dispatch Photo Upload Error:', ociError);
                 // Continue without photo instead of failing? User choice, but for now we continue
@@ -267,12 +280,18 @@ const createDispatch = async (req, res) => {
         for (const item of dispatchItems) {
             const qty = parseFloat(item.quantity) || 0;
             if (qty > 0) {
+                const factory = req.session.factory;
                 const result = await Product.findByIdAndUpdate(
                     item.productId,
-                    { $inc: { availableQty: -qty } },
+                    { 
+                        $inc: { 
+                            availableQty: -qty,
+                            [`factoryStock.${factory}`]: -qty
+                        } 
+                    },
                     { new: true }
                 );
-                console.log(`[Dispatch Stock] Deducted ${qty} boxes from product ${item.productId}. New availableQty: ${result ? result.availableQty : 'PRODUCT NOT FOUND'}`);
+                console.log(`[Dispatch Stock] Deducted ${qty} boxes from product ${item.productId} in ${factory}. New availableQty: ${result ? result.availableQty : 'PRODUCT NOT FOUND'}`);
             }
         }
 
@@ -290,19 +309,20 @@ const createDispatch = async (req, res) => {
                 quantity: qty,
                 receiverName,
                 remark,
-                invoiceNo,
-                invoiceDate: invoiceDate ? new Date(invoiceDate) : null,
+                dcNo,
+                dcDate: dcDate ? new Date(dcDate) : null,
                 vehicleNo,
                 driverName,
                 driverMobileNo,
-                invoicePhoto: invoicePhotoUrl,
-                recordedBy: req.session.userId
+                dcPhoto: dcPhotoUrl,
+                recordedBy: req.session.userId,
+                factory: req.session.factory
             });
 
             await dispatch.save();
         }
 
-        res.redirect('/factory-incharge/dispatch?success=Dispatch transactions recorded and Finished Good stock updated successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
+        res.redirect('/factory-incharge/dispatch?success=Dispatch transactions recorded and Finished Good stock updated successfully' + (dcPhotoUrl ? ' with DC photo' : ''));
     } catch (error) {
         console.error('Create Dispatch error:', error);
         res.redirect('/factory-incharge/dispatch/new?error=Server error during dispatch');
@@ -312,7 +332,8 @@ const createDispatch = async (req, res) => {
 // GET /factory-incharge/production
 const getProductionList = async (req, res) => {
     try {
-        const productionRecords = await Production.find()
+        const factory = req.session.factory;
+        const productionRecords = await Production.find({ factory })
             .populate('productId')
             .sort({ createdAt: -1 })
             .limit(50);
@@ -320,6 +341,7 @@ const getProductionList = async (req, res) => {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             productionRecords,
+            factory: factory,
             title: 'Production History',
             successMessage: req.query.success,
             errorMessage: req.query.error
@@ -413,8 +435,10 @@ const createProduction = async (req, res) => {
             for (const [rmId, requiredQty] of rmRequirements.entries()) {
                 const rm = await Product.findById(rmId);
                 if (!rm) continue;
-                if (rm.availableQty < requiredQty) {
-                    missingRMs.push(`${rm.productName} (Need: ${requiredQty.toFixed(2)}, Have: ${rm.availableQty.toFixed(2)})`);
+                const factory = req.session.factory;
+                const currentStock = rm.factoryStock[factory] || 0;
+                if (currentStock < requiredQty) {
+                    missingRMs.push(`${rm.productName} (Need: ${requiredQty.toFixed(2)}, Have: ${currentStock.toFixed(2)} in ${factory})`);
                 }
             }
 
@@ -424,12 +448,23 @@ const createProduction = async (req, res) => {
             }
 
             // 4. Deduct Raw Materials
+            const factory = req.session.factory;
             for (const [rmId, requiredQty] of rmRequirements.entries()) {
-                await Product.findByIdAndUpdate(rmId, { $inc: { availableQty: -requiredQty } });
+                await Product.findByIdAndUpdate(rmId, { 
+                    $inc: { 
+                        availableQty: -requiredQty,
+                        [`factoryStock.${factory}`]: -requiredQty
+                    } 
+                });
             }
 
             // 5. Increment Finished Good Stock (in Boxes)
-            await Product.findByIdAndUpdate(item.productId, { $inc: { availableQty: qty } });
+            await Product.findByIdAndUpdate(item.productId, { 
+                $inc: { 
+                    availableQty: qty,
+                    [`factoryStock.${factory}`]: qty
+                } 
+            });
 
             // 6. Create Production Record
             const production = new Production({
@@ -439,7 +474,8 @@ const createProduction = async (req, res) => {
                 batchNo,
                 shift,
                 remarks: item.remarks || '',
-                recordedBy: req.session.userId
+                recordedBy: req.session.userId,
+                factory: req.session.factory
             });
             await production.save();
             recorded++;
@@ -490,11 +526,23 @@ const searchCustomers = async (req, res) => {
 
 const getRawMaterialStock = async (req, res) => {
     try {
+        const factory = req.session.factory;
         const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
+        
+        // Add current factory stock to each product for the view
+        const materialsWithStock = rawMaterials.map(rm => {
+            const stock = rm.factoryStock[factory] || 0;
+            return {
+                ...rm.toObject(),
+                factoryStockValue: stock
+            };
+        });
+
         res.render('factoryIncharge/raw-material-stock', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            rawMaterials,
+            rawMaterials: materialsWithStock,
+            factory: factory,
             title: 'Raw Material Stock'
         });
     } catch (error) {
@@ -505,11 +553,23 @@ const getRawMaterialStock = async (req, res) => {
 
 const getFinishedGoodsStock = async (req, res) => {
     try {
+        const factory = req.session.factory;
         const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
+        
+        // Add current factory stock to each product for the view
+        const goodsWithStock = finishedGoods.map(fg => {
+            const stock = fg.factoryStock[factory] || 0;
+            return {
+                ...fg.toObject(),
+                factoryStockValue: stock
+            };
+        });
+
         res.render('factoryIncharge/finished-goods-stock', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            finishedGoods,
+            finishedGoods: goodsWithStock,
+            factory: factory,
             title: 'Finished Goods Stock'
         });
     } catch (error) {

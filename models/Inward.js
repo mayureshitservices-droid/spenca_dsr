@@ -59,6 +59,24 @@ const inwardSchema = new mongoose.Schema({
     recordedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    factory: {
+        type: String,
+        enum: ['indapur', 'shirapur'],
+        required: true,
+        default: 'indapur'
+    },
+    rejectedQuantity: {
+        type: Number,
+        default: 0
+    },
+    rejectedInwardQty: {
+        type: Number,
+        default: 0
+    },
+    rejectionReason: {
+        type: String,
+        trim: true
     }
 }, {
     timestamps: true

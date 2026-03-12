@@ -320,6 +320,8 @@ const exportTeleCRM = async (req, res) => {
 // GET /headoffice/ims
 const getIMS = async (req, res) => {
     try {
+        const query = {};
+
         const Product = require('../models/Product');
         const Customer = require('../models/Customer');
         const Inward = require('../models/Inward');
@@ -339,17 +341,17 @@ const getIMS = async (req, res) => {
         const suppliers = await Supplier.find().sort({ supplierName: 1 });
 
         // Fetch Inward History
-        const inwardTransactions = await Inward.find()
+        const inwardTransactions = await Inward.find(query)
             .populate('productId')
             .sort({ createdAt: -1 });
 
         // Fetch Dispatch History
-        const dispatchTransactions = await Dispatch.find()
+        const dispatchTransactions = await Dispatch.find(query)
             .populate('productId')
             .sort({ dispatchDate: -1 });
 
         // Fetch Production History
-        const productionRecords = await Production.find()
+        const productionRecords = await Production.find(query)
             .populate('productId')
             .sort({ createdAt: -1 });
 

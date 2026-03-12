@@ -4,7 +4,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <!-- Header -->
             <div class="mb-12">
-                <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none">Raw Materials</h1>
+                <h1 class="text-3xl font-black text-black tracking-tight uppercase leading-none"><%= factory.charAt(0).toUpperCase() + factory.slice(1) %> - Raw Materials</h1>
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1 mt-1">Current Inventory
                     Levels</p>
             </div>
@@ -14,7 +14,7 @@
                 <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                         <i data-lucide="search"
-                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                            class="w-5 h-5 text-gray-400 group-focus-within:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-500 transition-colors"></i>
                     </div>
                     <input type="text" id="rmSearch" placeholder="Search by material name or specification..."
                         style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
@@ -32,9 +32,8 @@
                     <!-- Mobile View (Cards) -->
                     <div id="cardsView" class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:hidden">
                         <% rawMaterials.forEach(function(material) { %>
-                            <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
                                 <div
-                                    class="material-card bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 <%= isLow ? 'border-t-amber-500' : 'border-t-emerald-500' %>">
+                                    class="material-card bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg overflow-hidden border border-white/20 transition-all hover:shadow-2xl hover:-translate-y-2 group flex flex-col h-full border-t-4 border-t-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-500">
                                     <div class="p-6 flex flex-col flex-grow">
                                         <div class="flex justify-between items-start mb-4">
                                             <h5
@@ -42,7 +41,7 @@
                                                 <%= material.productName %>
                                             </h5>
                                             <span
-                                                class="text-[10px] font-black px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg uppercase">RM</span>
+                                                class="text-[10px] font-black px-2 py-1 bg-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-50 text-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-600 rounded-lg uppercase">RM</span>
                                         </div>
 
                                         <% if (material.specification) { %>
@@ -56,34 +55,18 @@
 
                                                     <div class="grid grid-cols-2 gap-3 mt-auto">
                                                         <div
-                                                            class="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
+                                                            class="bg-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-50/30 rounded-xl p-3 border border-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-100/50">
                                                             <span
-                                                                class="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Stock</span>
-                                                            <span class="text-2xl font-black text-emerald-700">
-                                                                <%= (material.availableQty || 0).toFixed(2) %>
+                                                                class="block text-[10px] font-black text-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-600 uppercase tracking-widest mb-1">Stock</span>
+                                                            <span class="text-2xl font-black text-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-700">
+                                                                <%= (material.factoryStockValue || 0).toFixed(2) %>
                                                             </span>
                                                             <span
                                                                 class="text-[10px] font-bold text-gray-400 uppercase ml-1">
                                                                 <%= material.uom %>
                                                             </span>
                                                         </div>
-                                                        <div
-                                                            class="bg-amber-50/30 rounded-xl p-3 border border-amber-100/50">
-                                                            <span
-                                                                class="block text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Buffer</span>
-                                                            <span class="text-2xl font-black text-amber-700">
-                                                                <%= (material.bufferQty || 0).toFixed(2) %>
-                                                            </span>
-                                                        </div>
                                                     </div>
-                                                    <% if (isLow) { %>
-                                                        <div class="mt-3 flex items-center gap-2 text-amber-600">
-                                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                                                            <span
-                                                                class="text-[10px] font-black uppercase tracking-widest">Low
-                                                                Stock Alert</span>
-                                                        </div>
-                                                        <% } %>
                                     </div>
                                 </div>
                                 <% }); %>
@@ -105,16 +88,12 @@
                                         class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
                                         Available Qty</th>
                                     <th
-                                        class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">
-                                        Buffer Qty</th>
-                                    <th
                                         class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                                         Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 <% rawMaterials.forEach(function(material) { %>
-                                    <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
                                         <tr class="material-row hover:bg-gray-50/50 transition-colors group">
                                             <td class="px-8 py-6">
                                                 <p class="text-sm font-black text-gray-900 uppercase tracking-tight">
@@ -130,32 +109,19 @@
                                             <td class="px-8 py-6 text-right">
                                                 <div class="flex items-baseline justify-end gap-1">
                                                     <span class="text-lg font-black text-gray-900">
-                                                        <%= (material.availableQty || 0).toFixed(2) %>
+                                                        <%= (material.factoryStockValue || 0).toFixed(2) %>
                                                     </span>
                                                     <span class="text-[10px] font-bold text-gray-400 uppercase">
                                                         <%= material.uom %>
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="px-8 py-6 text-right">
-                                                <span class="text-lg font-black text-gray-500">
-                                                    <%= (material.bufferQty || 0).toFixed(2) %>
-                                                </span>
-                                            </td>
                                             <td class="px-8 py-6 text-center">
-                                                <% if (isLow) { %>
-                                                    <span
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-100">
-                                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                                        Low Stock
-                                                    </span>
-                                                    <% } else { %>
-                                                        <span
-                                                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-                                                            <i data-lucide="check-circle" class="w-3 h-3"></i>
-                                                            Healthy
-                                                        </span>
-                                                        <% } %>
+                                                <span
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-50 text-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-600 text-[10px] font-black uppercase tracking-widest border border-<%= factory === 'indapur' ? 'emerald' : 'purple' %>-100">
+                                                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                    Healthy
+                                                </span>
                                             </td>
                                         </tr>
                                         <% }); %>
@@ -230,11 +196,13 @@
                             });
                         }
 
-                        // Blue focus border for search input
+                        // Theme border/shadow for search input
                         if (searchInput) {
                             searchInput.addEventListener('focus', function () {
-                                this.style.borderColor = '#6366f1';
-                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                                const themeColor = '<%= (factory === "indapur") ? "#10b981" : "#a855f7" %>';
+                                const themeShadow = '<%= (factory === "indapur") ? "rgba(16,185,129,0.1)" : "rgba(168,85,247,0.1)" %>';
+                                this.style.borderColor = themeColor;
+                                this.style.boxShadow = `0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px ${themeShadow}`;
                             });
                             searchInput.addEventListener('blur', function () {
                                 this.style.borderColor = '';

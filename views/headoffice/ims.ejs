@@ -44,19 +44,15 @@
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Specification</th>
                                             <th
-                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
-                                                Available Stock</th>
+                                                class="px-6 py-4 text-[10px] font-black text-indigo-600 uppercase tracking-widest text-right">
+                                                Indapur Stock</th>
                                             <th
-                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
-                                                Buffer Level</th>
-                                            <th
-                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
-                                                Status</th>
+                                                class="px-6 py-4 text-[10px] font-black text-purple-600 uppercase tracking-widest text-right">
+                                                Shirapur Stock</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         <% rawMaterials.forEach(function(material) { %>
-                                            <% const isLow=(material.availableQty || 0) < (material.bufferQty || 0); %>
                                                 <tr class="rm-row hover:bg-gray-50/80 transition-colors group">
                                                     <td class="px-6 py-4">
                                                         <div
@@ -71,33 +67,16 @@
                                                         </span>
                                                     </td>
                                                     <td class="px-6 py-4 text-right tabular-nums">
-                                                        <span class="text-lg font-black text-emerald-700">
-                                                            <%= (material.availableQty || 0).toFixed(2) %>
-                                                        </span>
-                                                        <span
-                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
-                                                            <%= material.uom %>
+                                                        <span class="text-sm font-black text-indigo-600">
+                                                            <%= (material.factoryStock?.indapur || 0).toFixed(2) %>
                                                         </span>
                                                     </td>
                                                     <td class="px-6 py-4 text-right tabular-nums">
-                                                        <span class="text-sm font-black text-gray-600">
-                                                            <%= (material.bufferQty || 0).toFixed(2) %>
+                                                        <span class="text-sm font-black text-purple-600">
+                                                            <%= (material.factoryStock?.shirapur || 0).toFixed(2) %>
                                                         </span>
                                                     </td>
-                                                    <td class="px-6 py-4 text-center">
-                                                        <% if (isLow) { %>
-                                                            <span
-                                                                class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[9px] font-black rounded-lg uppercase tracking-widest">
-                                                                <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                                                Low Stock
-                                                            </span>
-                                                            <% } else { %>
-                                                                <span
-                                                                    class="px-2 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded-lg uppercase tracking-widest">
-                                                                    Healthy
-                                                                </span>
-                                                                <% } %>
-                                                    </td>
+                                                    
                                                 </tr>
                                                 <% }); %>
                                     </tbody>
@@ -156,19 +135,16 @@
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Packaging</th>
                                             <th
-                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
-                                                Available Stock</th>
+                                                class="px-6 py-4 text-[10px] font-black text-indigo-600 uppercase tracking-widest text-right">
+                                                Indapur Stock</th>
                                             <th
-                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
-                                                Buffer Level</th>
-                                            <th
-                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">
-                                                Status</th>
+                                                class="px-6 py-4 text-[10px] font-black text-purple-600 uppercase tracking-widest text-right">
+                                                Shirapur Stock</th>
+                                            
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         <% finishedGoods.forEach(function(product) { %>
-                                            <% const isLow=(product.availableQty || 0) < (product.bufferQty || 0); %>
                                                 <tr class="fg-row hover:bg-gray-50/80 transition-colors group">
                                                     <td class="px-6 py-4">
                                                         <div
@@ -183,33 +159,16 @@
                                                         </span>
                                                     </td>
                                                     <td class="px-6 py-4 text-right tabular-nums">
-                                                        <span class="text-lg font-black text-indigo-700">
-                                                            <%= (product.availableQty || 0).toFixed(0) %>
-                                                        </span>
-                                                        <span
-                                                            class="text-[10px] font-bold text-gray-400 uppercase ml-1">
-                                                            <%= product.uom %>
+                                                        <span class="text-sm font-black text-indigo-600">
+                                                            <%= (product.factoryStock?.indapur || 0).toFixed(0) %>
                                                         </span>
                                                     </td>
                                                     <td class="px-6 py-4 text-right tabular-nums">
-                                                        <span class="text-sm font-black text-gray-600">
-                                                            <%= (product.bufferQty || 0).toFixed(0) %>
+                                                        <span class="text-sm font-black text-purple-600">
+                                                            <%= (product.factoryStock?.shirapur || 0).toFixed(0) %>
                                                         </span>
                                                     </td>
-                                                    <td class="px-6 py-4 text-center">
-                                                        <% if (isLow) { %>
-                                                            <span
-                                                                class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 text-[9px] font-black rounded-lg uppercase tracking-widest">
-                                                                <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                                                Low Stock
-                                                            </span>
-                                                            <% } else { %>
-                                                                <span
-                                                                    class="px-2 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded-lg uppercase tracking-widest">
-                                                                    Healthy
-                                                                </span>
-                                                                <% } %>
-                                                    </td>
+                                                    
                                                 </tr>
                                                 <% }); %>
                                     </tbody>
@@ -230,7 +189,7 @@
             <!-- Production Section -->
             <div class="mb-16 scroll-mt-24 hidden" id="production-section">
                 <div class="flex items-center gap-4 mb-8">
-                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Production History</h2>
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Production Records</h2>
                     <span
                         class="px-4 py-1.5 bg-purple-100 text-purple-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Manufacturing</span>
                 </div>
@@ -274,6 +233,9 @@
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Batch</th>
                                             <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Factory</th>
+                                            <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
                                                 Produced</th>
                                         </tr>
@@ -297,6 +259,11 @@
                                                 </td>
                                                 <td class="px-6 py-4 text-xs font-mono text-indigo-600">
                                                     <%= record.batchNo %>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[9px] font-black rounded uppercase">
+                                                        <%= record.factory %>
+                                                    </span>
                                                 </td>
                                                 <td class="px-6 py-4 text-right">
                                                     <span class="font-black">
@@ -515,7 +482,7 @@
             <!-- Inward History Section -->
             <div class="mb-16 scroll-mt-24 hidden" id="inward-section">
                 <div class="flex items-center gap-4 mb-8">
-                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Inward History</h2>
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Inward Records</h2>
                     <span
                         class="px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Log</span>
                 </div>
@@ -545,6 +512,9 @@
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
                                                 Qty (Nos)</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                Factory</th>
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
                                                 Weight (KG)</th>
@@ -592,6 +562,11 @@
                                                                 item.productId.uom : '' %>
                                                         </span>
                                                 </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-black rounded uppercase">
+                                                        <%= item.factory %>
+                                                    </span>
+                                                </td>
                                                 <td
                                                     class="px-6 py-4 text-sm font-bold text-gray-900 text-right tabular-nums">
                                                     ₹<%= (item.price || 0).toFixed(2) %>
@@ -623,6 +598,27 @@
                                                                 class="text-gray-300 text-[10px] font-bold uppercase">N/A</span>
                                                             <% } %>
                                                 </td>
+                                                <td class="px-6 py-4 text-right">
+                                                    <% if (item.rejectedQuantity > 0) { %>
+                                                        <div class="flex flex-col items-end">
+                                                            <span class="text-sm font-black text-red-600">
+                                                                -<%= item.rejectedQuantity %> Nos
+                                                            </span>
+                                                            <% if (item.rejectedInwardQty && item.inwardUnit !== 'nos') { %>
+                                                                <span class="text-[9px] font-black text-red-400 uppercase">
+                                                                    (<%= item.rejectedInwardQty %> <%= item.inwardUnit %>)
+                                                                </span>
+                                                            <% } %>
+                                                            <% if (item.rejectionReason) { %>
+                                                                <span class="text-[9px] font-bold text-red-400 uppercase leading-tight text-right max-w-[120px] mt-0.5">
+                                                                    <%= item.rejectionReason %>
+                                                                </span>
+                                                            <% } %>
+                                                        </div>
+                                                    <% } else { %>
+                                                        <span class="text-[10px] font-bold text-gray-300 uppercase">None</span>
+                                                    <% } %>
+                                                </td>
                                             </tr>
                                             <% }); %>
                                     </tbody>
@@ -632,10 +628,10 @@
                         <% } %>
             </div>
 
-            <!-- Dispatch History Section -->
+            <!-- Dispatch Records Section -->
             <div class="mb-16 scroll-mt-24 hidden" id="dispatch-section">
                 <div class="flex items-center gap-4 mb-8">
-                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Dispatch History</h2>
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Dispatch Records</h2>
                     <span
                         class="px-4 py-1.5 bg-purple-100 text-purple-700 text-xs font-black rounded-full uppercase tracking-widest leading-none">Log</span>
                 </div>
@@ -648,7 +644,7 @@
                                 class="w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors"></i>
                         </div>
                         <input type="text" id="dispatchSearch"
-                            placeholder="Search by receiver, product, invoice, vehicle or driver..."
+                            placeholder="Search by receiver, product, DC, vehicle or driver..."
                             style="padding-left: 3.75rem; padding-right: 1.5rem; padding-top: 1.25rem; padding-bottom: 1.25rem;"
                             class="w-full bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl text-sm font-bold text-gray-900 placeholder-gray-400 outline-none shadow-around-lg transition-all" />
                     </div>
@@ -658,7 +654,7 @@
                     <div class="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center">
                         <i data-lucide="truck" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
                         <h3 class="text-xl font-bold text-gray-900 mb-2">No Dispatch Records</h3>
-                        <p class="text-gray-500 font-medium">No material dispatch history found.</p>
+                        <p class="text-gray-500 font-medium">No material dispatch records found.</p>
                     </div>
                     <% } else { %>
                         <div id="dispatchTableView"
@@ -681,10 +677,13 @@
                                                 Qty</th>
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                                Invoice No</th>
+                                                Factory</th>
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-                                                Invoice Date</th>
+                                                DC No</th>
+                                            <th
+                                                class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                                DC Date</th>
                                             <th
                                                 class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                                 Vehicle</th>
@@ -703,7 +702,7 @@
                                         <% dispatchTransactions.forEach(function(item) { %>
                                             <tr class="dispatch-row hover:bg-gray-50/80 transition-colors">
                                                 <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
-                                                    <%= item.dispatchDate ? new
+                                                     <%= item.dispatchDate ? new
                                                         Date(item.dispatchDate).toLocaleDateString('en-IN') : 'N/A' %>
                                                 </td>
                                                 <td class="px-6 py-4 text-sm font-medium text-gray-700">
@@ -726,13 +725,18 @@
                                                                 item.productId.uom : '' %>
                                                         </span>
                                                 </td>
+                                                <td class="px-6 py-4">
+                                                    <span class="px-2 py-0.5 bg-purple-50 text-purple-600 text-[9px] font-black rounded uppercase">
+                                                        <%= item.factory %>
+                                                    </span>
+                                                </td>
                                                 <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
-                                                    <%= item.invoiceNo || '-' %>
+                                                    <%= item.dcNo || '-' %>
                                                 </td>
                                                 <td
                                                     class="px-6 py-4 text-sm font-medium text-gray-600 whitespace-nowrap">
-                                                    <%= item.invoiceDate ? new
-                                                        Date(item.invoiceDate).toLocaleDateString('en-IN') : '-' %>
+                                                    <%= item.dcDate ? new
+                                                        Date(item.dcDate).toLocaleDateString('en-IN') : '-' %>
                                                 </td>
                                                 <td class="px-6 py-4 text-sm font-medium text-gray-600 font-mono">
                                                     <%= item.vehicleNo || '-' %>
@@ -744,14 +748,14 @@
                                                     <%= item.driverMobileNo || '-' %>
                                                 </td>
                                                 <td class="px-6 py-4 text-center">
-                                                    <% if (item.invoicePhoto) { %>
-                                                        <a href="<%= item.invoicePhoto %>" target="_blank"
+                                                    <% if (item.dcPhoto) { %>
+                                                        <a href="<%= item.dcPhoto %>" target="_blank"
                                                             class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors shadow-sm group"
-                                                            title="View Invoice Photo">
+                                                            title="View DC Photo">
                                                             <i data-lucide="image" class="w-4 h-4"></i>
                                                             <span
                                                                 class="text-[10px] font-black uppercase tracking-tight">View
-                                                                Photo</span>
+                                                                DC Photo</span>
                                                         </a>
                                                         <% } else { %>
                                                             <span
@@ -1231,9 +1235,9 @@
 
         <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ { label: 'RM Stock' ,
             icon: 'layer-group' , onClick: "showSection('stock-section')" }, { label: 'FG Stock' , icon: 'package' ,
-            onClick: "showSection('fg-stock-section')" }, { label: 'Production History' , icon: 'factory' ,
-            onClick: "showSection('production-section')" }, { label: 'Inward History' , icon: 'clipboard-list' ,
-            onClick: "showSection('inward-section')" }, { label: 'Dispatch History' , icon: 'truck' ,
+            onClick: "showSection('fg-stock-section')" }, { label: 'Production Records' , icon: 'factory' ,
+            onClick: "showSection('production-section')" }, { label: 'Inward Records' , icon: 'clipboard-list' ,
+            onClick: "showSection('inward-section')" }, { label: 'Dispatch Records' , icon: 'truck' ,
             onClick: "showSection('dispatch-section')" }, { label: 'Suppliers' , icon: 'users' ,
             onClick: "showSection('suppliers-section')" }, { label: 'Customers' , icon: 'user-check' ,
             onClick: "showSection('customers-section')" }, { label: 'Dashboard' , icon: 'layout-dashboard' ,
@@ -1241,6 +1245,7 @@
             <%- include('../partials/footer') %>
 
                 <script>
+
                     function showSection(sectionId) {
                         const sections = ['stock-section', 'fg-stock-section', 'production-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section'];
 

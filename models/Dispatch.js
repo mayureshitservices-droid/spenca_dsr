@@ -24,11 +24,11 @@ const dispatchSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    invoiceNo: {
+    dcNo: {
         type: String,
         trim: true
     },
-    invoiceDate: {
+    dcDate: {
         type: Date
     },
     vehicleNo: {
@@ -48,11 +48,17 @@ const dispatchSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    factory: {
+        type: String,
+        enum: ['indapur', 'shirapur'],
+        required: true,
+        default: 'indapur'
+    },
     remark: {
         type: String,
         trim: true
     },
-    invoicePhoto: {
+    dcPhoto: {
         type: String,
         trim: true
     }

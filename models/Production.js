@@ -33,6 +33,12 @@ const productionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    factory: {
+        type: String,
+        enum: ['indapur', 'shirapur'],
+        required: true,
+        default: 'indapur'
     }
 }, {
     timestamps: true

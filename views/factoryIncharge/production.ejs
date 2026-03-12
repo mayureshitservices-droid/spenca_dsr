@@ -7,7 +7,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                 <div class="space-y-2">
                     <h1 class="text-4xl font-black text-black tracking-tight uppercase leading-none">
-                        Production History
+                        Production
                     </h1>
                     <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Daily Manufacturing Log</p>
                 </div>
@@ -42,7 +42,7 @@
                                 <div class="relative group">
                                     <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                         <i data-lucide="search"
-                                            class="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                                            class="w-5 h-5 text-gray-400 group-focus-within:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-500 transition-colors"></i>
                                     </div>
                                     <input type="text" id="prodSearch"
                                         placeholder="Search by product name or batch number..."
@@ -91,7 +91,7 @@
                                                     </div>
                                                     <div class="text-right">
                                                         <span
-                                                            class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-full uppercase tracking-widest">
+                                                            class="px-3 py-1 bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-50 text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 text-[10px] font-black rounded-full uppercase tracking-widest">
                                                             Batch: <%= record.batchNo %>
                                                         </span>
                                                     </div>
@@ -104,7 +104,7 @@
                                                             class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Finished
                                                             Good</label>
                                                         <p
-                                                            class="text-lg font-black text-gray-900 uppercase leading-none group-hover:text-indigo-600 transition-colors">
+                                                            class="text-lg font-black text-gray-900 uppercase leading-none group-hover:text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 transition-colors">
                                                             <%= record.productName %>
                                                         </p>
                                                         <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">
@@ -187,7 +187,7 @@
                                                         </td>
                                                         <td class="px-8 py-6">
                                                             <span
-                                                                class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-full uppercase tracking-widest border border-indigo-100">
+                                                                class="px-3 py-1 bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-50 text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 text-[10px] font-black rounded-full uppercase tracking-widest border border-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-100">
                                                                 <%= record.batchNo %>
                                                             </span>
                                                         </td>
@@ -253,10 +253,12 @@
                         const rowElements = document.querySelectorAll('.prod-row');
 
                         if (searchInput) {
-                            // Blue focus border
+                            // Theme focus border
                             searchInput.addEventListener('focus', function () {
-                                this.style.borderColor = '#6366f1';
-                                this.style.boxShadow = '0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px rgba(99,102,241,0.1)';
+                                const themeColor = '<%= (factory === "indapur") ? "#6366f1" : "#a855f7" %>';
+                                const themeShadow = '<%= (factory === "indapur") ? "rgba(99,102,241,0.1)" : "rgba(168,85,247,0.1)" %>';
+                                this.style.borderColor = themeColor;
+                                this.style.boxShadow = `0 0 40px -5px rgba(0,0,0,.3), 0 0 20px -5px rgba(0,0,0,.15), 0 0 0 4px ${themeShadow}`;
                             });
                             searchInput.addEventListener('blur', function () {
                                 this.style.borderColor = '';
