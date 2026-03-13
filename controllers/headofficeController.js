@@ -570,15 +570,33 @@ const getYesterdayReport = async (req, res) => {
             createdAt: { $gte: yesterday, $lte: endYesterday }
         }).populate('productId');
 
+        // Organize by Factory
+        const factoryWiseData = {
+            indapur: { production: [], dispatches: [], inwards: [] },
+            shirapur: { production: [], dispatches: [] , inwards: [] }
+        };
+
+        const addToFactory = (item, type) => {
+            if (!item) return;
+            const factory = String(item.factory || 'indapur').toLowerCase().trim();
+            if (factoryWiseData[factory]) {
+                factoryWiseData[factory][type].push(item);
+            } else {
+                // Default to indapur if factory is unrecognized to avoid missing data
+                factoryWiseData.indapur[type].push(item);
+            }
+        };
+
+        if (Array.isArray(productionRecords)) productionRecords.forEach(r => addToFactory(r, 'production'));
+        if (Array.isArray(dispatches)) dispatches.forEach(d => addToFactory(d, 'dispatches'));
+        if (Array.isArray(inwards)) inwards.forEach(i => addToFactory(i, 'inwards'));
+
         res.render('headoffice/at-a-glance', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
             dateStr,
-            salespersonActivity,
-            dispatches,
-            productionRecords,
-            rmUsed: Object.values(rmUsed),
-            inwards
+            salespersonActivity: salespersonActivity || {},
+            factoryWiseData
         });
 
     } catch (error) {
