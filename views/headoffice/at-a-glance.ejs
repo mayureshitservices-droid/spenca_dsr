@@ -1,0 +1,219 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar', { user, userRole }) %>
+
+<div class="min-h-screen bg-[#fcfcfd] py-8 print:py-0 print:bg-white print:min-h-0">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Premium Header -->
+        <header class="relative overflow-hidden mb-8 p-8 rounded-[2rem] bg-white border border-gray-100 shadow-around-sm flex flex-col md:flex-row md:items-center justify-between gap-6 print:border-b-2 print:border-gray-100 print:rounded-none print:shadow-none print:p-0 print:mb-6 print:pb-6">
+            <div class="relative z-10">
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                    <span class="w-1.5 h-8 bg-primary-600 rounded-full print:hidden"></span>
+                    At a Glance : <span class="text-primary-600"><%= dateStr %></span>
+                </h1>
+            </div>
+            
+            <div class="relative z-10 flex gap-3 print:hidden">
+                <button onclick="window.print()" class="px-6 py-3 bg-primary-600 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:bg-primary-700 transition-all active:scale-95 flex items-center gap-2 group">
+                    <i data-lucide="printer" class="w-4 h-4 text-white group-hover:animate-pulse"></i>
+                    Print
+                </button>
+            </div>
+
+            <!-- Background Decoration (Screen Only) -->
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary-50 rounded-full blur-3xl opacity-40 print:hidden"></div>
+            <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-50 rounded-full blur-3xl opacity-40 print:hidden"></div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-4 print:grid-cols-2">
+            <!-- Salesperson Activity -->
+            <section class="glass-card overflow-hidden flex flex-col print:shadow-none print:border-gray-200">
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
+                    <h3 class="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 text-primary-600"></i>
+                        Orders
+                    </h3>
+                </div>
+                <div class="flex-grow">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/30">
+                            <tr>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Salesperson</th>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Orders</th>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <% if (Object.keys(salespersonActivity).length === 0) { %>
+                                <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No activity recorded</td></tr>
+                            <% } else { %>
+                                <% Object.entries(salespersonActivity).forEach(([name, stat]) => { %>
+                                    <tr class="hover:bg-gray-50/30 transition-colors">
+                                        <td class="px-6 py-3 text-xs font-bold text-gray-800"><%= name %></td>
+                                        <td class="px-6 py-3 text-xs font-black text-gray-900 text-center tabular-nums"><%= stat.count %></td>
+                                        <td class="px-6 py-3 text-xs font-black text-emerald-600 text-right tabular-nums">₹<%= stat.totalAmount.toLocaleString() %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Dispatches -->
+            <section class="glass-card overflow-hidden flex flex-col print:shadow-none print:border-gray-200">
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
+                    <h3 class="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="truck" class="w-4 h-4 text-purple-600"></i>
+                        Dispatches
+                    </h3>
+                </div>
+                <div class="flex-grow">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/30">
+                            <tr>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">DC Ref</th>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Receiver</th>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <% if (dispatches.length === 0) { %>
+                                <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No dispatches</td></tr>
+                            <% } else { %>
+                                <% dispatches.forEach(dc => { %>
+                                    <tr class="hover:bg-gray-50/30 transition-colors">
+                                        <td class="px-6 py-3 text-[10px] font-black text-gray-400">DC-<%= dc.dcNo %></td>
+                                        <td class="px-6 py-3 text-xs font-bold text-gray-800 uppercase tabular-nums tracking-tight"><%= dc.receiverName %></td>
+                                        <td class="px-6 py-3 text-xs font-black text-gray-900 text-right tabular-nums"><%= dc.quantity %> <%= dc.productId ? dc.productId.uom : '' %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Production -->
+            <section class="glass-card overflow-hidden flex flex-col print:shadow-none print:border-gray-200">
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
+                    <h3 class="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="factory" class="w-4 h-4 text-amber-600"></i>
+                        Production
+                    </h3>
+                </div>
+                <div class="flex-grow">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/30">
+                            <tr>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">FG Product</th>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <% if (productionRecords.length === 0) { %>
+                                <tr><td colspan="2" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No production</td></tr>
+                            <% } else { %>
+                                <% productionRecords.forEach(rec => { %>
+                                    <tr class="hover:bg-gray-50/30 transition-colors">
+                                        <td class="px-6 py-3 text-xs font-black text-gray-800 uppercase tracking-tight"><%= rec.productName %></td>
+                                        <td class="px-6 py-3 text-xs font-black text-primary-600 text-right tabular-nums"><%= rec.quantity %> <%= rec.productId ? rec.productId.uom : '' %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Material Inwards -->
+            <section class="glass-card overflow-hidden flex flex-col print:shadow-none print:border-gray-200">
+                <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-100">
+                    <h3 class="text-xs font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i>
+                        Material Inwards
+                    </h3>
+                </div>
+                <div class="flex-grow">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/30">
+                            <tr>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Material</th>
+                                <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <% if (inwards.length === 0) { %>
+                                <tr><td colspan="2" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No inwards</td></tr>
+                            <% } else { %>
+                                <% inwards.forEach(inw => { %>
+                                    <tr class="hover:bg-gray-50/30 transition-colors">
+                                        <td class="px-6 py-3">
+                                            <div class="text-xs font-black text-gray-800 uppercase tracking-tight"><%= inw.productName %></div>
+                                            <div class="text-[9px] font-bold text-gray-400 truncate w-40"><%= inw.supplierName %></div>
+                                        </td>
+                                        <td class="px-6 py-3 text-xs font-black text-emerald-600 text-right tabular-nums"><%= inw.quantity %> <%= inw.productId ? inw.productId.uom : '' %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- Compact Footer -->
+        <footer class="mt-8 text-center print:mt-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 print:bg-white print:border-t print:border-gray-100 print:rounded-none print:w-full print:justify-center">
+                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Generated by Spenca DSR • <%= new Date().toLocaleDateString('en-IN') %> • Confidential</span>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<%- include('../partials/fab', { user, userRole }) %>
+<%- include('../partials/footer') %>
+
+<style>
+/* Glass Component */
+.glass-card {
+    @apply bg-white rounded-[1.5rem] border border-gray-100 shadow-around-sm transition-all duration-300;
+}
+.glass-card:hover {
+    @apply shadow-around-lg -translate-y-0.5 border-primary-100;
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 4mm;
+    }
+    body {
+        margin: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .min-h-screen { min-height: 0 !important; }
+    nav, footer, .fab-container, #fabMain, [data-lucide="printer"] { display: none !important; }
+    
+    /* Strict One Page Grid */
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+    section {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+    .text-xs { font-size: 8.5px !important; }
+    .text-\[10px\] { font-size: 8px !important; }
+    .text-3xl { font-size: 16px !important; }
+    .px-6 { padding-left: 10px !important; padding-right: 10px !important; }
+    .py-3 { padding-top: 5px !important; padding-bottom: 5px !important; }
+    
+    .glass-card {
+        border-radius: 12px !important;
+        border: 1px solid #f0f0f0 !important;
+        background-color: white !important;
+    }
+}
+</style>

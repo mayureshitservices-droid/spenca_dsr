@@ -501,6 +501,92 @@ const getFinishedGoodsStock = async (req, res) => {
     }
 };
 
+const getYesterdayReport = async (req, res) => {
+    try {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+
+        const endYesterday = new Date(yesterday);
+        endYesterday.setHours(23, 59, 59, 999);
+
+        // Date for display (yesterday)
+        const dateStr = yesterday.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        // 1. Salesperson Wise Orders
+        const orders = await Order.find({
+            createdAt: { $gte: yesterday, $lte: endYesterday },
+            orderStatus: 'Ordered'
+        }).populate('salespersonId', 'fullName');
+
+        const salespersonActivity = {};
+        orders.forEach(order => {
+            const name = order.salespersonId ? order.salespersonId.fullName : 'Direct/Other';
+            if (!salespersonActivity[name]) {
+                salespersonActivity[name] = { count: 0, totalAmount: 0 };
+            }
+            salespersonActivity[name].count++;
+            const orderTotal = (order.products || []).reduce((sum, p) => sum + (p.quantity * (p.rate || 0)), 0);
+            salespersonActivity[name].totalAmount += orderTotal;
+        });
+
+        // 2. Dispatches (DC)
+        const dispatches = await Dispatch.find({
+            dispatchDate: { $gte: yesterday, $lte: endYesterday }
+        }).populate('productId');
+
+        // 3. Production
+        const productionRecords = await Production.find({
+            createdAt: { $gte: yesterday, $lte: endYesterday }
+        }).populate({
+            path: 'productId',
+            populate: { path: 'components.productId' }
+        });
+
+        // 4. Raw Material Used (Derived from production)
+        const rmUsed = {};
+        productionRecords.forEach(record => {
+            if (record.productId && record.productId.components) {
+                record.productId.components.forEach(comp => {
+                    const name = comp.productName || (comp.productId ? comp.productId.productName : 'Unknown');
+                    const uom = comp.uom || (comp.productId ? comp.productId.uom : '');
+                    const key = `${name}|${uom}`;
+                    
+                    if (!rmUsed[key]) {
+                        rmUsed[key] = { name, uom, quantity: 0 };
+                    }
+                    // Quantity in components is usually per 1 unit of product
+                    rmUsed[key].quantity += (comp.quantity * record.quantity);
+                });
+            }
+        });
+
+        // 5. Inwards
+        const inwards = await Inward.find({
+            createdAt: { $gte: yesterday, $lte: endYesterday }
+        }).populate('productId');
+
+        res.render('headoffice/at-a-glance', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            dateStr,
+            salespersonActivity,
+            dispatches,
+            productionRecords,
+            rmUsed: Object.values(rmUsed),
+            inwards
+        });
+
+    } catch (error) {
+        console.error('Yesterday Report error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 const getProductionHistory = async (req, res) => {
     try {
         const productionRecords = await Production.find()
@@ -522,6 +608,7 @@ const getProductionHistory = async (req, res) => {
 module.exports = {
     getDashboard,
     getIMS,
+    getYesterdayReport,
     downloadDailyReport,
     getTeleCRM,
     exportTeleCRM,
