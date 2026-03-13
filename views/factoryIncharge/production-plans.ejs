@@ -38,7 +38,7 @@
         <button onclick="filterPlans('Completed')" class="plan-filter-btn px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest transition-all bg-white hover:bg-emerald-50 text-gray-600 hover:text-emerald-600 shadow-sm border border-gray-100">Completed</button>
     </div>
 
-    <!-- Plans Grid -->
+    <!-- Plans Table -->
     <% if (!productionPlans || productionPlans.length === 0) { %>
         <div class="bg-white/95 backdrop-blur-md rounded-3xl p-20 text-center shadow-around-lg border border-gray-100">
             <div class="flex flex-col items-center gap-6">
@@ -52,106 +52,106 @@
             </div>
         </div>
     <% } else { %>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="plansGrid">
-            <% productionPlans.forEach(plan => { %>
-                <div class="plan-card glass-card p-6 flex flex-col group transition-all hover:shadow-2xl hover:-translate-y-1 relative overflow-hidden bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20" data-status="<%= plan.status %>">
-                    
-                    <!-- Top Meta -->
-                    <div class="mb-5 pb-4 border-b border-gray-100 flex justify-between items-start">
-                        <div class="flex flex-col">
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Plan Date</p>
-                            <p class="text-sm font-black text-gray-900">
-                                <%= new Date(plan.assignedDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
-                            </p>
-                            <p class="text-[10px] font-bold text-gray-500 mt-1">
-                                Assigned by <span class="text-gray-900"><%= plan.assignedBy ? plan.assignedBy.fullName : 'System' %></span>
-                            </p>
-                        </div>
-                        <div class="text-right flex flex-col items-end gap-2">
-                            <% 
-                                let statusClass = 'bg-gray-100 text-gray-600';
-                                if (plan.status === 'Pending') statusClass = 'bg-amber-100 text-amber-700 border border-amber-200';
-                                if (plan.status === 'In Progress') statusClass = 'bg-blue-100 text-blue-700 border border-blue-200';
-                                if (plan.status === 'Completed') statusClass = 'bg-emerald-100 text-emerald-700 border border-emerald-200';
-                            %>
-                            <span class="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest shadow-sm <%= statusClass %>">
-                                <%= plan.status %>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Targets -->
-                    <div class="flex-grow">
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Target Finished Goods</h4>
-                        <div class="space-y-3">
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 overflow-hidden" id="plansGrid">
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50/50 border-b border-gray-100 sticky top-0 z-10 backdrop-blur-sm">
+                            <th class="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Date</th>
+                            <th class="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Product Name</th>
+                            <th class="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Target</th>
+                            <th class="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Produced</th>
+                            <th class="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
+                            <th class="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100" id="plansTableBody">
+                        <% productionPlans.forEach(plan => { %>
                             <% plan.targetFinishedGoods.forEach(target => { %>
                                 <% 
                                     const progress = target.targetBoxes > 0 ? (target.producedBoxes / target.targetBoxes) * 100 : 0;
-                                    const progressClamped = Math.min(100, Math.max(0, progress));
                                     const isComplete = target.producedBoxes >= target.targetBoxes;
-                                %>
-                                <div class="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 relative overflow-hidden group/item hover:bg-white transition-colors">
-                                    <div class="absolute bottom-0 left-0 h-1 bg-gray-100 w-full">
-                                        <div class="h-full transition-all duration-1000 <%= isComplete ? 'bg-emerald-500' : (factory === 'indapur' ? 'bg-indigo-500' : 'bg-purple-500') %>" style="width: <%= progressClamped %>%"></div>
-                                    </div>
                                     
-                                    <div class="relative z-10 flex justify-between items-start mb-2">
-                                        <div class="pr-4">
-                                            <p class="text-sm font-black text-gray-900 uppercase leading-snug">
+                                    let statusClass = 'bg-gray-100 text-gray-600';
+                                    let statusText = 'Pending';
+                                    
+                                    if (target.producedBoxes > 0 && target.producedBoxes < target.targetBoxes) {
+                                        statusClass = 'bg-blue-100 text-blue-700 border border-blue-200';
+                                        statusText = 'In Progress';
+                                    } else if (isComplete) {
+                                        statusClass = 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+                                        statusText = 'Completed';
+                                    } else if (plan.status === 'Pending') {
+                                        statusClass = 'bg-amber-100 text-amber-700 border border-amber-200';
+                                        statusText = 'Pending';
+                                    }
+                                %>
+                                <tr class="plan-row group hover:bg-gray-50/50 transition-colors" data-status="<%= statusText %>">
+                                    <td class="px-6 py-5 whitespace-nowrap">
+                                        <p class="text-sm font-black text-gray-900 leading-none">
+                                            <%= new Date(plan.assignedDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex flex-col">
+                                            <p class="text-sm font-black text-gray-900 uppercase">
                                                 <%= target.product ? target.product.productName : 'Unknown Product' %>
                                             </p>
-                                            <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">
+                                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                                                 <%= target.product ? target.product.packaging : '' %>
                                             </p>
                                         </div>
-                                        <div class="text-right shrink-0">
-                                            <div class="text-[10px] font-black uppercase tracking-widest mb-1 text-gray-400">Target</div>
-                                            <div class="text-lg font-black text-gray-900 leading-none"><%= target.targetBoxes %> <span class="text-[9px] text-gray-400 uppercase">box</span></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="relative z-10 flex justify-between items-end mt-3 pt-3 border-t border-gray-200/50">
-                                        <div>
-                                            <div class="text-[9px] font-black uppercase tracking-widest mb-1 text-gray-400">Produced</div>
-                                            <div class="text-sm font-black <%= isComplete ? 'text-emerald-600' : 'text-indigo-600' %>">
-                                                <%= target.producedBoxes %> <span class="text-[9px] opacity-70 uppercase">box</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right whitespace-nowrap">
+                                        <p class="text-sm font-black text-gray-900">
+                                            <%= target.targetBoxes %> <span class="text-[9px] text-gray-400 uppercase ml-1">Box</span>
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-5 text-right whitespace-nowrap">
+                                        <div class="flex flex-col items-end">
+                                            <p class="text-sm font-black <%= isComplete ? 'text-emerald-600' : 'text-gray-900' %>">
+                                                <%= target.producedBoxes %> <span class="text-[9px] text-gray-400 uppercase ml-1">Box</span>
+                                            </p>
+                                            <div class="w-16 h-1 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                                                <div class="h-full <%= isComplete ? 'bg-emerald-500' : (factory === 'indapur' ? 'bg-indigo-500' : 'bg-purple-500') %>" style="width: <%= Math.min(100, progress) + '%' %>"></div>
                                             </div>
                                         </div>
-                                        <div class="text-right">
-                                            <span class="text-[10px] font-black <%= isComplete ? 'text-emerald-500' : 'text-gray-500' %>">
-                                                <%= progressClamped.toFixed(0) %>%
+                                    </td>
+                                    <td class="px-6 py-5 text-center whitespace-nowrap">
+                                        <span class="px-3 py-1 text-[9px] font-black rounded-full uppercase tracking-widest shadow-sm <%= statusClass %>">
+                                            <%= statusText %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right whitespace-nowrap">
+                                        <% if (!isComplete) { %>
+                                            <a href="/factory-incharge/production/new" class="inline-flex items-center gap-2 px-4 py-2 bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-700 transition-all shadow-md hover:shadow-lg">
+                                                <i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Log Production
+                                            </a>
+                                        <% } else { %>
+                                            <span class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-xl uppercase tracking-widest border border-emerald-100">
+                                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Target Met
                                             </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                        <% } %>
+                                    </td>
+                                </tr>
                             <% }) %>
-                        </div>
-                    </div>
-
-                    <!-- Action Area -->
-                    <div class="mt-6 pt-5 border-t border-gray-100 flex justify-between items-center">
-                        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            <%= plan.targetFinishedGoods.length %> Product(s)
-                        </div>
-                        <% if (plan.status !== 'Completed') { %>
-                            <a href="/factory-incharge/production/new" class="text-[11px] font-black text-white bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600 hover:bg-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-700 px-4 py-2 rounded-lg uppercase tracking-widest transition-colors shadow-md flex items-center gap-2">
-                                <i data-lucide="play-circle" class="w-3.5 h-3.5"></i> Log Production
-                            </a>
-                        <% } else { %>
-                            <span class="text-[11px] font-black text-emerald-600 bg-emerald-50 px-4 py-2 rounded-lg uppercase tracking-widest flex items-center gap-2 border border-emerald-100">
-                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Target Met
-                            </span>
-                        <% } %>
-                    </div>
-                </div>
-            <% }) %>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- No Filter Results Message -->
-        <div id="noFilterResults" class="hidden bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center mt-6">
-            <i data-lucide="filter-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">No Plans Match Filter</h3>
-            <p class="text-gray-500 font-medium text-sm">Try selecting a different status filter.</p>
+        <div id="noFilterResults" class="hidden bg-white/95 backdrop-blur-md rounded-3xl p-20 text-center shadow-around-lg border border-gray-100 mt-6">
+            <div class="flex flex-col items-center gap-6">
+                <div class="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                    <i data-lucide="filter-x" class="w-10 h-10 text-gray-300"></i>
+                </div>
+                <div class="space-y-2">
+                    <h3 class="text-xl font-black text-gray-900 uppercase tracking-widest">No Plans Match Filter</h3>
+                    <p class="text-sm font-medium text-gray-400">Try selecting a different status filter.</p>
+                </div>
+            </div>
         </div>
     <% } %>
 </div>
@@ -183,31 +183,31 @@
             }
         });
 
-        // Filter Cards
-        const cards = document.querySelectorAll('.plan-card');
+        // Filter Rows
+        const rows = document.querySelectorAll('.plan-row');
         let visibleCount = 0;
         
-        cards.forEach(card => {
-            const cardStatus = card.getAttribute('data-status');
-            if (status === 'All' || cardStatus === status) {
-                card.style.display = '';
+        rows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status');
+            if (status === 'All' || rowStatus === status) {
+                row.style.display = '';
                 visibleCount++;
             } else {
-                card.style.display = 'none';
+                row.style.display = 'none';
             }
         });
 
         // Show/Hide No Results
         const noResults = document.getElementById('noFilterResults');
-        const grid = document.getElementById('plansGrid');
+        const tableGrid = document.getElementById('plansGrid');
         
-        if (noResults && grid) {
+        if (noResults && tableGrid) {
             if (visibleCount === 0) {
                 noResults.classList.remove('hidden');
-                grid.classList.add('hidden');
+                tableGrid.classList.add('hidden');
             } else {
                 noResults.classList.add('hidden');
-                grid.classList.remove('hidden');
+                tableGrid.classList.remove('hidden');
             }
         }
     }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spenca-dsr-v10';
+const CACHE_NAME = 'spenca-dsr-v11';
 
 // Base assets to cache
 const ASSETS_TO_CACHE = [

@@ -809,7 +809,7 @@
                     }
 
                     function deleteProduct(productId) {
-                        if (!confirm('Are you sure you want to delete this product?')) return;
+                        if (false) return; // Removed confirmation as per user request
 
                         // Reset client error box
                         const errorBox = document.getElementById('clientErrorBox');
