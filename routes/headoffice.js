@@ -36,5 +36,6 @@ router.get('/telecrm/campaigns', headofficeController.getCampaigns);
 router.get('/telecrm/export/:deviceId', headofficeController.exportTeleCRM);
 router.post('/suppliers/create', headofficeController.createSupplier);
 router.post('/customers/create', headofficeController.createCustomer);
+router.post('/mrp/calculate', headofficeController.calculateMRP);
 
 module.exports = router;

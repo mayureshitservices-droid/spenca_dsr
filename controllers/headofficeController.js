@@ -364,7 +364,14 @@ const getIMS = async (req, res) => {
             customers,
             inwardTransactions,
             dispatchTransactions,
-            productionRecords
+            productionRecords,
+            extraFabItems: [
+                {
+                    label: 'Run MRP',
+                    icon: 'calculator',
+                    onClick: "showSection('mrp-section')"
+                }
+            ]
         });
     } catch (error) {
         console.error('IMS Dashboard error:', error);
@@ -623,6 +630,75 @@ const getProductionHistory = async (req, res) => {
     }
 };
 
+const calculateMRP = async (req, res) => {
+    try {
+        const { items, factory } = req.body; // items: [{ productId, quantity }]
+        
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: 'No items provided' });
+        }
+
+        const requirements = {}; // Map of RM ID -> { name, needed, uom }
+        const fgStockInfo = [];
+
+        for (const item of items) {
+            const product = await Product.findById(item.productId).populate('components.productId');
+            if (!product || !product.components) continue;
+
+            const targetQty = parseFloat(item.quantity) || 0;
+            const unitsPerBox = parseFloat(product.packaging) || 1;
+            const totalUnits = targetQty * unitsPerBox;
+
+            // Track FG Stock Info
+            fgStockInfo.push({
+                name: product.productName,
+                packaging: product.packaging || 'N/A',
+                targetQty: targetQty,
+                availableQty: (product.factoryStock && product.factoryStock[factory]) ? product.factoryStock[factory].toFixed(0) : 0
+            });
+
+            product.components.forEach(comp => {
+                const rmId = comp.productId._id.toString();
+                if (!requirements[rmId]) {
+                    requirements[rmId] = {
+                        name: comp.productName || comp.productId.productName,
+                        needed: 0,
+                        uom: comp.uom || comp.productId.uom
+                    };
+                }
+                requirements[rmId].needed += (comp.quantity * totalUnits);
+            });
+        }
+
+        // Now fetch current stock and calculate balances
+        const results = [];
+        for (const rmId in requirements) {
+            const rm = await Product.findById(rmId);
+            const reqData = requirements[rmId];
+            const stock = (rm.factoryStock && rm.factoryStock[factory]) ? rm.factoryStock[factory] : 0;
+            const balance = stock - reqData.needed;
+            
+            results.push({
+                name: reqData.name,
+                requiredQty: reqData.needed.toFixed(2),
+                uom: reqData.uom,
+                availableQty: stock.toFixed(2),
+                balance: balance.toFixed(2),
+                status: balance >= 0 ? 'Excess' : 'Shortage'
+            });
+        }
+
+        res.json({
+            rawMaterials: results,
+            finishedGoods: fgStockInfo
+        });
+
+    } catch (error) {
+        console.error('MRP Calculation error:', error);
+        res.status(500).json({ error: 'Calculation failed' });
+    }
+};
+
 module.exports = {
     getDashboard,
     getIMS,
@@ -635,5 +711,6 @@ module.exports = {
     getCampaigns,
     getRawMaterialStock,
     getFinishedGoodsStock,
-    getProductionHistory
+    getProductionHistory,
+    calculateMRP
 };

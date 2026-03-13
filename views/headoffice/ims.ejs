@@ -778,6 +778,105 @@
                         </div>
                         <% } %>
             </div>
+
+            <!-- MRP Section -->
+            <div class="mb-16 scroll-mt-24 hidden" id="mrp-section">
+                <div class="flex items-center gap-4 mb-8">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Material Requirement Planning</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 align-top">
+                    <!-- Form Card -->
+                    <div class="lg:col-span-1 bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 p-6 flex flex-col">
+                        <div class="mb-6 flex justify-between items-end">
+                            <div>
+                                <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight">Production Planning</h3>
+                                <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">Select Factory and Finished Goods</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6 w-full space-y-2">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Factory *</label>
+                            <select id="mrpFactory" class="input-field shadow-sm text-sm">
+                                <option value="indapur">Indapur Factory</option>
+                                <option value="shirapur">Shirapur Factory</option>
+                            </select>
+                        </div>
+
+                        <div id="mrpItemsContainer" class="space-y-4 flex-1">
+                            <!-- Product Row -->
+                            <div class="mrp-row relative space-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100" id="mrpRow_1">
+                                <button onclick="removeMRPRow(1)" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors bg-white rounded-xl border border-gray-100 shadow-sm z-10" title="Remove Product">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                                <div class="space-y-2 pr-10">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Finished Good *</label>
+                                    <div class="relative">
+                                        <input type="text" id="mrpProductInput_1" required autocomplete="off" class="input-field shadow-sm text-sm w-full" placeholder="Search product name...">
+                                        <input type="hidden" id="mrpProductId_1" class="mrp-item-id">
+                                        <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden suggestions-box" id="mrpSuggestions_1"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Target Boxes *</label>
+                                    <input type="number" id="mrpQuantity_1" required class="input-field shadow-sm text-sm w-full mrp-item-qty" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-4">
+                            <button onclick="addMRPProductRow()" class="w-full flex justify-center items-center gap-2 px-4 py-3 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-100/50">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add New Product
+                            </button>
+                            <button onclick="runMRPCalculation()" id="runMRPBtn" class="w-full py-4 bg-[#1C2574] text-white font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
+                                <i data-lucide="calculator" class="w-5 h-5" id="mrpBtnIcon"></i> Run MRP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FG Stock Card -->
+                    <div class="lg:col-span-1 bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 p-6 flex flex-col h-full max-h-[600px]">
+                        <div class="mb-4">
+                            <h3 class="text-sm font-black text-gray-900 uppercase tracking-tight">Available FG Stock</h3>
+                            <p class="text-[9px] font-bold text-gray-400 mt-0.5 uppercase tracking-widest">For Selected Target FGs</p>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            <div id="mrpFgStockContent" class="text-center py-8 text-gray-400">
+                                <i data-lucide="package-search" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                <p class="text-[10px] font-black uppercase tracking-widest">Calculate to see stock</p>
+                            </div>
+                            <table class="w-full text-left border-collapse hidden" id="mrpFgTable">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-100">
+                                        <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">Product</th>
+                                        <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Reqd</th>
+                                        <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Available</th>
+                                        <th class="px-2 py-2 text-[9px] font-black text-indigo-600 uppercase tracking-widest text-right">Produce</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mrpFgResultsBody" class="divide-y divide-gray-50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- RM Required Card -->
+                    <div class="lg:col-span-1 bg-white/95 backdrop-blur-md rounded-3xl shadow-around-lg border border-white/20 p-6 flex flex-col h-full max-h-[600px]">
+                        <div class="mb-4">
+                            <h3 class="text-sm font-black text-gray-900 uppercase tracking-tight">Required Raw Material</h3>
+                            <p class="text-[9px] font-bold text-gray-400 mt-0.5 uppercase tracking-widest">Requirements vs Stock</p>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+                            <div id="mrpRmContent" class="text-center py-8 text-gray-400">
+                                <i data-lucide="list-tree" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                <p class="text-[10px] font-black uppercase tracking-widest">Calculate to see BOM</p>
+                            </div>
+                            <div class="space-y-3 hidden" id="mrpRmTable">
+                                <!-- RM Items injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Add Supplier Modal -->
@@ -965,6 +1064,8 @@
                 </div>
             </div>
         </div>
+
+
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -1233,21 +1334,28 @@
             });
         </script>
 
-        <%- include('../partials/fab', { user, userRole, hideDefaults: true, extraFabItems: [ { label: 'RM Stock' ,
-            icon: 'layer-group' , onClick: "showSection('stock-section')" }, { label: 'FG Stock' , icon: 'package' ,
-            onClick: "showSection('fg-stock-section')" }, { label: 'Production Records' , icon: 'factory' ,
-            onClick: "showSection('production-section')" }, { label: 'Inward Records' , icon: 'clipboard-list' ,
-            onClick: "showSection('inward-section')" }, { label: 'Dispatch Records' , icon: 'truck' ,
-            onClick: "showSection('dispatch-section')" }, { label: 'Suppliers' , icon: 'users' ,
-            onClick: "showSection('suppliers-section')" }, { label: 'Customers' , icon: 'user-check' ,
-            onClick: "showSection('customers-section')" }, { label: 'Dashboard' , icon: 'layout-dashboard' ,
-            onClick: "window.location.href='/headoffice/dashboard'" } ] }) %>
+        <%- include('../partials/fab', { 
+            user, 
+            userRole, 
+            hideDefaults: true, 
+            extraFabItems: [ 
+                ...(typeof extraFabItems !== 'undefined' ? extraFabItems : []),
+                { label: 'RM Stock' , icon: 'layer-group' , onClick: "showSection('stock-section')" }, 
+                { label: 'FG Stock' , icon: 'package' , onClick: "showSection('fg-stock-section')" }, 
+                { label: 'Production Records' , icon: 'factory' , onClick: "showSection('production-section')" }, 
+                { label: 'Inward Records' , icon: 'clipboard-list' , onClick: "showSection('inward-section')" }, 
+                { label: 'Dispatch Records' , icon: 'truck' , onClick: "showSection('dispatch-section')" }, 
+                { label: 'Suppliers' , icon: 'users' , onClick: "showSection('suppliers-section')" }, 
+                { label: 'Customers' , icon: 'user-check' , onClick: "showSection('customers-section')" }, 
+                { label: 'Dashboard' , icon: 'layout-dashboard' , onClick: "window.location.href='/headoffice/dashboard'" } 
+            ] 
+        }) %>
             <%- include('../partials/footer') %>
 
                 <script>
 
                     function showSection(sectionId) {
-                        const sections = ['stock-section', 'fg-stock-section', 'production-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section'];
+                        const sections = ['stock-section', 'fg-stock-section', 'production-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section', 'mrp-section'];
 
                         // Close FAB menu first
                         const fabBackdrop = document.getElementById('fabBackdrop');
@@ -1313,7 +1421,7 @@
                         lucide.createIcons();
 
                         const hash = window.location.hash.substring(1);
-                        const validSections = ['stock-section', 'fg-stock-section', 'production-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section'];
+                        const validSections = ['stock-section', 'fg-stock-section', 'production-section', 'suppliers-section', 'customers-section', 'inward-section', 'dispatch-section', 'mrp-section'];
 
                         if (hash && validSections.includes(hash)) {
                             showSection(hash);
@@ -1321,4 +1429,217 @@
                             showSection('stock-section');
                         }
                     });
+
+                    // --- MRP Logic ---
+                    let mrpRowCount = 1;
+
+                    // Initialize first row
+                    document.addEventListener('DOMContentLoaded', function () {
+                        initializeMRPAutocomplete(1);
+                    });
+
+                    function initializeMRPAutocomplete(id) {
+                        const input = document.getElementById(`mrpProductInput_${id}`);
+                        const suggestions = document.getElementById(`mrpSuggestions_${id}`);
+                        
+                        if (!input || !suggestions) return;
+
+                        // Reusing debounce and search logic structure
+                        const debounce = (fn, wait) => {
+                            let timeout;
+                            return (...args) => {
+                                clearTimeout(timeout);
+                                timeout = setTimeout(() => fn(...args), wait);
+                            };
+                        };
+
+                        const search = debounce(async (query) => {
+                            if (query.length < 2) {
+                                suggestions.classList.add('hidden');
+                                return;
+                            }
+
+                            try {
+                                const response = await fetch(`/api/factory-incharge/products/search-fg?q=${encodeURIComponent(query)}`);
+                                const data = await response.json();
+
+                                suggestions.innerHTML = '';
+                                if (data.length > 0) {
+                                    data.forEach(item => {
+                                        const div = document.createElement('div');
+                                        div.className = 'p-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors group';
+                                        div.innerHTML = `
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-xs font-black text-gray-900 group-hover:text-indigo-600 uppercase">${item.productName}</span>
+                                                <span class="text-[9px] font-bold text-gray-400">${item.packaging || '1'} n/b</span>
+                                            </div>
+                                        `;
+                                        div.addEventListener('click', () => {
+                                            input.value = item.productName;
+                                            document.getElementById(`mrpProductId_${id}`).value = item._id;
+                                            suggestions.classList.add('hidden');
+                                        });
+                                        suggestions.appendChild(div);
+                                    });
+                                    suggestions.classList.remove('hidden');
+                                }
+                            } catch (e) { console.error(e); }
+                        }, 300);
+
+                        input.addEventListener('input', (e) => search(e.target.value));
+                    }
+
+                    function addMRPProductRow() {
+                        mrpRowCount++;
+                        const container = document.getElementById('mrpItemsContainer');
+                        const row = document.createElement('div');
+                        row.className = 'mrp-row relative space-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100 animate-in fade-in slide-in-from-bottom-2 duration-300';
+                        row.id = `mrpRow_${mrpRowCount}`;
+                        row.innerHTML = `
+                            <button onclick="removeMRPRow(${mrpRowCount})" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors bg-white rounded-xl border border-gray-100 shadow-sm z-10" title="Remove Product">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                            <div class="space-y-2 pr-10">
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Finished Good *</label>
+                                <div class="relative">
+                                    <input type="text" id="mrpProductInput_${mrpRowCount}" required autocomplete="off" class="input-field shadow-sm text-sm w-full" placeholder="Search product name...">
+                                    <input type="hidden" id="mrpProductId_${mrpRowCount}" class="mrp-item-id">
+                                    <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden suggestions-box" id="mrpSuggestions_${mrpRowCount}"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Target Boxes *</label>
+                                <input type="number" id="mrpQuantity_${mrpRowCount}" required class="input-field shadow-sm text-sm w-full mrp-item-qty" placeholder="0">
+                            </div>
+                        `;
+                        container.appendChild(row);
+                        lucide.createIcons();
+                        initializeMRPAutocomplete(mrpRowCount);
+                    }
+
+                    function removeMRPRow(id) {
+                        const row = document.getElementById(`mrpRow_${id}`);
+                        if (document.querySelectorAll('.mrp-row').length > 1) {
+                            row.remove();
+                        }
+                    }
+
+                    async function runMRPCalculation() {
+                        const btn = document.getElementById('runMRPBtn');
+                        const icon = document.getElementById('mrpBtnIcon');
+                        const factory = document.getElementById('mrpFactory').value;
+                        const items = [];
+                        
+                        document.querySelectorAll('.mrp-row').forEach(row => {
+                            const id = row.id.split('_')[1];
+                            const productId = document.getElementById(`mrpProductId_${id}`).value;
+                            const qty = document.getElementById(`mrpQuantity_${id}`).value;
+                            if (productId && qty > 0) {
+                                items.push({ productId, quantity: qty });
+                            }
+                        });
+
+                        if (items.length === 0) {
+                            alert('Please select at least one product with quantity');
+                            return;
+                        }
+
+                        // Start Loading
+                        btn.disabled = true;
+                        icon.classList.add('animate-spin');
+                        btn.innerHTML = 'Calculating...';
+
+                        try {
+                            const response = await fetch('/headoffice/mrp/calculate', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ items, factory })
+                            });
+                            
+                            const data = await response.json();
+                            displayMRPResults(data.rawMaterials, data.finishedGoods);
+                        } catch (e) {
+                            console.error(e);
+                            alert('Calculation failed. Please try again.');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i data-lucide="calculator" class="w-5 h-5"></i> Run MRP';
+                            lucide.createIcons();
+                        }
+                    }
+
+                    function displayMRPResults(rmResults, fgResults) {
+                        const tableRm = document.getElementById('mrpRmTable');
+                        const contentRm = document.getElementById('mrpRmContent');
+                        const tableFg = document.getElementById('mrpFgTable');
+                        const contentFg = document.getElementById('mrpFgStockContent');
+                        const bodyFg = document.getElementById('mrpFgResultsBody');
+                        
+                        // Render FG Stock
+                        bodyFg.innerHTML = '';
+                        if (fgResults && fgResults.length > 0) {
+                            fgResults.forEach(fg => {
+                                const row = document.createElement('tr');
+                                row.className = 'hover:bg-gray-50/50 transition-colors';
+                                const produceQty = Math.max(0, fg.targetQty - fg.availableQty);
+                                row.innerHTML = `
+                                    <td class="px-2 py-3 border-b border-gray-100">
+                                        <div class="text-[10px] font-black text-gray-900 uppercase leading-snug">${fg.name}</div>
+                                        <div class="text-[9px] font-bold text-gray-400 uppercase">${fg.packaging} N/B</div>
+                                    </td>
+                                    <td class="px-2 py-3 text-right border-b border-gray-100">
+                                        <span class="text-xs font-bold text-gray-800">${fg.targetQty}</span>
+                                    </td>
+                                    <td class="px-2 py-3 text-right border-b border-gray-100">
+                                        <span class="text-xs font-bold text-emerald-600">${fg.availableQty}</span>
+                                    </td>
+                                    <td class="px-2 py-3 text-right border-b border-gray-100">
+                                        <span class="text-xs font-black text-indigo-600">${produceQty}</span>
+                                    </td>
+                                `;
+                                bodyFg.appendChild(row);
+                            });
+                            contentFg.classList.add('hidden');
+                            tableFg.classList.remove('hidden');
+                        } else {
+                            contentFg.classList.remove('hidden');
+                            tableFg.classList.add('hidden');
+                        }
+
+                        // Render RM Results
+                        tableRm.innerHTML = '';
+                        if (rmResults && rmResults.length > 0) {
+                            rmResults.forEach(res => {
+                                const isShortage = res.status === 'Shortage';
+                                const card = document.createElement('div');
+                                card.className = `p-4 bg-gray-50/80 rounded-2xl border ${isShortage ? 'border-red-100' : 'border-emerald-100'} hover:shadow-md transition-all`;
+                                card.innerHTML = `
+                                    <div class="flex justify-between items-start mb-3">
+                                        <span class="text-xs font-black text-gray-900 uppercase leading-tight pr-2">${res.name}</span>
+                                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isShortage ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${res.status}</span>
+                                    </div>
+                                    <div class="flex items-end justify-between mt-2">
+                                        <div class="flex-1">
+                                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 transition-transform">Needed</p>
+                                            <p class="text-[13px] font-bold text-gray-700 tracking-tight">${res.requiredQty} <span class="text-[9px] uppercase tracking-widest">${res.uom}</span></p>
+                                        </div>
+                                        <div class="flex-1 text-center border-l border-gray-200">
+                                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 transition-transform">Stock</p>
+                                            <p class="text-[13px] font-bold text-indigo-600 tracking-tight">${res.availableQty} <span class="text-[9px] uppercase tracking-widest">${res.uom}</span></p>
+                                        </div>
+                                        <div class="flex-1 text-right border-l border-gray-200 pl-2">
+                                            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 transition-transform">Bal</p>
+                                            <p class="text-[13px] font-black tracking-tight ${isShortage ? 'text-red-600' : 'text-emerald-600'}">${isShortage ? '-' : '+'}${Math.abs(res.balance)}</p>
+                                        </div>
+                                    </div>
+                                `;
+                                tableRm.appendChild(card);
+                            });
+                            contentRm.classList.add('hidden');
+                            tableRm.classList.remove('hidden');
+                        } else {
+                            contentRm.classList.remove('hidden');
+                            tableRm.classList.add('hidden');
+                        }
+                    }
                 </script>
