@@ -4,6 +4,7 @@ const Inward = require('../models/Inward');
 const Dispatch = require('../models/Dispatch');
 const Customer = require('../models/Customer');
 const Production = require('../models/Production');
+const ProductionPlan = require('../models/ProductionPlan');
 const ociService = require('../services/ociService');
 const path = require('path');
 
@@ -578,6 +579,29 @@ const getFinishedGoodsStock = async (req, res) => {
     }
 };
 
+// GET /factory-incharge/production-plans
+const getProductionPlans = async (req, res) => {
+    try {
+        const factory = req.session.factory;
+        
+        const productionPlans = await ProductionPlan.find({ factory })
+            .populate('assignedBy', 'fullName')
+            .populate('targetFinishedGoods.product', 'productName packaging uom')
+            .sort({ assignedDate: -1 });
+
+        res.render('factoryIncharge/production-plans', {
+            user: { name: req.session.userName },
+            userRole: req.session.userRole,
+            productionPlans,
+            factory,
+            title: 'Production Plans'
+        });
+    } catch (error) {
+        console.error('Get Production Plans error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
     getRawMaterialStock,
@@ -594,5 +618,6 @@ module.exports = {
     searchCustomers,
     getProductionList,
     getProductionForm,
-    createProduction
+    createProduction,
+    getProductionPlans
 };

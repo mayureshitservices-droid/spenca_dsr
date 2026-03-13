@@ -6,6 +6,7 @@ const Supplier = require('../models/Supplier');
 const Production = require('../models/Production');
 const Inward = require('../models/Inward');
 const Dispatch = require('../models/Dispatch');
+const ProductionPlan = require('../models/ProductionPlan');
 const ExcelJS = require('exceljs');
 
 // GET /headoffice/dashboard
@@ -699,6 +700,44 @@ const calculateMRP = async (req, res) => {
     }
 };
 
+const assignProductionPlan = async (req, res) => {
+    try {
+        const { factory, items } = req.body;
+
+        if (!factory || !items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: 'Factory and valid items must be provided' });
+        }
+
+        // Validate items
+        for (const item of items) {
+            if (!item.productId || !item.targetBoxes || item.targetBoxes <= 0) {
+                return res.status(400).json({ error: 'Invalid product details provided' });
+            }
+        }
+
+        const productionPlan = new ProductionPlan({
+            factory,
+            assignedBy: req.session.userId,
+            targetFinishedGoods: items.map(item => ({
+                product: item.productId,
+                targetBoxes: item.targetBoxes,
+                producedBoxes: 0
+            }))
+        });
+
+        await productionPlan.save();
+        
+        res.status(201).json({ 
+            message: 'Production plan assigned successfully',
+            planId: productionPlan._id 
+        });
+
+    } catch (error) {
+        console.error('Assign Production Plan error:', error);
+        res.status(500).json({ error: 'Failed to assign production plan' });
+    }
+};
+
 module.exports = {
     getDashboard,
     getIMS,
@@ -712,5 +751,6 @@ module.exports = {
     getRawMaterialStock,
     getFinishedGoodsStock,
     getProductionHistory,
-    calculateMRP
+    calculateMRP,
+    assignProductionPlan
 };

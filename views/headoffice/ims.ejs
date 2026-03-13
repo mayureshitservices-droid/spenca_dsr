@@ -840,22 +840,30 @@
                             <h3 class="text-sm font-black text-gray-900 uppercase tracking-tight">Available FG Stock</h3>
                             <p class="text-[9px] font-bold text-gray-400 mt-0.5 uppercase tracking-widest">For Selected Target FGs</p>
                         </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
-                            <div id="mrpFgStockContent" class="text-center py-8 text-gray-400">
-                                <i data-lucide="package-search" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                                <p class="text-[10px] font-black uppercase tracking-widest">Calculate to see stock</p>
+                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 flex flex-col justify-between">
+                            <div>
+                                <div id="mrpFgStockContent" class="text-center py-8 text-gray-400">
+                                    <i data-lucide="package-search" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                                    <p class="text-[10px] font-black uppercase tracking-widest">Calculate to see stock</p>
+                                </div>
+                                <table class="w-full text-left border-collapse hidden" id="mrpFgTable">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-100">
+                                            <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">Product</th>
+                                            <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Reqd</th>
+                                            <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Available</th>
+                                            <th class="px-2 py-2 text-[9px] font-black text-indigo-600 uppercase tracking-widest text-right">Produce</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mrpFgResultsBody" class="divide-y divide-gray-50"></tbody>
+                                </table>
                             </div>
-                            <table class="w-full text-left border-collapse hidden" id="mrpFgTable">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b border-gray-100">
-                                        <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">Product</th>
-                                        <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Reqd</th>
-                                        <th class="px-2 py-2 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Available</th>
-                                        <th class="px-2 py-2 text-[9px] font-black text-indigo-600 uppercase tracking-widest text-right">Produce</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="mrpFgResultsBody" class="divide-y divide-gray-50"></tbody>
-                            </table>
+                            
+                            <div class="mt-6 pt-4 border-t border-gray-100 hidden" id="assignPlanContainer">
+                                <button onclick="assignProductionPlan()" id="assignPlanBtn" class="w-full py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i> Assign Production Plan
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1637,9 +1645,80 @@
                             });
                             contentRm.classList.add('hidden');
                             tableRm.classList.remove('hidden');
+                            document.getElementById('assignPlanContainer').classList.remove('hidden');
                         } else {
                             contentRm.classList.remove('hidden');
                             tableRm.classList.add('hidden');
+                            document.getElementById('assignPlanContainer').classList.add('hidden');
+                        }
+                    }
+
+                    async function assignProductionPlan() {
+                        const factory = document.getElementById('mrpFactory').value;
+                        const items = [];
+                        let hasErrors = false;
+                        
+                        document.querySelectorAll('.mrp-row').forEach(row => {
+                            const id = row.id.split('_')[1];
+                            const productId = document.getElementById(`mrpProductId_${id}`).value;
+                            const qty = parseInt(document.getElementById(`mrpQuantity_${id}`).value, 10);
+                            
+                            if (productId && qty > 0) {
+                                items.push({ productId, targetBoxes: qty });
+                            } else if (document.getElementById(`mrpProductInput_${id}`).value.trim() !== '') {
+                                hasErrors = true;
+                            }
+                        });
+
+                        if (items.length === 0 || hasErrors) {
+                            alert('Please ensure all selected products have a valid target quantity greater than zero.');
+                            return;
+                        }
+
+                        if (!confirm(`Are you sure you want to assign this production plan for ${factory.toUpperCase()} factory?`)) {
+                            return;
+                        }
+
+                        const btn = document.getElementById('assignPlanBtn');
+                        const originalText = btn.innerHTML;
+                        btn.disabled = true;
+                        btn.innerHTML = 'Assigning...';
+
+                        try {
+                            const response = await fetch('/headoffice/mrp/assign', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ factory, items })
+                            });
+                            
+                            if (response.ok) {
+                                alert('Production plan assigned successfully!');
+                                // Reset the form
+                                document.getElementById('mrpItemsContainer').innerHTML = '';
+                                mrpRowCount = 0;
+                                addMRPProductRow();
+                                
+                                // Reset Results
+                                document.getElementById('mrpFgResultsBody').innerHTML = '';
+                                document.getElementById('mrpFgStockContent').classList.remove('hidden');
+                                document.getElementById('mrpFgTable').classList.add('hidden');
+                                
+                                document.getElementById('mrpRmTable').innerHTML = '';
+                                document.getElementById('mrpRmContent').classList.remove('hidden');
+                                document.getElementById('mrpRmTable').classList.add('hidden');
+                                
+                                document.getElementById('assignPlanContainer').classList.add('hidden');
+                            } else {
+                                const err = await response.json();
+                                alert(err.error || 'Failed to assign plan');
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert('An error occurred while assigning the plan.');
+                        } finally {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            lucide.createIcons();
                         }
                     }
                 </script>

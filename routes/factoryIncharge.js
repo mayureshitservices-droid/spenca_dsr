@@ -41,4 +41,6 @@ router.get('/production', factoryInchargeController.getProductionList);
 router.get('/production/new', factoryInchargeController.getProductionForm);
 router.post('/production', factoryInchargeController.createProduction);
 
+router.get('/production-plans', factoryInchargeController.getProductionPlans);
+
 module.exports = router;
