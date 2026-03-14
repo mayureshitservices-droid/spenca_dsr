@@ -9,12 +9,14 @@ const Dispatch = require('../models/Dispatch');
 const ProductionPlan = require('../models/ProductionPlan');
 const ExcelJS = require('exceljs');
 
+// Services
+const inventoryService = require('../services/inventoryService');
+const reportService = require('../services/reportService');
+const telecrmService = require('../services/telecrmService');
+
 // GET /headoffice/dashboard
 const getDashboard = async (req, res) => {
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
         // Fetch salesperson stats
         const salespersonStats = await Order.aggregate([
             {
@@ -181,8 +183,7 @@ const downloadDailyReport = async (req, res) => {
 // GET /headoffice/telecrm
 const getTeleCRM = async (req, res) => {
     try {
-        const { fetchDevicesWithStats } = require('./telecrmController');
-        const devices = await fetchDevicesWithStats();
+        const devices = await telecrmService.fetchDevicesWithStats();
 
         res.render('headoffice/telecrm', {
             user: { name: req.session.userName },
@@ -323,38 +324,16 @@ const getIMS = async (req, res) => {
     try {
         const query = {};
 
-        const Product = require('../models/Product');
-        const Customer = require('../models/Customer');
-        const Inward = require('../models/Inward');
-        const Dispatch = require('../models/Dispatch');
-        const Production = require('../models/Production');
-
-        // Fetch raw materials for stock view
-        const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
-
-        // Fetch finished goods for stock view
-        const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
-
-        // Fetch customers
+        // Use Inventory Service for stock and history fetching
+        const rawMaterials = await inventoryService.getStock('Raw Material');
+        const finishedGoods = await inventoryService.getStock('Finished Good');
+        
         const customers = await Customer.find().sort({ customerName: 1 });
-
-        // Fetch suppliers
         const suppliers = await Supplier.find().sort({ supplierName: 1 });
 
-        // Fetch Inward History
-        const inwardTransactions = await Inward.find(query)
-            .populate('productId')
-            .sort({ createdAt: -1 });
-
-        // Fetch Dispatch History
-        const dispatchTransactions = await Dispatch.find(query)
-            .populate('productId')
-            .sort({ dispatchDate: -1 });
-
-        // Fetch Production History
-        const productionRecords = await Production.find(query)
-            .populate('productId')
-            .sort({ createdAt: -1 });
+        const inwardTransactions = await inventoryService.getTransactions('Inward', query);
+        const dispatchTransactions = await inventoryService.getTransactions('Dispatch', query);
+        const productionRecords = await inventoryService.getTransactions('Production', query);
 
         res.render('headoffice/ims', {
             user: { name: req.session.userName },
@@ -511,100 +490,12 @@ const getFinishedGoodsStock = async (req, res) => {
 
 const getYesterdayReport = async (req, res) => {
     try {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
-
-        const endYesterday = new Date(yesterday);
-        endYesterday.setHours(23, 59, 59, 999);
-
-        // Date for display (yesterday)
-        const dateStr = yesterday.toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-
-        // 1. Salesperson Wise Orders
-        const orders = await Order.find({
-            createdAt: { $gte: yesterday, $lte: endYesterday },
-            orderStatus: 'Ordered'
-        }).populate('salespersonId', 'fullName');
-
-        const salespersonActivity = {};
-        orders.forEach(order => {
-            const name = order.salespersonId ? order.salespersonId.fullName : 'Direct/Other';
-            if (!salespersonActivity[name]) {
-                salespersonActivity[name] = { count: 0, totalAmount: 0 };
-            }
-            salespersonActivity[name].count++;
-            const orderTotal = (order.products || []).reduce((sum, p) => sum + (p.quantity * (p.rate || 0)), 0);
-            salespersonActivity[name].totalAmount += orderTotal;
-        });
-
-        // 2. Dispatches (DC)
-        const dispatches = await Dispatch.find({
-            dispatchDate: { $gte: yesterday, $lte: endYesterday }
-        }).populate('productId');
-
-        // 3. Production
-        const productionRecords = await Production.find({
-            createdAt: { $gte: yesterday, $lte: endYesterday }
-        }).populate({
-            path: 'productId',
-            populate: { path: 'components.productId' }
-        });
-
-        // 4. Raw Material Used (Derived from production)
-        const rmUsed = {};
-        productionRecords.forEach(record => {
-            if (record.productId && record.productId.components) {
-                record.productId.components.forEach(comp => {
-                    const name = comp.productName || (comp.productId ? comp.productId.productName : 'Unknown');
-                    const uom = comp.uom || (comp.productId ? comp.productId.uom : '');
-                    const key = `${name}|${uom}`;
-                    
-                    if (!rmUsed[key]) {
-                        rmUsed[key] = { name, uom, quantity: 0 };
-                    }
-                    // Quantity in components is usually per 1 unit of product
-                    rmUsed[key].quantity += (comp.quantity * record.quantity);
-                });
-            }
-        });
-
-        // 5. Inwards
-        const inwards = await Inward.find({
-            createdAt: { $gte: yesterday, $lte: endYesterday }
-        }).populate('productId');
-
-        // Organize by Factory
-        const factoryWiseData = {
-            indapur: { production: [], dispatches: [], inwards: [] },
-            shirapur: { production: [], dispatches: [] , inwards: [] }
-        };
-
-        const addToFactory = (item, type) => {
-            if (!item) return;
-            const factory = String(item.factory || 'indapur').toLowerCase().trim();
-            if (factoryWiseData[factory]) {
-                factoryWiseData[factory][type].push(item);
-            } else {
-                // Default to indapur if factory is unrecognized to avoid missing data
-                factoryWiseData.indapur[type].push(item);
-            }
-        };
-
-        if (Array.isArray(productionRecords)) productionRecords.forEach(r => addToFactory(r, 'production'));
-        if (Array.isArray(dispatches)) dispatches.forEach(d => addToFactory(d, 'dispatches'));
-        if (Array.isArray(inwards)) inwards.forEach(i => addToFactory(i, 'inwards'));
+        const reportData = await reportService.getYesterdayReportData();
 
         res.render('headoffice/at-a-glance', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            dateStr,
-            salespersonActivity: salespersonActivity || {},
-            factoryWiseData
+            ...reportData
         });
 
     } catch (error) {
@@ -639,60 +530,8 @@ const calculateMRP = async (req, res) => {
             return res.status(400).json({ error: 'No items provided' });
         }
 
-        const requirements = {}; // Map of RM ID -> { name, needed, uom }
-        const fgStockInfo = [];
-
-        for (const item of items) {
-            const product = await Product.findById(item.productId).populate('components.productId');
-            if (!product || !product.components) continue;
-
-            const targetQty = parseFloat(item.quantity) || 0;
-            const unitsPerBox = parseFloat(product.packaging) || 1;
-            const totalUnits = targetQty * unitsPerBox;
-
-            // Track FG Stock Info
-            fgStockInfo.push({
-                name: product.productName,
-                packaging: product.packaging || 'N/A',
-                targetQty: targetQty,
-                availableQty: (product.factoryStock && product.factoryStock[factory]) ? product.factoryStock[factory].toFixed(0) : 0
-            });
-
-            product.components.forEach(comp => {
-                const rmId = comp.productId._id.toString();
-                if (!requirements[rmId]) {
-                    requirements[rmId] = {
-                        name: comp.productName || comp.productId.productName,
-                        needed: 0,
-                        uom: comp.uom || comp.productId.uom
-                    };
-                }
-                requirements[rmId].needed += (comp.quantity * totalUnits);
-            });
-        }
-
-        // Now fetch current stock and calculate balances
-        const results = [];
-        for (const rmId in requirements) {
-            const rm = await Product.findById(rmId);
-            const reqData = requirements[rmId];
-            const stock = (rm.factoryStock && rm.factoryStock[factory]) ? rm.factoryStock[factory] : 0;
-            const balance = stock - reqData.needed;
-            
-            results.push({
-                name: reqData.name,
-                requiredQty: reqData.needed.toFixed(2),
-                uom: reqData.uom,
-                availableQty: stock.toFixed(2),
-                balance: balance.toFixed(2),
-                status: balance >= 0 ? 'Excess' : 'Shortage'
-            });
-        }
-
-        res.json({
-            rawMaterials: results,
-            finishedGoods: fgStockInfo
-        });
+        const results = await inventoryService.calculateMRP(items, factory);
+        res.json(results);
 
     } catch (error) {
         console.error('MRP Calculation error:', error);

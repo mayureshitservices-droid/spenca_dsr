@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const telecrmController = require('../controllers/telecrmController');
-const { isAuthenticated } = require('../middleware/auth');
-const { checkRole } = require('../middleware/roleCheck');
+const { isAuthenticated, isHeadOffice } = require('../middleware/auth');
 const { authenticateDevice } = require('../middleware/apiAuth');
 
 // Device registration (no auth required)
@@ -36,15 +35,15 @@ router.post('/campaigns/sync-stats', authenticateDevice, telecrmController.syncC
 // --- Protected Routes (Requires Head Office / SysAdmin session) ---
 
 // Create new campaign (requires Excel upload)
-router.post('/admin/campaigns', isAuthenticated, checkRole(['headoffice', 'sysadmin']), upload.single('file'), telecrmController.createCampaign);
+router.post('/admin/campaigns', isHeadOffice, upload.single('file'), telecrmController.createCampaign);
 
 // Get all campaigns with stats (for monitoring)
-router.get('/admin/campaigns', isAuthenticated, checkRole(['headoffice', 'sysadmin']), telecrmController.getCampaignsForAdmin);
+router.get('/admin/campaigns', isHeadOffice, telecrmController.getCampaignsForAdmin);
 
 // Update telecaller name (requires session)
-router.patch('/device/:deviceId', isAuthenticated, checkRole(['headoffice', 'sysadmin']), telecrmController.updateTelecaller);
+router.patch('/device/:deviceId', isHeadOffice, telecrmController.updateTelecaller);
 
 // Get all devices with stats (for Head Office dashboard)
-router.get('/devices', isAuthenticated, checkRole(['headoffice', 'sysadmin']), telecrmController.getDevices);
+router.get('/devices', isHeadOffice, telecrmController.getDevices);
 
 module.exports = router;

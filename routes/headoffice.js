@@ -1,27 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const headofficeController = require('../controllers/headofficeController');
+const { isHeadOffice } = require('../middleware/auth');
 
-// Middleware to check if user is headoffice
-const isHeadOffice = (req, res, next) => {
-    const allowedRoles = ['headoffice', 'sysadmin', 'owner'];
-    if (req.session.userId && allowedRoles.includes(req.session.userRole)) {
-        return next();
-    }
-
-    // Prevent redirects for API/JSON requests
-    const isApiRequest = req.originalUrl.toLowerCase().startsWith('/api/') ||
-        (req.headers['accept'] && req.headers['accept'].includes('application/json')) ||
-        req.headers['x-requested-with'] === 'XMLHttpRequest';
-
-    if (isApiRequest) {
-        console.log(`[HeadOffice] Unauthorized API request to ${req.originalUrl} from ${req.ip}`);
-        return res.status(401).json({ error: 'Unauthorized: Head Office access required' });
-    }
-
-    res.redirect('/login');
-};
-
+// Apply Head Office role check to all routes
 router.use(isHeadOffice);
 
 router.get('/dashboard', headofficeController.getDashboard);

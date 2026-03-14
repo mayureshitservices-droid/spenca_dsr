@@ -6,6 +6,7 @@ const Customer = require('../models/Customer');
 const Production = require('../models/Production');
 const ProductionPlan = require('../models/ProductionPlan');
 const ociService = require('../services/ociService');
+const inventoryService = require('../services/inventoryService');
 const path = require('path');
 
 // GET /factory-incharge/dashboard
@@ -28,10 +29,7 @@ const getDashboard = async (req, res) => {
 const getInwardList = async (req, res) => {
     try {
         const factory = req.session.factory;
-        const inwardTransactions = await Inward.find({ factory })
-            .sort({ createdAt: -1 })
-            .populate('supplierId', 'supplierName')
-            .populate('productId', 'productName packaging uom');
+        const inwardTransactions = await inventoryService.getTransactions('Inward', { factory });
 
         res.render('factoryIncharge/inward', {
             user: { name: req.session.userName },
@@ -196,9 +194,7 @@ const searchRawMaterials = async (req, res) => {
 const getDispatchList = async (req, res) => {
     try {
         const factory = req.session.factory;
-        const dispatchTransactions = await Dispatch.find({ factory })
-            .sort({ createdAt: -1 })
-            .populate('productId', 'productName packaging uom');
+        const dispatchTransactions = await inventoryService.getTransactions('Dispatch', { factory });
 
         res.render('factoryIncharge/dispatch', {
             user: { name: req.session.userName },
@@ -334,10 +330,8 @@ const createDispatch = async (req, res) => {
 const getProductionList = async (req, res) => {
     try {
         const factory = req.session.factory;
-        const productionRecords = await Production.find({ factory })
-            .populate('productId')
-            .sort({ createdAt: -1 })
-            .limit(50);
+        const productionRecords = await inventoryService.getTransactions('Production', { factory }, 50);
+        
         res.render('factoryIncharge/production', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
@@ -528,21 +522,12 @@ const searchCustomers = async (req, res) => {
 const getRawMaterialStock = async (req, res) => {
     try {
         const factory = req.session.factory;
-        const rawMaterials = await Product.find({ productType: 'Raw Material' }).sort({ productName: 1 });
-        
-        // Add current factory stock to each product for the view
-        const materialsWithStock = rawMaterials.map(rm => {
-            const stock = rm.factoryStock[factory] || 0;
-            return {
-                ...rm.toObject(),
-                factoryStockValue: stock
-            };
-        });
+        const rawMaterials = await inventoryService.getStock('Raw Material', factory);
 
         res.render('factoryIncharge/raw-material-stock', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            rawMaterials: materialsWithStock,
+            rawMaterials,
             factory: factory,
             title: 'Raw Material Stock'
         });
@@ -555,21 +540,12 @@ const getRawMaterialStock = async (req, res) => {
 const getFinishedGoodsStock = async (req, res) => {
     try {
         const factory = req.session.factory;
-        const finishedGoods = await Product.find({ productType: 'Finished Good' }).sort({ productName: 1 });
-        
-        // Add current factory stock to each product for the view
-        const goodsWithStock = finishedGoods.map(fg => {
-            const stock = fg.factoryStock[factory] || 0;
-            return {
-                ...fg.toObject(),
-                factoryStockValue: stock
-            };
-        });
+        const finishedGoods = await inventoryService.getStock('Finished Good', factory);
 
         res.render('factoryIncharge/finished-goods-stock', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            finishedGoods: goodsWithStock,
+            finishedGoods,
             factory: factory,
             title: 'Finished Goods Stock'
         });
@@ -583,11 +559,7 @@ const getFinishedGoodsStock = async (req, res) => {
 const getProductionPlans = async (req, res) => {
     try {
         const factory = req.session.factory;
-        
-        const productionPlans = await ProductionPlan.find({ factory })
-            .populate('assignedBy', 'fullName')
-            .populate('targetFinishedGoods.product', 'productName packaging uom')
-            .sort({ assignedDate: -1 });
+        const productionPlans = await inventoryService.getProductionPlans(factory);
 
         res.render('factoryIncharge/production-plans', {
             user: { name: req.session.userName },
