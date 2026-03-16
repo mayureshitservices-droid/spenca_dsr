@@ -1,51 +1,48 @@
-const Order = require('../models/Order');
 const Dispatch = require('../models/Dispatch');
 const Production = require('../models/Production');
 const Inward = require('../models/Inward');
 const ExcelJS = require('exceljs');
 
 /**
- * Generate Yesterday's Summary Report Data
+ * Generate At-a-Glance Summary Report Data
+ * @param {string|Date} dateParam - The date to generate the report for
  */
-const getYesterdayReportData = async () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
+const getAtAGlanceReportData = async (dateParam) => {
+    let targetDate;
+    if (dateParam) {
+        const [yyyy, mm, dd] = dateParam.split('-').map(Number);
+        targetDate = new Date(yyyy, mm - 1, dd);
+    } else {
+        targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() - 1);
+    }
+    
+    targetDate.setHours(0, 0, 0, 0);
 
-    const endYesterday = new Date(yesterday);
-    endYesterday.setHours(23, 59, 59, 999);
+    const endTarget = new Date(targetDate);
+    endTarget.setHours(23, 59, 59, 999);
 
-    const dateStr = yesterday.toLocaleDateString('en-IN', {
+    const dateStr = targetDate.toLocaleDateString('en-IN', {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
     });
 
-    // 1. Salesperson Wise Orders
-    const orders = await Order.find({
-        createdAt: { $gte: yesterday, $lte: endYesterday },
-        orderStatus: 'Ordered'
-    }).populate('salespersonId', 'fullName');
+    // ISO Date for the date picker value - using local date methods to avoid UTC shift
+    const yyyy = targetDate.getFullYear();
+    const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(targetDate.getDate()).padStart(2, '0');
+    const isoDate = `${yyyy}-${mm}-${dd}`;
 
-    const salespersonActivity = {};
-    orders.forEach(order => {
-        const name = order.salespersonId ? order.salespersonId.fullName : 'Direct/Other';
-        if (!salespersonActivity[name]) {
-            salespersonActivity[name] = { count: 0, totalAmount: 0 };
-        }
-        salespersonActivity[name].count++;
-        const orderTotal = (order.products || []).reduce((sum, p) => sum + (p.quantity * (p.rate || 0)), 0);
-        salespersonActivity[name].totalAmount += orderTotal;
-    });
 
     // 2. Dispatches
     const dispatches = await Dispatch.find({
-        dispatchDate: { $gte: yesterday, $lte: endYesterday }
+        dispatchDate: { $gte: targetDate, $lte: endTarget }
     }).populate('productId');
 
     // 3. Production
     const productionRecords = await Production.find({
-        createdAt: { $gte: yesterday, $lte: endYesterday }
+        createdAt: { $gte: targetDate, $lte: endTarget }
     }).populate({
         path: 'productId',
         populate: { path: 'components.productId' }
@@ -53,7 +50,7 @@ const getYesterdayReportData = async () => {
 
     // 4. Inwards
     const inwards = await Inward.find({
-        createdAt: { $gte: yesterday, $lte: endYesterday }
+        createdAt: { $gte: targetDate, $lte: endTarget }
     }).populate('productId');
 
     // Organize by Factory
@@ -73,12 +70,43 @@ const getYesterdayReportData = async () => {
     };
 
     if (Array.isArray(productionRecords)) productionRecords.forEach(r => addToFactory(r, 'production'));
-    if (Array.isArray(dispatches)) dispatches.forEach(d => addToFactory(d, 'dispatches'));
     if (Array.isArray(inwards)) inwards.forEach(i => addToFactory(i, 'inwards'));
+
+    // Handle Dispatches with Aggregation
+    const groupedDispatches = {}; 
+
+    if (Array.isArray(dispatches)) {
+        dispatches.forEach(d => {
+            const factory = String(d.factory || 'indapur').toLowerCase().trim();
+            if (!groupedDispatches[factory]) groupedDispatches[factory] = {};
+            
+            const receiverKey = d.receiverName || 'Unknown';
+            if (!groupedDispatches[factory][receiverKey]) {
+                groupedDispatches[factory][receiverKey] = {
+                    receiverName: receiverKey,
+                    products: [],
+                    totalBoxes: 0
+                };
+            }
+
+            groupedDispatches[factory][receiverKey].products.push({
+                productName: d.productName,
+                quantity: d.quantity
+            });
+            groupedDispatches[factory][receiverKey].totalBoxes += d.quantity;
+        });
+
+        // Map back to factoryWiseData
+        Object.keys(groupedDispatches).forEach(f => {
+            if (factoryWiseData[f]) {
+                factoryWiseData[f].dispatches = Object.values(groupedDispatches[f]);
+            }
+        });
+    }
 
     return {
         dateStr,
-        salespersonActivity,
+        isoDate,
         factoryWiseData
     };
 };
@@ -147,6 +175,6 @@ const generateSalesReportExcel = async (orders) => {
 };
 
 module.exports = {
-    getYesterdayReportData,
+    getAtAGlanceReportData,
     generateSalesReportExcel
 };

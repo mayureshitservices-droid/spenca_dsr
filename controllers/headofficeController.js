@@ -490,7 +490,8 @@ const getFinishedGoodsStock = async (req, res) => {
 
 const getYesterdayReport = async (req, res) => {
     try {
-        const reportData = await reportService.getYesterdayReportData();
+        const { date } = req.query;
+        const reportData = await reportService.getAtAGlanceReportData(date);
 
         res.render('headoffice/at-a-glance', {
             user: { name: req.session.userName },
@@ -499,7 +500,7 @@ const getYesterdayReport = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Yesterday Report error:', error);
+        console.error('At-a-glance Report error:', error);
         res.status(500).send('Server error');
     }
 };
