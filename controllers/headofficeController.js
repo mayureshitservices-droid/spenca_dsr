@@ -328,6 +328,7 @@ const getIMS = async (req, res) => {
         const rawMaterials = await inventoryService.getStock('Raw Material');
         const finishedGoods = await inventoryService.getStock('Finished Good');
         
+        const coreProducts = await Product.find({ isTemplate: true, productType: 'Finished Good' }).sort({ productName: 1 });
         const customers = await Customer.find().sort({ customerName: 1 });
         const suppliers = await Supplier.find().sort({ supplierName: 1 });
 
@@ -340,6 +341,7 @@ const getIMS = async (req, res) => {
             userRole: req.session.userRole,
             rawMaterials,
             finishedGoods,
+            coreProducts,
             suppliers,
             customers,
             inwardTransactions,
@@ -389,7 +391,7 @@ const createSupplier = async (req, res) => {
 // POST /headoffice/customers/create
 const createCustomer = async (req, res) => {
     try {
-        const { customerName, address, mobileNo, category, gstNo, paymentTerms, status, customerType } = req.body;
+        const { customerName, address, mobileNo, category, gstNo, paymentTerms, status, customerType, coreProductIds, capColor } = req.body;
 
         const existingCustomer = await Customer.findOne({ customerName });
         if (existingCustomer) {
@@ -404,10 +406,90 @@ const createCustomer = async (req, res) => {
             gstNo,
             paymentTerms,
             status,
-            customerType
+            customerType,
+            capColor
         });
 
         await customer.save();
+
+        // Automated Branded Product Creation
+        if (customerType === 'Branded' && coreProductIds) {
+            const selectedIds = Array.isArray(coreProductIds) ? coreProductIds : [coreProductIds];
+            
+            for (const templateId of selectedIds) {
+                const template = await Product.findById(templateId).populate('components.productId');
+                if (!template) continue;
+
+                // 1. Create Branded RMs if needed
+                const brandedComponents = [];
+                for (const comp of template.components) {
+                    if (comp.productId && comp.productId.isTemplate) {
+                        // Create a branded version of this RM (e.g., Label or Cap) linked to this FG
+                        // Format labels: [Customer] - [Prod Short] Label
+                        // Format caps: [Customer] - [Prod Short] [Color] Cap
+                        let rmSuffix = comp.productName;
+                        if (rmSuffix === 'Cap' && capColor) {
+                            rmSuffix = `${capColor} Cap`;
+                        }
+                        
+                        const brandedRMName = `${customerName} - ${template.productName} ${rmSuffix}`;
+                        let brandedRM = await Product.findOne({ productName: brandedRMName, brandedCustomerId: customer._id });
+                        
+                        if (!brandedRM) {
+                            brandedRM = new Product({
+                                productName: brandedRMName,
+                                productType: 'Raw Material',
+                                uom: comp.uom || comp.productId.uom,
+                                specification: comp.productId.specification,
+                                packaging: comp.productId.packaging,
+                                isBranded: true,
+                                brandedCustomerId: customer._id,
+                                availableQty: 0,
+                                factoryStock: { indapur: 0, shirapur: 0 }
+                            });
+                            await brandedRM.save();
+                        }
+                        
+                        brandedComponents.push({
+                            productId: brandedRM._id,
+                            productName: brandedRM.productName,
+                            quantity: comp.quantity,
+                            uom: brandedRM.uom
+                        });
+                    } else {
+                        // Regular RM (Preform, Cap, Shrink), keep as is
+                        brandedComponents.push({
+                            productId: comp.productId._id,
+                            productName: comp.productName,
+                            quantity: comp.quantity,
+                            uom: comp.uom
+                        });
+                    }
+                }
+
+                // 2. Create Branded FG
+                // Format: [Customer] - [Prod Short]
+                const brandedFGName = `${customerName} - ${template.productName}`;
+                let brandedFG = await Product.findOne({ productName: brandedFGName, brandedCustomerId: customer._id });
+                
+                if (!brandedFG) {
+                    brandedFG = new Product({
+                        productName: brandedFGName,
+                        productType: 'Finished Good',
+                        uom: template.uom,
+                        specification: template.specification,
+                        packaging: template.packaging,
+                        isBranded: true,
+                        brandedCustomerId: customer._id,
+                        availableQty: 0,
+                        factoryStock: { indapur: 0, shirapur: 0 },
+                        components: brandedComponents
+                    });
+                    await brandedFG.save();
+                }
+            }
+        }
+
         res.redirect('/headoffice/ims#customers-section');
     } catch (error) {
         console.error('Create Customer error:', error);
@@ -578,6 +660,38 @@ const assignProductionPlan = async (req, res) => {
     }
 };
 
+const renderChallan = async (req, res) => {
+    try {
+        const { dispatchId } = req.params;
+        const Dispatch = require('../models/Dispatch');
+        const Product = require('../models/Product');
+        const Customer = require('../models/Customer');
+
+        const dispatch = await Dispatch.findById(dispatchId).populate('productId');
+        if (!dispatch) {
+            return res.status(404).send('Dispatch not found');
+        }
+
+        // Try to find customer details for address/GSTIN
+        const customer = await Customer.findOne({ customerName: { $regex: new RegExp(`^${dispatch.receiverName}$`, 'i') } });
+        
+        const dispatchData = {
+            ...dispatch.toObject(),
+            receiverAddress: customer ? customer.address : '---',
+            receiverGSTIN: customer ? customer.gstNo : '---'
+        };
+
+        res.render('factoryIncharge/delivery-challan', {
+            dispatch: dispatchData,
+            user: { name: req.session.userName },
+            userRole: req.session.userRole
+        });
+    } catch (error) {
+        console.error('Render Challan error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
     getIMS,
@@ -592,5 +706,6 @@ module.exports = {
     getFinishedGoodsStock,
     getProductionHistory,
     calculateMRP,
-    assignProductionPlan
+    assignProductionPlan,
+    renderChallan
 };

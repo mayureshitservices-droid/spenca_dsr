@@ -1,12 +1,12 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar', { user, userRole }) %>
 
-<div class="min-h-screen bg-[#fcfcfd] py-8 print:py-0 print:bg-white print:min-h-0">
+<div class="min-h-screen bg-[#fcfcfd] py-4 print:py-0 print:bg-white print:min-h-0">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Premium Header -->
-        <header class="relative overflow-hidden mb-8 p-8 rounded-[2rem] bg-white border border-gray-100 shadow-around-sm flex flex-col md:flex-row md:items-center justify-between gap-6 print:border-b-2 print:border-gray-100 print:rounded-none print:shadow-none print:p-0 print:mb-6 print:pb-6">
+        <header class="relative overflow-hidden mb-3 p-5 rounded-[2rem] bg-white border border-gray-100 shadow-around-sm flex flex-col md:flex-row md:items-center justify-between gap-4 print:border-b-2 print:border-gray-100 print:rounded-none print:shadow-none print:p-0 print:mb-6 print:pb-6">
             <div class="relative z-10">
-                <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3 report-title">
                     <span class="w-1.5 h-8 bg-primary-600 rounded-full print:hidden"></span>
                     Daily Report : <span class="text-primary-600"><%= dateStr %></span>
                 </h1>
@@ -24,8 +24,23 @@
                     >
                 </div>
 
-                <button onclick="window.print()" class="px-6 py-3 bg-primary-600 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:bg-primary-700 transition-all active:scale-95 flex items-center gap-2 group">
-                    <i data-lucide="printer" class="w-4 h-4 text-white group-hover:animate-pulse"></i>
+                <div class="flex items-center gap-2">
+                    <button onclick="switchTab('production')" id="btn-production" class="tab-btn active px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 group">
+                        <i data-lucide="factory" class="w-4 h-4"></i>
+                        Production
+                    </button>
+                    <button onclick="switchTab('dispatches')" id="btn-dispatches" class="tab-btn px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 group">
+                        <i data-lucide="truck" class="w-4 h-4"></i>
+                        Dispatches
+                    </button>
+                    <button onclick="switchTab('inwards')" id="btn-inwards" class="tab-btn px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 group">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Inwards
+                    </button>
+                </div>
+
+                <button onclick="window.print()" class="px-6 py-3 bg-white text-gray-700 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-sm border border-gray-200 hover:border-gray-400 transition-all active:scale-95 flex items-center gap-2 group">
+                    <i data-lucide="printer" class="w-4 h-4 text-gray-500 group-hover:text-gray-700"></i>
                     Print
                 </button>
             </div>
@@ -35,41 +50,16 @@
             <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-50 rounded-full blur-3xl opacity-40 print:hidden"></div>
         </header>
 
-
-        <!-- Tab Navigation -->
-        <div class="flex items-center justify-center gap-3 mb-8 print:hidden">
-            <button onclick="switchTab('production')" id="btn-production" class="tab-btn active px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 group">
-                <i data-lucide="factory" class="w-4 h-4"></i>
-                Production
-            </button>
-            <button onclick="switchTab('dispatches')" id="btn-dispatches" class="tab-btn px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 group">
-                <i data-lucide="truck" class="w-4 h-4"></i>
-                Dispatches
-            </button>
-            <button onclick="switchTab('inwards')" id="btn-inwards" class="tab-btn px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-2 group">
-                <i data-lucide="download" class="w-4 h-4"></i>
-                Inwards
-            </button>
-        </div>
-
         <% ['indapur', 'shirapur'].forEach(factory => { %>
             <% const data = factoryWiseData[factory] %>
-            <div class="mb-12 print:mb-8">
-                <div class="flex items-center gap-4 mb-6 print:mb-4">
-                    <h2 class="text-base font-black text-gray-900 uppercase tracking-[0.3em] flex items-center gap-3">
-                        <span class="w-12 h-px bg-primary-200"></span>
-                        <%= factory %> Factory
-                        <span class="w-12 h-px bg-primary-200"></span>
-                    </h2>
-                </div>
-
-                <div class="space-y-8">
+            <div class="mb-4 print:mb-8">
+                <div class="space-y-4">
                     <!-- Production -->
                     <section data-tab-content="production" class="tab-content glass-card overflow-hidden flex flex-col print:!flex">
                         <div class="px-6 py-4 bg-indigo-50/30 border-b border-indigo-100">
                             <h3 class="text-xs font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="factory" class="w-4 h-4"></i>
-                                Production Details
+                                <%= factory %> Factory : Production Details
                             </h3>
                         </div>
                         <div class="flex-grow">
@@ -107,7 +97,7 @@
                         <div class="px-6 py-4 bg-purple-50/30 border-b border-purple-100 flex justify-between items-center">
                             <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="truck" class="w-4 h-4"></i>
-                                Dispatch Details
+                                <%= factory %> Factory : Dispatch Details
                             </h3>
                             <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-black uppercase tracking-tighter">Outward</span>
                         </div>
@@ -134,8 +124,20 @@
                                                         <% if (group.products) { %>
                                                             <% group.products.forEach(p => { %>
                                                                 <div class="flex items-center justify-between gap-4 p-2 bg-gray-50/50 rounded-lg border border-gray-100/50">
-                                                                    <span class="text-[11px] font-black text-gray-600 uppercase tracking-tight"><%= p.productName %></span>
-                                                                    <span class="text-[11px] font-black text-purple-600 tabular-nums"><%= p.quantity.toLocaleString() %> Boxes</span>
+                                                                    <div class="flex flex-col">
+                                                                        <span class="text-[11px] font-black text-gray-600 uppercase tracking-tight"><%= p.productName %></span>
+                                                                        <% if (p.dcNo) { %>
+                                                                            <span class="text-[8px] font-bold text-gray-400">DC: #<%= p.dcNo %></span>
+                                                                        <% } %>
+                                                                    </div>
+                                                                    <div class="flex items-center gap-3">
+                                                                        <span class="text-[11px] font-black text-purple-600 tabular-nums"><%= p.quantity.toLocaleString() %> Boxes</span>
+                                                                        <% if (p.id) { %>
+                                                                            <a href="/headoffice/challan/<%= p.id %>" target="_blank" class="p-1.5 bg-white border border-gray-200 rounded-md text-gray-400 hover:text-emerald-600 hover:border-emerald-200 transition-all group/print" title="Print Challan">
+                                                                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                                                                            </a>
+                                                                        <% } %>
+                                                                    </div>
                                                                 </div>
                                                             <% }) %>
                                                         <% } %>
@@ -158,7 +160,7 @@
                         <div class="px-6 py-4 bg-emerald-50/30 border-b border-emerald-100 flex justify-between items-center">
                             <h3 class="text-xs font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="download" class="w-4 h-4"></i>
-                                Inward Details
+                                <%= factory %> Factory : Inward Details
                             </h3>
                             <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-black uppercase tracking-tighter">Inward</span>
                         </div>
@@ -175,37 +177,44 @@
                                     <% if (data.inwards.length === 0) { %>
                                         <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No inwards recorded for today</td></tr>
                                     <% } else { %>
-                                        <% data.inwards.forEach(inw => { %>
-                                            <tr class="hover:bg-gray-50/30 transition-colors">
-                                                <td class="px-6 py-3">
-                                                    <div class="text-sm font-black text-gray-800 uppercase leading-tight"><%= inw.productName %></div>
-                                                </td>
-                                                <td class="px-6 py-3 text-center">
-                                                    <div class="text-[10px] font-bold text-gray-500 uppercase truncate max-w-[150px] mx-auto"><%= inw.supplierName %></div>
-                                                </td>
-                                                <td class="px-6 py-3 text-sm font-black text-emerald-600 text-right tabular-nums">
-                                                    <% 
-                                                        const isPreform = inw.productName.toLowerCase().includes('preform');
-                                                        let displayQty = inw.quantity;
-                                                        let displayUnit = (inw.productId && inw.productId.uom) ? inw.productId.uom : (inw.inwardUnit || 'Boxes');
-
-                                                        if (isPreform) {
-                                                            displayUnit = 'KG';
-                                                            if (inw.inwardWeight) {
-                                                                displayQty = inw.inwardWeight;
-                                                            } else {
-                                                                // Extract gram weight from name (e.g. "32 gm Preform" -> 32)
-                                                                const gmMatch = inw.productName.match(/(\d+\.?\d*)\s*gm/i);
-                                                                if (gmMatch) {
-                                                                    const gmWeight = parseFloat(gmMatch[1]);
-                                                                    displayQty = (inw.quantity * gmWeight) / 1000;
-                                                                }
-                                                            }
-                                                        }
-                                                    %>
-                                                    <%= displayQty.toLocaleString(undefined, { minimumFractionDigits: isPreform ? 2 : 0, maximumFractionDigits: 2 }) %> <%= displayUnit %>
+                                        <% const categories = Object.keys(data.inwardsByCategory || {}); %>
+                                        <% categories.forEach(category => { %>
+                                            <tr>
+                                                <td colspan="3" class="px-6 py-2 bg-emerald-50/60 border-y border-emerald-100">
+                                                    <span class="text-[9px] font-black text-emerald-700 uppercase tracking-[0.2em]"><%= category %></span>
                                                 </td>
                                             </tr>
+                                            <% data.inwardsByCategory[category].forEach(inw => { %>
+                                                <tr class="hover:bg-gray-50/30 transition-colors">
+                                                    <td class="px-6 py-3">
+                                                        <div class="text-sm font-black text-gray-800 uppercase leading-tight"><%= inw.productName %></div>
+                                                    </td>
+                                                    <td class="px-6 py-3 text-center">
+                                                        <div class="text-[10px] font-bold text-gray-500 uppercase truncate max-w-[150px] mx-auto"><%= inw.supplierName %></div>
+                                                    </td>
+                                                    <td class="px-6 py-3 text-sm font-black text-emerald-600 text-right tabular-nums">
+                                                        <% 
+                                                            const isPreform = inw.productName.toLowerCase().includes('preform');
+                                                            let displayQty = inw.quantity;
+                                                            let displayUnit = (inw.productId && inw.productId.uom) ? inw.productId.uom : (inw.inwardUnit || 'Boxes');
+
+                                                            if (isPreform) {
+                                                                displayUnit = 'KG';
+                                                                if (inw.inwardWeight) {
+                                                                    displayQty = inw.inwardWeight;
+                                                                } else {
+                                                                    const gmMatch = inw.productName.match(/(\d+\.?\d*)\s*gm/i);
+                                                                    if (gmMatch) {
+                                                                        const gmWeight = parseFloat(gmMatch[1]);
+                                                                        displayQty = (inw.quantity * gmWeight) / 1000;
+                                                                    }
+                                                                }
+                                                            }
+                                                        %>
+                                                        <%= displayQty.toLocaleString(undefined, { minimumFractionDigits: isPreform ? 2 : 0, maximumFractionDigits: 2 }) %> <%= displayUnit %>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
                                         <% }) %>
                                     <% } %>
                                 </tbody>
@@ -252,20 +261,53 @@
 </script>
 
 <style>
-/* Tab Buttons */
-.tab-btn {
-    @apply bg-white text-gray-400 border border-gray-100 shadow-sm hover:border-primary-200 hover:text-primary-600;
+.report-title {
+    display: none;
 }
+.tab-btn {
+    background-color: #ffffff !important;
+    color: #6b7280 !important;
+    border: 1px solid #e5e7eb !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    font-size: 10px !important;
+    padding: 0.75rem 2rem !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.2s !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.tab-btn:hover {
+    border-color: #1C2574 !important;
+    color: #1C2574 !important;
+    transform: translateY(-1px) !important;
+}
+
 .tab-btn.active {
-    @apply bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-100;
+    background-color: #1C2574 !important;
+    color: #ffffff !important;
+    border-color: #1C2574 !important;
+    box-shadow: 0 20px 25px -5px rgba(28, 37, 116, 0.25) !important;
 }
 
 /* Glass Component */
 .glass-card {
-    @apply bg-white rounded-[1.5rem] border border-gray-100 shadow-around-sm transition-all duration-300;
+    background-color: #ffffff !important;
+    border-radius: 1.5rem !important;
+    border: 1px solid #f3f4f6 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
 }
+
 .glass-card:hover {
-    @apply shadow-around-lg -translate-y-0.5 border-primary-100;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px) !important;
+    border-color: #e1e5ff !important;
 }
 
 @media print {
@@ -280,6 +322,7 @@
     }
     .min-h-screen { min-height: 0 !important; }
     nav, footer, .fab-container, #fabMain, [data-lucide="printer"] { display: none !important; }
+    .report-title { display: flex !important; }
     
     /* Strict One Page Grid */
     .grid {

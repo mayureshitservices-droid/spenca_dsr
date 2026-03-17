@@ -103,6 +103,13 @@
                                             </a>
                                         </div>
                                     <% } %>
+
+                                    <div class="leading-tight">
+                                        <label class="block text-[8px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Challan</label>
+                                        <a href="/factory-incharge/challan/<%= item._id %>" class="flex items-center gap-1 text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-tight">
+                                            <i data-lucide="printer" class="w-3 h-3"></i> Print Challan
+                                        </a>
+                                    </div>
                                 </div>
                             <% } %>
 
@@ -144,6 +151,7 @@
                                 <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Logistics</th>
                                 <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Quantity</th>
                                 <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Remarks</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
@@ -194,13 +202,15 @@
                                         </div>
                                     </td>
                                     <td class="px-8 py-6">
-                                        <% if (item.remark) { %>
-                                            <p class="text-[10px] font-medium text-gray-500 max-w-xs truncate" title="<%= item.remark %>">
-                                                <%= item.remark %>
-                                            </p>
                                         <% } else { %>
                                             <span class="text-gray-300 text-[10px] italic">No notes</span>
                                         <% } %>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <a href="/factory-incharge/challan/<%= item._id %>" class="flex items-center gap-2 text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest transition-colors group/btn">
+                                            <i data-lucide="printer" class="w-4 h-4 group-hover/btn:scale-110 transition-transform"></i>
+                                            Challan
+                                        </a>
                                     </td>
                                 </tr>
                             <% }) %>

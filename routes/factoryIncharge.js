@@ -13,10 +13,12 @@ router.get('/stock/finished-goods', factoryInchargeController.getFinishedGoodsSt
 router.get('/inward', factoryInchargeController.getInwardList);
 router.get('/inward/new', factoryInchargeController.getInwardForm);
 router.post('/inward', upload.single('invoicePhoto'), factoryInchargeController.createInward);
+router.post('/suppliers', factoryInchargeController.createSupplier);
 
 router.get('/dispatch', factoryInchargeController.getDispatchList);
 router.get('/dispatch/new', factoryInchargeController.getDispatchForm);
 router.post('/dispatch', upload.single('dcPhoto'), factoryInchargeController.createDispatch);
+router.get('/challan/:dispatchId', factoryInchargeController.renderChallan);
 
 router.get('/production', factoryInchargeController.getProductionList);
 router.get('/production/new', factoryInchargeController.getProductionForm);

@@ -21,65 +21,97 @@
                     onsubmit="return collectItems()" class="p-8 space-y-8">
 
                     <!-- Header Info: Supplier & Invoice -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Header Info: Supplier Selection -->
+                    <div id="supplierSelectionContainer" class="grid grid-cols-1 gap-8 items-start">
                         <!-- Supplier Selection -->
-                        <div class="md:col-span-2 space-y-3">
-                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Select
-                                Supplier *</label>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Select Supplier *</label>
                             <div class="relative">
                                 <input type="text" id="supplierInput" required autocomplete="off" class="input-field"
                                     placeholder="Start typing supplier name...">
                                 <input type="hidden" id="selectedSupplierId" name="supplierId">
+                                <input type="hidden" id="isNewSupplier" name="isNewSupplier" value="false">
                                 <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
                                     id="supplierSuggestions"></div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="space-y-3">
-                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                No</label>
-                            <div class="relative">
-                                <input type="text" name="invoiceNo" class="input-field" placeholder="INV/2024/001">
+                    <!-- Inline Supplier Creation Section (Full Width Horizontal) -->
+                    <div id="quickSupplierSection" class="hidden p-8 bg-primary-50/20 rounded-3xl border-2 border-dashed border-primary-100 animate-in slide-in-from-top-4 duration-500">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <i data-lucide="building-2" class="w-4 h-4 text-primary-600"></i>
+                                </div>
+                                <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">Create New Supplier</h3>
                             </div>
+                            <button type="button" onclick="closeQuickSupplier()" class="text-[10px] font-black text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center gap-1">
+                                <i data-lucide="x-circle" class="w-3 h-3"></i>
+                                Cancel
+                            </button>
                         </div>
-
-                        <div class="space-y-3">
-                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                Date</label>
-                            <div class="relative">
-                                <input type="date" name="invoiceDate" class="input-field">
+                        <div class="space-y-6">
+                            <!-- Row 1: Name & Address -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Business Name *</label>
+                                    <input type="text" name="qs_name" id="qs_name" class="input-field bg-gray-50 py-4" placeholder="Full Name">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Address</label>
+                                    <input type="text" name="qs_address" id="qs_address" class="input-field bg-gray-50 py-4" placeholder="Full location">
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="md:col-span-2 space-y-3">
-                            <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice
-                                Photo</label>
-                            <div class="relative group">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex-1">
-                                        <label for="invoicePhoto"
-                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer bg-gray-50 hover:bg-gray-100/50 hover:border-primary-400 transition-all group-hover:shadow-sm">
-                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <i data-lucide="image"
-                                                    class="w-8 h-8 text-gray-400 mb-2 group-hover:scale-110 transition-transform"></i>
-                                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400"
-                                                    id="photoStatusText">Click to upload invoice photo
-                                                </p>
-                                            </div>
-                                            <input type="file" name="invoicePhoto" id="invoicePhoto" class="hidden"
-                                                accept="image/*" onchange="updatePhotoLabel(this)">
-                                        </label>
-                                    </div>
-                                    <div id="photoPreview" class="hidden">
-                                        <img id="previewImg"
-                                            class="w-32 h-32 object-cover rounded-3xl border-2 border-gray-100 shadow-sm">
-                                    </div>
+                            <!-- Row 2: Phone & GST -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone</label>
+                                    <input type="text" name="qs_phone" id="qs_phone" class="input-field bg-gray-50 py-4" placeholder="Contact number">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">GST No</label>
+                                    <input type="text" name="qs_gst" id="qs_gst" class="input-field bg-gray-50 py-4" placeholder="27XXXXXXXXXXXXX">
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <hr class="border-gray-100">
+
+                    <!-- Invoice Info Row (Right above materials) -->
+                    <div class="p-6 bg-gray-50/30 rounded-3xl border-2 border-dashed border-gray-100 animate-in slide-in-from-top-4 duration-300">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice No</label>
+                                <input type="text" name="invoiceNo" class="input-field bg-white" placeholder="INV-001">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice Date</label>
+                                <input type="date" name="invoiceDate" class="input-field bg-white" value="<%= new Date().toISOString().split('T')[0] %>">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-black text-gray-500 uppercase tracking-widest ml-1">Invoice Photo</label>
+                                <div class="relative group">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex-1">
+                                            <input type="file" name="invoicePhoto" id="invoicePhoto" class="hidden" onchange="updatePhotoLabel(this)">
+                                            <label for="invoicePhoto"
+                                                class="flex flex-col items-center justify-center w-full h-14 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer bg-white hover:bg-gray-100/50 hover:border-primary-400 transition-all group-hover:shadow-sm">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <i data-lucide="camera" class="w-4 h-4 text-gray-400"></i>
+                                                    <p class="text-[9px] font-black uppercase tracking-widest text-gray-400" id="photoStatusText">Capture</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div id="photoPreview" class="hidden">
+                                            <img id="previewImg" class="w-14 h-14 object-cover rounded-2xl border-2 border-gray-100 shadow-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Items Section -->
                     <div class="space-y-6">
@@ -92,61 +124,73 @@
                             <!-- Item Row Template -->
                             <div class="group relative bg-gray-50/50 p-6 rounded-3xl border-2 border-dashed border-gray-200"
                                 id="itemRow_1">
-                                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-                                    <!-- Material Selection -->
-                                    <div class="md:col-span-5 space-y-2">
-                                        <label
-                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select
-                                            Material *</label>
+                                <!-- Trash Icon (Absolute Position) -->
+                                <button type="button" onclick="removeItemRow(1)"
+                                    class="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all transform hover:scale-110 z-10">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
+                                    <!-- Material Selection & Trash Icon Header -->
+                                    <div class="sm:col-span-5 space-y-2">
+                                        <div class="flex items-center min-h-[1.5rem] ml-1">
+                                            <label
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                                                Select Material *</label>
+                                        </div>
                                         <div class="relative">
                                             <input type="text" id="materialInput_1" required autocomplete="off"
-                                                class="input-field shadow-sm"
-                                                placeholder="Start typing material name...">
-                                            <input type="hidden" id="selectedProductId_1" class="item-product-id">
-                                            <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
-                                                id="materialSuggestions_1"></div>
+                                                class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm"
+                                                placeholder="Search material...">
+                                            <input type="hidden" id="selectedMaterialId_1" class="item-product-id">
+                                            <div class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[50] hidden"
+                                                id="suggestions_1"></div>
                                         </div>
                                     </div>
 
-                                    <!-- Quantity / Unit Type Selection -->
-                                    <div class="md:col-span-3 space-y-2">
-                                        <div class="flex items-center justify-between ml-1">
+                                    <!-- Quantity (Expanded to 3 cols) -->
+                                    <div class="sm:col-span-3 space-y-2">
+                                        <div class="flex items-center justify-between min-h-[1.5rem] ml-1">
                                             <label
-                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty
-                                                *</label>
-                                            <div id="unitBadgeContainer_1" class="hidden">
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                                                Qty *</label>
+                                            <div id="unitBadgeContainer_1" class="hidden shrink-0">
                                                 <span
-                                                    class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">Weight
-                                                    (KG)</span>
+                                                    class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">Weight</span>
                                                 <input type="hidden" id="unitType_1" value="nos">
                                             </div>
                                         </div>
                                         <div class="relative">
                                             <input type="number" step="0.01" id="quantity_1" required
-                                                class="input-field shadow-sm item-quantity" placeholder="0.00"
-                                                oninput="calculateTotalNos(1)">
-                                            <div id="conversionText_1"
-                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary-600 uppercase hidden">
-                                            </div>
+                                                class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm item-quantity"
+                                                placeholder="0.00" oninput="calculateTotalNos(1)">
+                                        </div>
+                                        <div id="conversionText_1"
+                                            class="text-[10px] font-black text-primary-600 uppercase mt-1 ml-1 hidden">
                                         </div>
                                         <input type="hidden" id="totalNos_1" class="calculated-nos">
                                     </div>
 
                                     <!-- Price -->
-                                    <div class="md:col-span-2 space-y-2">
-                                        <label
-                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Price
-                                            / Unit *</label>
+                                    <div class="sm:col-span-2 space-y-2">
+                                        <div class="flex items-center min-h-[1.5rem] ml-1">
+                                            <label id="priceLabel_1"
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">
+                                                Price / Unit *</label>
+                                        </div>
                                         <input type="number" step="0.01" id="price_1" required
-                                            class="input-field shadow-sm item-price" placeholder="0.00">
+                                            class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm item-price"
+                                            placeholder="0.00">
                                     </div>
 
                                     <!-- GST -->
-                                    <div class="md:col-span-2 space-y-2">
-                                        <label
-                                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">GST
-                                            %</label>
-                                        <select id="gstPercentage_1" required class="input-field shadow-sm item-gst">
+                                    <div class="sm:col-span-2 space-y-2">
+                                        <div class="flex items-center min-h-[1.5rem] ml-1">
+                                            <label
+                                                class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                                                GST %</label>
+                                        </div>
+                                        <select id="gstPercentage_1" required
+                                            class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm item-gst">
                                             <option value="0">0%</option>
                                             <option value="5">5%</option>
                                             <option value="12">12%</option>
@@ -154,102 +198,82 @@
                                             <option value="28">28%</option>
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                    <!-- Rejection Fields -->
-                                    <div class="md:col-span-3 space-y-2">
-                                        <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejected Qty</label>
-                                        <div class="relative">
-                                            <input type="number" step="0.01" id="rejectedQuantity_1" class="input-field shadow-sm item-rejected-qty border-red-50 focus:border-red-200" placeholder="0.00" oninput="calculateTotalNos(1)">
-                                            <div id="rejectedConversionText_1" class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-500 uppercase hidden"></div>
+                    <hr class="border-gray-100">
+
+                    <button type="button" onclick="addItemRow()"
+                        class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        Add Another Material
+                    </button>
+            </div>
+
+            <!-- Hidden field for collected items -->
+            <input type="hidden" name="items" id="itemsData">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Submit -->
+                <div class="md:col-span-2 pt-6">
+                    <button type="submit" class="btn-primary w-full py-5 text-lg shadow-around-primary">
+                        submit
+                    </button>
+                </div>
+            </div>
+            </form>
+
+            <!-- Alerts (Relocated to bottom) -->
+            <div class="mt-8 space-y-4">
+                <% if (typeof success !=='undefined' && success) { %>
+                    <div
+                        class="p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-500"></i>
+                            <p class="font-bold">
+                                <%= success %>
+                            </p>
+                        </div>
+                    </div>
+                    <% } %>
+
+                        <% if (typeof error !=='undefined' && error) { %>
+                            <div
+                                class="p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div class="flex items-start gap-4">
+                                    <i data-lucide="alert-octagon" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-black uppercase tracking-widest text-red-600">
+                                            Requirement Not Met</p>
+                                        <p class="font-bold text-lg leading-tight">
+                                            <%= error %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } %>
+
+                                <!-- Client-side Error Box -->
+                                <div id="clientErrorBox"
+                                    class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <div class="flex items-start gap-4">
+                                        <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
+                                        <div class="space-y-1">
+                                            <p class="text-sm font-black uppercase tracking-widest text-red-600">
+                                                Check Input Details</p>
+                                            <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
                                         </div>
-                                        <input type="hidden" id="rejectedNos_1" class="calculated-rejected-nos">
-                                    </div>
-
-                                    <div class="md:col-span-8 space-y-2">
-                                        <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejection Reason</label>
-                                        <input type="text" id="rejectionReason_1" class="input-field shadow-sm item-rejection-reason border-red-50 focus:border-red-200" placeholder="Reason for rejection (if any)">
-                                    </div>
-
-                                    <!-- Actions -->
-                                    <div class="md:col-span-1">
-                                        <button type="button" onclick="removeItemRow(1)"
-                                            class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
-                                            <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
+                                        <button type="button"
+                                            onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
+                                            class="ml-auto text-red-400 hover:text-red-600">
+                                            <i data-lucide="x" class="w-5 h-5"></i>
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <button type="button" onclick="addItemRow()"
-                            class="w-full py-4 border-2 border-dashed border-primary-300 text-black font-black rounded-3xl hover:bg-primary-50 hover:border-primary-400 transition-all flex items-center justify-center gap-3 active:scale-95">
-                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                            Add Another Material
-                        </button>
-                    </div>
-
-                    <!-- Hidden field for collected items -->
-                    <input type="hidden" name="items" id="itemsData">
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Submit -->
-                        <div class="md:col-span-2 pt-6">
-                            <button type="submit" class="btn-primary w-full py-5 text-lg">
-                                submit
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- Alerts (Relocated to bottom) -->
-                <div class="mt-8 space-y-4">
-                    <% if (typeof success !=='undefined' && success) { %>
-                        <div
-                            class="p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-800 flex items-center justify-between gap-3 rounded-r-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-500"></i>
-                                <p class="font-bold">
-                                    <%= success %>
-                                </p>
-                            </div>
-                        </div>
-                        <% } %>
-
-                            <% if (typeof error !=='undefined' && error) { %>
-                                <div
-                                    class="p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    <div class="flex items-start gap-4">
-                                        <i data-lucide="alert-octagon" class="w-8 h-8 text-red-600 shrink-0"></i>
-                                        <div class="space-y-1">
-                                            <p class="text-sm font-black uppercase tracking-widest text-red-600">
-                                                Requirement Not Met</p>
-                                            <p class="font-bold text-lg leading-tight">
-                                                <%= error %>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% } %>
-
-                                    <!-- Client-side Error Box -->
-                                    <div id="clientErrorBox"
-                                        class="hidden p-6 bg-red-100 border-l-8 border-red-600 text-red-900 rounded-xl shadow-md animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                        <div class="flex items-start gap-4">
-                                            <i data-lucide="alert-circle" class="w-8 h-8 text-red-600 shrink-0"></i>
-                                            <div class="space-y-1">
-                                                <p class="text-sm font-black uppercase tracking-widest text-red-600">
-                                                    Check Input Details</p>
-                                                <p id="clientErrorText" class="font-bold text-lg leading-tight"></p>
-                                            </div>
-                                            <button type="button"
-                                                onclick="document.getElementById('clientErrorBox').classList.add('hidden')"
-                                                class="ml-auto text-red-400 hover:text-red-600">
-                                                <i data-lucide="x" class="w-5 h-5"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                </div>
             </div>
+        </div>
         </div>
 
 
@@ -269,63 +293,57 @@
                         row.id = `itemRow_${rowCount}`;
 
                         row.innerHTML = `
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-                                <div class="md:col-span-5 space-y-2">
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Material *</label>
+                            <!-- Trash Icon (Absolute Position) -->
+                            <button type="button" onclick="removeItemRow(\${rowCount})"
+                                class="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all transform hover:scale-110 z-10">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start w-full">
+                                <div class="sm:col-span-5 space-y-2">
+                                    <div class="flex items-center min-h-[1.5rem] ml-1">
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Select Material *</label>
+                                    </div>
                                     <div class="relative">
                                         <input type="text" id="materialInput_${rowCount}" required autocomplete="off"
-                                            class="input-field shadow-sm" placeholder="Start typing material name...">
-                                        <input type="hidden" id="selectedProductId_${rowCount}" class="item-product-id">
-                                        <div class="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] hidden"
-                                            id="materialSuggestions_${rowCount}"></div>
+                                            class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm" placeholder="Search material...">
+                                        <input type="hidden" id="selectedMaterialId_${rowCount}" class="item-product-id">
+                                        <div class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[50] hidden"
+                                            id="suggestions_${rowCount}"></div>
                                     </div>
                                 </div>
-                                <div class="md:col-span-3 space-y-2">
-                                    <div class="flex items-center justify-between ml-1">
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Qty *</label>
-                                        <div id="unitBadgeContainer_${rowCount}" class="hidden">
-                                            <span class="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">Weight (KG)</span>
+                                <div class="sm:col-span-3 space-y-2">
+                                    <div class="flex items-center justify-between min-h-[1.5rem] ml-1">
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Qty *</label>
+                                        <div id="unitBadgeContainer_${rowCount}" class="hidden shrink-0">
+                                            <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 border border-indigo-200">Weight</span>
                                             <input type="hidden" id="unitType_${rowCount}" value="nos">
                                         </div>
                                     </div>
                                     <div class="relative">
                                         <input type="number" step="0.01" id="quantity_${rowCount}" required
-                                            class="input-field shadow-sm item-quantity" placeholder="0.00" oninput="calculateTotalNos(${rowCount})">
-                                        <div id="conversionText_${rowCount}" class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary-600 uppercase hidden"></div>
+                                            class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm item-quantity" placeholder="0.00" oninput="calculateTotalNos(${rowCount})">
                                     </div>
+                                    <div id="conversionText_${rowCount}" class="text-[10px] font-black text-primary-600 uppercase mt-1 ml-1 hidden"></div>
                                     <input type="hidden" id="totalNos_${rowCount}" class="calculated-nos">
                                 </div>
-                                <div class="md:col-span-2 space-y-2">
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Price / Unit *</label>
+                                <div class="sm:col-span-2 space-y-2">
+                                    <div class="flex items-center min-h-[1.5rem] ml-1">
+                                        <label id="priceLabel_${rowCount}" class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-ellipsis overflow-hidden">Price / Unit *</label>
+                                    </div>
                                     <input type="number" step="0.01" id="price_${rowCount}" required
-                                        class="input-field shadow-sm item-price" placeholder="0.00">
+                                        class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm item-price" placeholder="0.00">
                                 </div>
-                                <div class="md:col-span-2 space-y-2">
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">GST %</label>
-                                    <select id="gstPercentage_${rowCount}" required class="input-field shadow-sm item-gst">
+                                <div class="sm:col-span-2 space-y-2">
+                                    <div class="flex items-center min-h-[1.5rem] ml-1">
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">GST %</label>
+                                    </div>
+                                    <select id="gstPercentage_${rowCount}" required class="w-full h-[56px] py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 shadow-sm item-gst">
                                         <option value="0">0%</option>
                                         <option value="5">5%</option>
                                         <option value="12">12%</option>
                                         <option value="18" selected>18%</option>
                                         <option value="28">28%</option>
                                     </select>
-                                </div>
-                                <div class="md:col-span-3 space-y-2">
-                                    <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejected Qty</label>
-                                    <div class="relative">
-                                        <input type="number" step="0.01" id="rejectedQuantity_${rowCount}" class="input-field shadow-sm item-rejected-qty border-red-50 focus:border-red-200" placeholder="0.00" oninput="calculateTotalNos(${rowCount})">
-                                        <div id="rejectedConversionText_${rowCount}" class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-red-500 uppercase hidden"></div>
-                                    </div>
-                                    <input type="hidden" id="rejectedNos_${rowCount}" class="calculated-rejected-nos">
-                                </div>
-                                <div class="md:col-span-8 space-y-2">
-                                    <label class="block text-[10px] font-black text-red-400 uppercase tracking-widest ml-1">Rejection Reason</label>
-                                    <input type="text" id="rejectionReason_${rowCount}" class="input-field shadow-sm item-rejection-reason border-red-50 focus:border-red-200" placeholder="Reason for rejection (if any)">
-                                </div>
-                                <div class="md:col-span-1">
-                                    <button type="button" onclick="removeItemRow(${rowCount})" class="w-full p-3.5 text-gray-300 hover:text-red-500 transition-colors bg-transparent rounded-2xl">
-                                        <i data-lucide="trash-2" class="w-5 h-5 mx-auto"></i>
-                                    </button>
                                 </div>
                             </div>
                         `;
@@ -349,8 +367,8 @@
                     function initMaterialAutocomplete(id) {
                         console.log(`Initializing Material Autocomplete for row ${id}...`);
                         const input = document.getElementById(`materialInput_${id}`);
-                        const suggestions = document.getElementById(`materialSuggestions_${id}`);
-                        const hiddenInput = document.getElementById(`selectedProductId_${id}`);
+                        const suggestions = document.getElementById(`suggestions_${id}`); // Changed to suggestions_${id}
+                        const hiddenInput = document.getElementById(`selectedMaterialId_${id}`); // Changed to selectedMaterialId_${id}
 
                         if (!input) console.error(`CRITICAL: materialInput_${id} NOT found!`);
 
@@ -369,23 +387,26 @@
                                 console.log(`Material selected for row ${id}:`, item.productName);
                                 document.getElementById(`materialInput_${id}`).value = item.productName;
 
-                                // Check if it's a preform
-                                const isPreform = item.productName.toLowerCase().includes('preform');
+                                // Check if it's a preform or cap
+                                const nameLower = item.productName.toLowerCase();
+                                const isPreform = nameLower.includes('preform');
+                                const isCap = nameLower.includes('cap');
                                 const badge = document.getElementById(`unitBadgeContainer_${id}`);
                                 const conversionText = document.getElementById(`conversionText_${id}`);
 
                                 if (isPreform) {
                                     if (badge) badge.classList.remove('hidden');
                                     toggleUnit(id, 'kg'); // Force KG
-                                    // Extract weight from name (e.g. "32 gm Preform" -> 32)
                                     const match = item.productName.match(/(\d+\.?\d*)\s*gm/i);
-                                    if (match) {
-                                        input.dataset.weight = match[1];
-                                    }
+                                    if (match) input.dataset.weight = match[1];
+                                    input.dataset.type = 'preform';
+                                    input.dataset.type = 'cap';
+                                    toggleUnit(id, 'boxes'); 
                                 } else {
                                     if (badge) badge.classList.add('hidden');
-                                    toggleUnit(id, 'nos'); // Reset to Nos
+                                    toggleUnit(id, 'nos');
                                     delete input.dataset.weight;
+                                    delete input.dataset.type;
                                     conversionText.classList.add('hidden');
                                 }
                                 calculateTotalNos(id);
@@ -404,30 +425,43 @@
                     function toggleUnit(id, unit) {
                         const unitType = document.getElementById(`unitType_${id}`);
                         const quantityInput = document.getElementById(`quantity_${id}`);
+                        const badgeLabel = document.querySelector(`#unitBadgeContainer_${id} span`);
+                        const priceLabel = document.getElementById(`priceLabel_${id}`);
 
                         if (unitType) unitType.value = unit;
 
                         if (unit === 'kg') {
-                            if (quantityInput) quantityInput.placeholder = "Enter Weight (KG)";
-                        } else if (unit === 'bags') {
-                            if (quantityInput) quantityInput.placeholder = "Enter Bags";
+                            if (quantityInput) quantityInput.placeholder = "Enter Weight";
+                            if (badgeLabel) badgeLabel.innerText = "Weight (KG)";
+                            if (priceLabel) {
+                                priceLabel.innerText = "Price / KG *";
+                                priceLabel.classList.replace('text-gray-400', 'text-red-500');
+                            }
+                        } else if (unit === 'bags' || unit === 'boxes') {
+                            const isBox = unit === 'boxes';
+                            if (quantityInput) quantityInput.placeholder = isBox ? "Enter Boxes" : "Enter Bags";
+                            if (badgeLabel) badgeLabel.innerText = isBox ? "Boxes" : "Bags";
+                            if (priceLabel) {
+                                priceLabel.innerText = isBox ? "Price / BOX *" : "Price / BAG *";
+                                priceLabel.classList.replace('text-gray-400', 'text-red-500');
+                            }
                         } else {
                             if (quantityInput) quantityInput.placeholder = "0.00";
+                            if (priceLabel) {
+                                priceLabel.innerText = "Price / Unit *";
+                                priceLabel.classList.replace('text-red-500', 'text-gray-400');
+                            }
                         }
                         calculateTotalNos(id);
                     }
 
                     function calculateTotalNos(id) {
                         const quantity = parseFloat(document.getElementById(`quantity_${id}`).value) || 0;
-                        const rejectedQty = parseFloat(document.getElementById(`rejectedQuantity_${id}`).value) || 0;
                         const unitType = document.getElementById(`unitType_${id}`).value;
                         const weight = document.getElementById(`materialInput_${id}`).dataset.weight;
-                        
+
                         const totalNosInput = document.getElementById(`totalNos_${id}`);
                         const conversionText = document.getElementById(`conversionText_${id}`);
-                        
-                        const rejectedNosInput = document.getElementById(`rejectedNos_${id}`);
-                        const rejectedConversionText = document.getElementById(`rejectedConversionText_${id}`);
 
                         if (unitType === 'kg' && weight) {
                             // Pieces = (KG * 1000) / Gram Weight
@@ -435,28 +469,28 @@
                             totalNosInput.value = total;
                             conversionText.innerText = `= ${total} Nos`;
                             conversionText.classList.remove('hidden');
+                        } else if (unitType === 'bags' || unitType === 'boxes') {
+                            const materialInput = document.getElementById(`materialInput_${id}`);
+                            const isCap = materialInput && materialInput.dataset.type === 'cap';
+                            let total = 0;
 
-                            const rejected = Math.round((rejectedQty * 1000) / parseFloat(weight));
-                            rejectedNosInput.value = rejected;
-                            rejectedConversionText.innerText = `= ${rejected} Nos`;
-                            rejectedConversionText.classList.remove('hidden');
-                        } else if (unitType === 'bags' && weight && preformConversions[weight]) {
-                            const multiplier = preformConversions[weight];
-                            const total = Math.round(quantity * multiplier);
-                            totalNosInput.value = total;
-                            conversionText.innerText = `= ${total} Nos`;
-                            conversionText.classList.remove('hidden');
+                            if (isCap || unitType === 'boxes') {
+                                total = Math.round(quantity * 7000);
+                            } else if (weight && preformConversions[weight]) {
+                                total = Math.round(quantity * preformConversions[weight]);
+                            }
 
-                            const rejected = Math.round(rejectedQty * multiplier);
-                            rejectedNosInput.value = rejected;
-                            rejectedConversionText.innerText = `= ${rejected} Nos`;
-                            rejectedConversionText.classList.remove('hidden');
+                            if (total > 0) {
+                                totalNosInput.value = total;
+                                conversionText.innerText = `= ${total} Nos`;
+                                conversionText.classList.remove('hidden');
+                            } else {
+                                totalNosInput.value = quantity;
+                                conversionText.classList.add('hidden');
+                            }
                         } else {
                             totalNosInput.value = quantity;
                             conversionText.classList.add('hidden');
-                            
-                            rejectedNosInput.value = rejectedQty;
-                            rejectedConversionText.classList.add('hidden');
                         }
                     }
 
@@ -485,13 +519,14 @@
 
                         rows.forEach(row => {
                             const id = row.id.split('_')[1];
-                            const productId = document.getElementById(`selectedProductId_${id}`).value;
+                            const productId = document.getElementById(`selectedMaterialId_${id}`).value; // Changed to selectedMaterialId_${id}
                             const materialName = document.getElementById(`materialInput_${id}`).value;
                             const quantity = parseFloat(document.getElementById(`quantity_${id}`).value);
                             const price = parseFloat(document.getElementById(`price_${id}`).value);
                             const gstPercentage = document.getElementById(`gstPercentage_${id}`).value;
                             const unitType = document.getElementById(`unitType_${id}`) ? document.getElementById(`unitType_${id}`).value : 'nos';
                             const totalNos = parseFloat(document.getElementById(`totalNos_${id}`).value);
+
 
                             // Check if the row has any input, if not, skip it (e.g., empty added row)
                             if (!materialName && isNaN(quantity) && isNaN(price)) {
@@ -519,10 +554,7 @@
                                     gstPercentage,
                                     inwardUnit: unitType,
                                     inwardQty: quantity, // Original value entered by user
-                                    inwardWeight: unitType === 'kg' ? quantity : null,
-                                    rejectedQuantity: parseFloat(document.getElementById(`rejectedNos_${id}`).value) || 0,
-                                    rejectedInwardQty: parseFloat(document.getElementById(`rejectedQuantity_${id}`).value) || 0,
-                                    rejectionReason: document.getElementById(`rejectionReason_${id}`).value
+                                    inwardWeight: unitType === 'kg' ? quantity : null
                                 });
                                 row.classList.remove('border-red-200', 'bg-red-50/30');
                             }
@@ -583,15 +615,27 @@
                                 suggestions: supplierSuggestions,
                                 hiddenInput: document.getElementById('selectedSupplierId'),
                                 url: '/api/suppliers/search',
+                                emptyHtml: `
+                                    <div class="px-6 py-5 text-center">
+                                        <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-3 italic">No matching partner</p>
+                                        <button type="button" onclick="openQuickSupplier()" 
+                                            class="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-100 transition-colors">
+                                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                            Register New Supplier
+                                        </button>
+                                    </div>
+                                `,
                                 formatResult: (item) => `
                                     <div class="p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors">
                                         <div class="font-black text-gray-900 uppercase text-xs">${item.supplierName}</div>
-                                        <div class="text-[10px] font-bold text-gray-400">GST: ${item.gstNo || 'N/A'}</div>
+                                        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${item.gstNo || 'NO GST'} • ${item.phoneNumber || 'NO CONTACT'}</div>
                                     </div>
                                 `,
                                 onSelect: (item) => {
-                                    console.log('Supplier selected:', item.supplierName);
                                     document.getElementById('supplierInput').value = item.supplierName;
+                                    document.getElementById('selectedSupplierId').value = item._id;
+                                    document.getElementById('isNewSupplier').value = 'false';
+                                    closeQuickSupplier(); // Ensure it's closed
                                 }
                             });
                             console.log('Supplier Autocomplete Initialized');
@@ -604,9 +648,44 @@
                             console.error('Initialization Error:', e);
                         }
 
-                        // Icons last
+                        // Labels last
                         if (typeof lucide !== 'undefined') {
                             lucide.createIcons();
                         }
                     });
+
+                    function openQuickSupplier() {
+                        const section = document.getElementById('quickSupplierSection');
+                        const selectionContainer = document.getElementById('supplierSelectionContainer');
+                        const isNewField = document.getElementById('isNewSupplier');
+                        const nameField = document.getElementById('qs_name');
+                        const inputVal = document.getElementById('supplierInput').value;
+
+                        if (section) {
+                            section.classList.remove('hidden');
+                            if (selectionContainer) selectionContainer.classList.add('hidden');
+                            isNewField.value = 'true';
+                            if (nameField && inputVal) {
+                                nameField.value = inputVal;
+                            }
+                            section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        
+                        // Close suggestions if open
+                        document.getElementById('supplierSuggestions').classList.add('hidden');
+                    }
+
+                    function closeQuickSupplier() {
+                        const section = document.getElementById('quickSupplierSection');
+                        const selectionContainer = document.getElementById('supplierSelectionContainer');
+                        const isNewField = document.getElementById('isNewSupplier');
+                        if (section) {
+                            section.classList.add('hidden');
+                            if (selectionContainer) selectionContainer.classList.remove('hidden');
+                            isNewField.value = 'false';
+                        }
+                    }
+
+                    // Old Save Function removed - now handled by main submit
                 </script>
+>

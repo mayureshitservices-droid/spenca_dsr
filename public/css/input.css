@@ -24,6 +24,10 @@
         @apply w-full py-4 px-6 border-2 border-transparent rounded-2xl bg-gray-50 text-base text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 appearance-none min-h-[56px];
     }
 
+    .input-field-sm {
+        @apply w-full py-2 px-4 border-2 border-transparent rounded-xl bg-gray-50 text-sm text-gray-900 font-bold placeholder-gray-400 transition-all duration-300 focus:bg-white focus:border-primary-600 focus:outline-none focus:ring-4 focus:ring-primary-100 appearance-none min-h-[42px];
+    }
+
     .card-header-primary {
         @apply bg-primary-600 text-white font-black p-6 rounded-t-3xl;
     }

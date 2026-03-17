@@ -128,26 +128,16 @@
                                                         </span>
                                                         <% } %>
                                                 </div>
-                                                <% if (item.rejectedQuantity > 0) { %>
-                                                    <p class="text-[9px] font-black text-red-500 uppercase mt-1">
-                                                        Rejected: <%= item.rejectedQuantity %> Nos
-                                                        <% if (item.rejectedInwardQty && item.inwardUnit !== 'nos') { %>
-                                                            (<%= item.rejectedInwardQty %> <%= item.inwardUnit %>)
-                                                        <% } %>
-                                                    </p>
-                                                    <% if (item.rejectionReason) { %>
-                                                        <p class="text-[8px] font-bold text-red-400 uppercase leading-tight mt-0.5">
-                                                            Reason: <%= item.rejectionReason %>
-                                                        </p>
-                                                    <% } %>
-                                                <% } %>
-                                                <% if (item.inwardUnit && item.inwardUnit !=='nos' && item.inwardUnit
-                                                    !=='kg' ) { %>
+                                                <% if (item.inwardUnit && item.inwardUnit !== 'nos' && item.inwardUnit !== 'kg') { %>
                                                     <p class="text-[9px] font-black text-primary-600 uppercase mt-1">
                                                         Entry: <%= item.inwardQty %>
+                                                        <% if (item.productName && item.productName.toLowerCase().includes('cap') && (item.inwardUnit === 'bags' || item.inwardUnit === 'boxes')) { %>
+                                                            boxes
+                                                        <% } else { %>
                                                             <%= item.inwardUnit %>
+                                                        <% } %>
                                                     </p>
-                                                    <% } %>
+                                                <% } %>
                                             </div>
                                         </div>
                             </div>
@@ -178,12 +168,10 @@
                                     <th
                                         class="px-6 py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest text-right">
                                         Weight (KG)</th>
+
                                     <th
                                         class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">
                                         Entry Info</th>
-                                    <th
-                                        class="px-8 py-5 text-[10px] font-black text-red-400 uppercase tracking-[0.2em] text-right">
-                                        Rejected</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
@@ -253,38 +241,19 @@
                                         <td class="px-8 py-6 text-right font-black text-<%= factory === 'indapur' ? 'indigo' : 'purple' %>-600">
                                             <%= item.inwardWeight ? item.inwardWeight + ' KG' : '-' %>
                                         </td>
+
                                         <td class="px-8 py-6 text-center">
-                                            <% if (item.inwardUnit && item.inwardUnit !=='nos' ) { %>
-                                                <span
-                                                    class="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 text-primary-600 text-[10px] font-black uppercase tracking-widest border border-primary-100">
+                                            <% if (item.inwardUnit && item.inwardUnit !== 'nos') { %>
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 text-primary-600 text-[10px] font-black uppercase tracking-widest border border-primary-100">
                                                     <%= item.inwardQty %>
+                                                    <% if (item.productName && item.productName.toLowerCase().includes('cap') && (item.inwardUnit === 'bags' || item.inwardUnit === 'boxes')) { %>
+                                                        boxes
+                                                    <% } else { %>
                                                         <%= item.inwardUnit %>
+                                                    <% } %>
                                                 </span>
-                                                <% } else { %>
-                                                    <span
-                                                        class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 py-1">Direct
-                                                        Nos</span>
-                                                    <% } %>
-                                        </td>
-                                        <td class="px-8 py-6 text-right">
-                                            <% if (item.rejectedQuantity > 0) { %>
-                                                <div class="flex flex-col items-end">
-                                                    <span class="text-sm font-black text-red-500">
-                                                        -<%= item.rejectedQuantity %> Nos
-                                                    </span>
-                                                    <% if (item.rejectedInwardQty && item.inwardUnit !== 'nos') { %>
-                                                        <span class="text-[9px] font-black text-red-400 uppercase">
-                                                            (<%= item.rejectedInwardQty %> <%= item.inwardUnit %>)
-                                                        </span>
-                                                    <% } %>
-                                                    <% if (item.rejectionReason) { %>
-                                                        <span class="text-[8px] font-bold text-red-400 uppercase text-right leading-tight max-w-[120px] mt-0.5">
-                                                            <%= item.rejectionReason %>
-                                                        </span>
-                                                    <% } %>
-                                                </div>
                                             <% } else { %>
-                                                <span class="text-[10px] font-bold text-gray-300 uppercase">None</span>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 py-1">Direct Nos</span>
                                             <% } %>
                                         </td>
                                     </tr>

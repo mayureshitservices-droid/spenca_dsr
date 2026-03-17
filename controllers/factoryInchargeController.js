@@ -63,11 +63,60 @@ const getInwardForm = async (req, res) => {
 // POST /factory-incharge/inward
 const createInward = async (req, res) => {
     try {
-        const { supplierId, items, invoiceNo, invoiceDate } = req.body;
+        const { 
+            supplierId, 
+            invoiceNo, 
+            invoiceDate, 
+            items,
+            isNewSupplier,
+            qs_name,
+            qs_phone,
+            qs_gst,
+            qs_address
+        } = req.body;
 
-        const supplier = await Supplier.findById(supplierId);
+        let finalSupplierId = supplierId;
+
+        // If it's a new supplier, create it first
+        if (isNewSupplier === 'true' && qs_name) {
+            // Check if supplier already exists by name just in case
+            const existingSupplier = await Supplier.findOne({ 
+                supplierName: { $regex: new RegExp(`^${qs_name.trim()}$`, 'i') } 
+            });
+
+            if (existingSupplier) {
+                finalSupplierId = existingSupplier._id;
+            } else {
+                const newSupplier = new Supplier({
+                    supplierName: qs_name.trim(),
+                    phoneNumber: qs_phone,
+                    gstNo: qs_gst,
+                    address: qs_address,
+                    status: 'Active'
+                });
+                await newSupplier.save();
+                finalSupplierId = newSupplier._id;
+            }
+        }
+
+        if (!finalSupplierId || finalSupplierId === "" || finalSupplierId === "null") {
+            return res.redirect('/factory-incharge/inward/new?error=Supplier identification failed. Please select or register a supplier.');
+        }
+
+        const supplier = await Supplier.findById(finalSupplierId);
         if (!supplier) {
-            return res.redirect('/factory-incharge/inward/new?error=Invalid supplier');
+            return res.redirect('/factory-incharge/inward/new?error=Supplier not found in database');
+        }
+
+        // Handle Photo Upload
+        let invoicePhotoUrl = null;
+        if (req.file) {
+            try {
+                const fileName = `inward_${Date.now()}_${req.file.originalname}`;
+                invoicePhotoUrl = await ociService.uploadToOCI(req.file.buffer, fileName, req.file.mimetype);
+            } catch (ociError) {
+                console.error('OCI Upload Error (Inward):', ociError);
+            }
         }
 
         // Parse items from JSON string
@@ -75,30 +124,11 @@ const createInward = async (req, res) => {
         try {
             inwardItems = JSON.parse(items);
         } catch (e) {
-            // Fallback for single item if items is not valid JSON
-            const { productId, quantity, price, gstPercentage } = req.body;
-            if (productId && quantity) {
-                inwardItems = [{ productId, quantity, price, gstPercentage }];
-            }
+            console.error('JSON Parse Error:', e);
         }
 
         if (!inwardItems || inwardItems.length === 0) {
             return res.redirect('/factory-incharge/inward/new?error=No items added');
-        }
-
-        // --- Phase 1: Handle Invoice Photo Upload (Optional) ---
-        let invoicePhotoUrl = null;
-        if (req.file) {
-            try {
-                const file = req.file;
-                const fileName = `invoices/INW_${invoiceNo || Date.now()}_${Date.now()}${path.extname(file.originalname)}`;
-                console.log(`[Inward Upload] Uploading invoice photo: ${fileName}`);
-
-                invoicePhotoUrl = await ociService.uploadToOCI(file.buffer, fileName, file.mimetype);
-                console.log(`[Inward Upload] Success. URL: ${invoicePhotoUrl}`);
-            } catch (ociError) {
-                console.error('[Inward Upload] OCI Error:', ociError);
-            }
         }
 
         // --- Phase 2: Process each item ---
@@ -107,9 +137,6 @@ const createInward = async (req, res) => {
             if (!product) continue;
 
             const totalQuantity = parseFloat(item.quantity) || 0;
-            const rejectedQuantity = parseFloat(item.rejectedQuantity) || 0;
-            const acceptedQuantity = Math.max(0, totalQuantity - rejectedQuantity);
-
             const price = parseFloat(item.price) || 0;
             const gstPercentage = parseFloat(item.gstPercentage) || 0;
 
@@ -117,14 +144,11 @@ const createInward = async (req, res) => {
 
             // Create inward record
             const inward = new Inward({
-                supplierId,
+                supplierId: finalSupplierId,
                 supplierName: supplier.supplierName,
                 productId: item.productId,
                 productName: product.productName,
                 quantity: totalQuantity,
-                rejectedQuantity: rejectedQuantity,
-                rejectedInwardQty: parseFloat(item.rejectedInwardQty) || 0,
-                rejectionReason: item.rejectionReason || null,
                 price: price,
                 gstPercentage: gstPercentage,
                 inwardUnit: item.inwardUnit || 'nos',
@@ -140,21 +164,66 @@ const createInward = async (req, res) => {
 
             await inward.save();
 
-            // Update product stock with Accepted quantity only
+            // Update product stock
             const factory = req.session.factory;
-            const update = {
+            await Product.findByIdAndUpdate(item.productId, {
                 $inc: {
-                    availableQty: acceptedQuantity,
-                    [`factoryStock.${factory}`]: acceptedQuantity
+                    availableQty: totalQuantity,
+                    [`factoryStock.${factory}`]: totalQuantity
                 }
-            };
-            await Product.findByIdAndUpdate(item.productId, update);
+            });
         }
 
         res.redirect('/factory-incharge/inward?success=Inward transactions recorded successfully' + (invoicePhotoUrl ? ' with invoice photo' : ''));
     } catch (error) {
         console.error('Create Inward error:', error);
-        res.redirect('/factory-incharge/dashboard?error=Failed to record inward');
+        res.redirect('/factory-incharge/inward/new?error=Failed to record inward: ' + error.message);
+    }
+};
+
+// POST /factory-incharge/suppliers
+const createSupplier = async (req, res) => {
+    try {
+        const { supplierName, address, phoneNumber, gstNo, paymentTerms, status } = req.body;
+
+        const existingSupplier = await Supplier.findOne({ supplierName });
+        if (existingSupplier) {
+            if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+                return res.status(400).json({ error: 'Supplier already exists' });
+            }
+            return res.status(400).send('Supplier already exists');
+        }
+
+        const supplier = new Supplier({
+            supplierName,
+            address,
+            phoneNumber,
+            gstNo,
+            paymentTerms,
+            status: status || 'Active'
+        });
+
+        await supplier.save();
+
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({ 
+                success: true, 
+                message: 'Supplier created successfully',
+                supplier: {
+                    _id: supplier._id,
+                    supplierName: supplier.supplierName,
+                    gstNo: supplier.gstNo
+                }
+            });
+        }
+
+        res.redirect('/factory-incharge/inward/new?success=Supplier created');
+    } catch (error) {
+        console.error('Create Supplier error:', error);
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(500).json({ error: 'Server error' });
+        }
+        res.status(500).send('Server error');
     }
 };
 
@@ -559,17 +628,45 @@ const getFinishedGoodsStock = async (req, res) => {
 const getProductionPlans = async (req, res) => {
     try {
         const factory = req.session.factory;
-        const productionPlans = await inventoryService.getProductionPlans(factory);
+        const plans = await inventoryService.getProductionPlans(factory);
 
         res.render('factoryIncharge/production-plans', {
             user: { name: req.session.userName },
             userRole: req.session.userRole,
-            productionPlans,
-            factory,
+            plans,
+            factory: factory,
             title: 'Production Plans'
         });
     } catch (error) {
         console.error('Get Production Plans error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
+const renderChallan = async (req, res) => {
+    try {
+        const { dispatchId } = req.params;
+        const dispatch = await Dispatch.findById(dispatchId).populate('productId');
+        if (!dispatch) {
+            return res.status(404).send('Dispatch not found');
+        }
+
+        // Try to find customer details for address/GSTIN
+        const customer = await Customer.findOne({ customerName: { $regex: new RegExp(`^${dispatch.receiverName}$`, 'i') } });
+        
+        const dispatchData = {
+            ...dispatch.toObject(),
+            receiverAddress: customer ? customer.address : '---',
+            receiverGSTIN: customer ? customer.gstNo : '---'
+        };
+
+        res.render('factoryIncharge/delivery-challan', {
+            dispatch: dispatchData,
+            user: { name: req.session.userName },
+            userRole: req.session.userRole
+        });
+    } catch (error) {
+        console.error('Render Challan error:', error);
         res.status(500).send('Server error');
     }
 };
@@ -581,9 +678,11 @@ module.exports = {
     getInwardList,
     getInwardForm,
     createInward,
+    createSupplier,
     getDispatchList,
     getDispatchForm,
     createDispatch,
+    renderChallan,
     searchSuppliers,
     searchRawMaterials,
     searchFinishedGoods,

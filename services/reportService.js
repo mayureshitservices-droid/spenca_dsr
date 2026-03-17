@@ -90,8 +90,10 @@ const getAtAGlanceReportData = async (dateParam) => {
             }
 
             groupedDispatches[factory][receiverKey].products.push({
+                id: d._id,
                 productName: d.productName,
-                quantity: d.quantity
+                quantity: d.quantity,
+                dcNo: d.dcNo
             });
             groupedDispatches[factory][receiverKey].totalBoxes += d.quantity;
         });
@@ -103,6 +105,46 @@ const getAtAGlanceReportData = async (dateParam) => {
             }
         });
     }
+
+    // Group inwards by category for each factory
+    const CATEGORY_KEYWORDS = [
+        { label: 'Preforms',  keywords: ['preform'] },
+        { label: 'Labels',    keywords: ['label', 'sleeve'] },
+        { label: 'Caps',      keywords: ['cap', 'cap '] },
+        { label: 'Masterbatch', keywords: ['masterbatch', 'mb ', 'master batch'] },
+        { label: 'Paper',    keywords: ['paper', 'chemical', 'solvent', 'adhesive', 'ink'] },
+        { label: 'Packaging', keywords: ['carton', 'box', 'corrugated', 'shipper', 'wrap'] },
+    ];
+
+    const detectCategory = (name) => {
+        const lower = (name || '').toLowerCase();
+        for (const cat of CATEGORY_KEYWORDS) {
+            if (cat.keywords.some(kw => lower.includes(kw))) return cat.label;
+        }
+        return 'Others';
+    };
+
+    ['indapur', 'shirapur'].forEach(f => {
+        const grouped = {};
+        factoryWiseData[f].inwards.forEach(inw => {
+            const cat = detectCategory(inw.productName);
+            if (!grouped[cat]) grouped[cat] = {};
+
+            // Aggregate by product name
+            const key = inw.productName;
+            if (!grouped[cat][key]) {
+                grouped[cat][key] = { ...inw.toObject(), quantity: 0, inwardWeight: 0 };
+            }
+            grouped[cat][key].quantity += inw.quantity || 0;
+            grouped[cat][key].inwardWeight += inw.inwardWeight || 0;
+        });
+
+        // Convert inner objects to arrays
+        factoryWiseData[f].inwardsByCategory = {};
+        for (const cat of Object.keys(grouped)) {
+            factoryWiseData[f].inwardsByCategory[cat] = Object.values(grouped[cat]);
+        }
+    });
 
     return {
         dateStr,

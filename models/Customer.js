@@ -38,6 +38,10 @@ const customerSchema = new mongoose.Schema({
         type: String,
         enum: ['Regular', 'Branded'],
         default: 'Regular'
+    },
+    capColor: {
+        type: String,
+        trim: true
     }
 }, {
     timestamps: true

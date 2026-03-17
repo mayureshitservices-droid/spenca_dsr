@@ -39,6 +39,10 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer'
     },
+    isTemplate: {
+        type: Boolean,
+        default: false
+    },
     photo: {
         type: String, // File path
         default: null

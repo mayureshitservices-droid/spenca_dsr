@@ -1056,10 +1056,40 @@
                                 <label
                                     class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer
                                     Type</label>
-                                <select name="customerType" class="input-field">
+                                <select name="customerType" class="input-field" onchange="toggleCoreProducts(this.value)">
                                     <option value="Regular">Regular</option>
                                     <option value="Branded">Branded</option>
                                 </select>
+                            </div>
+
+                            <!-- Core Products Selection (Hidden by default) -->
+                            <div id="coreProductsSection" class="col-span-1 md:col-span-2 space-y-4 hidden animate-in fade-in slide-in-from-top-2">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-purple-600 uppercase tracking-widest px-1">Cap Color Preference</label>
+                                    <select name="capColor" class="input-field border-purple-100 focus:border-purple-500 focus:ring-purple-200">
+                                        <option value="Blue">Blue</option>
+                                        <option value="Red">Red</option>
+                                        <option value="Black">Black</option>
+                                        <option value="Green">Green</option>
+                                        <option value="Light Blue">Light Blue</option>
+                                    </select>
+                                </div>
+                                <label class="block text-[10px] font-black text-purple-600 uppercase tracking-widest px-1">Select Core Products to Generate</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-purple-50/50 p-4 rounded-3xl border border-purple-100">
+                                    <% if (typeof coreProducts !== 'undefined' && coreProducts.length > 0) { %>
+                                        <% coreProducts.forEach(product => { %>
+                                            <label class="flex items-center gap-3 p-3 bg-white rounded-2xl border border-purple-100/50 cursor-pointer hover:shadow-md transition-all group">
+                                                <input type="checkbox" name="coreProductIds" value="<%= product._id %>" class="w-5 h-5 rounded-lg border-purple-200 text-purple-600 focus:ring-purple-500">
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs font-black text-gray-900 group-hover:text-purple-600 uppercase transition-colors"><%= product.productName %></span>
+                                                    <span class="text-[9px] font-bold text-gray-400 uppercase"><%= product.packaging %> N/B</span>
+                                                </div>
+                                            </label>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p class="col-span-2 text-[10px] font-bold text-gray-400 uppercase text-center py-4">No template products found</p>
+                                    <% } %>
+                                </div>
                             </div>
 
                             <div class="space-y-2">
@@ -1433,6 +1463,22 @@
                             modal.classList.remove('hidden');
                             modal.classList.add('flex');
                             document.body.style.overflow = 'hidden';
+                            // Reset core products section
+                            const typeSelect = modal.querySelector('select[name="customerType"]');
+                            if (typeSelect) toggleCoreProducts(typeSelect.value);
+                        }
+                    }
+
+                    function toggleCoreProducts(type) {
+                        const section = document.getElementById('coreProductsSection');
+                        if (section) {
+                            if (type === 'Branded') {
+                                section.classList.remove('hidden');
+                            } else {
+                                section.classList.add('hidden');
+                                // Uncheck all if switched back to Regular
+                                section.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                            }
                         }
                     }
 

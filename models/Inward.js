@@ -65,18 +65,6 @@ const inwardSchema = new mongoose.Schema({
         enum: ['indapur', 'shirapur'],
         required: true,
         default: 'indapur'
-    },
-    rejectedQuantity: {
-        type: Number,
-        default: 0
-    },
-    rejectedInwardQty: {
-        type: Number,
-        default: 0
-    },
-    rejectionReason: {
-        type: String,
-        trim: true
     }
 }, {
     timestamps: true

@@ -473,7 +473,8 @@ function setupAutocomplete(options) {
         hiddenInput,
         url,
         formatResult,
-        onSelect
+        onSelect,
+        emptyHtml
     } = options;
 
     if (!input) {
@@ -522,7 +523,7 @@ function setupAutocomplete(options) {
                     }
 
                     if (items.length === 0) {
-                        suggestions.innerHTML = '<div class="px-6 py-4 text-sm text-gray-400 font-bold">No results found</div>';
+                        suggestions.innerHTML = emptyHtml || '<div class="px-6 py-4 text-sm text-gray-400 font-bold">No results found</div>';
                     } else {
                         suggestions.innerHTML = '';
                         items.forEach(item => {
