@@ -55,7 +55,7 @@
             <div class="mb-4 print:mb-8">
                 <div class="space-y-4">
                     <!-- Production -->
-                    <section data-tab-content="production" class="tab-content glass-card overflow-hidden flex flex-col print:!flex">
+                    <section data-tab-content="production" class="tab-content glass-card overflow-hidden flex flex-col">
                         <div class="px-6 py-4 bg-indigo-50/30 border-b border-indigo-100">
                             <h3 class="text-xs font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="factory" class="w-4 h-4"></i>
@@ -63,27 +63,27 @@
                             </h3>
                         </div>
                         <div class="flex-grow">
-                            <table class="w-full text-left">
+                            <table class="w-full text-left border-collapse">
                                 <thead class="bg-gray-50/50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Product Name</th>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Shift</th>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Quantity</th>
+                                    <tr class="border-t border-b border-dashed border-gray-300">
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest border-r border-dashed border-gray-300 border-l">Product Name</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-r border-dashed border-gray-300">Shift</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right border-r border-dashed border-gray-300">Quantity</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-50">
+                                <tbody class="divide-y-0">
                                     <% if (data.production.length === 0) { %>
-                                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No production activity recorded for today</td></tr>
+                                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs border-x border-b border-dashed border-gray-300">No production activity recorded for today</td></tr>
                                     <% } else { %>
                                         <% data.production.forEach(rec => { %>
-                                            <tr class="hover:bg-gray-50/30 transition-colors">
-                                                <td class="px-6 py-3">
+                                            <tr class="hover:bg-gray-50/30 transition-colors border-b border-dashed border-gray-300">
+                                                <td class="px-6 py-3 border-r border-dashed border-gray-300 border-l">
                                                     <div class="text-sm font-black text-gray-800 uppercase leading-tight"><%= rec.productName %></div>
                                                 </td>
-                                                <td class="px-6 py-3 text-center">
+                                                <td class="px-6 py-3 text-center border-r border-dashed border-gray-300">
                                                     <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md text-[9px] font-bold uppercase">Shift <%= rec.shift %></span>
                                                 </td>
-                                                <td class="px-6 py-3 text-sm font-black text-indigo-600 text-right tabular-nums"><%= rec.quantity.toLocaleString() %> Boxes</td>
+                                                <td class="px-6 py-3 text-sm font-black text-indigo-600 text-right tabular-nums border-r border-dashed border-gray-300"><%= rec.quantity.toLocaleString() %> Boxes</td>
                                             </tr>
                                         <% }) %>
                                     <% } %>
@@ -93,33 +93,33 @@
                     </section>
 
                     <!-- Dispatches -->
-                    <section data-tab-content="dispatches" class="tab-content hidden glass-card overflow-hidden flex flex-col print:!flex">
+                    <section data-tab-content="dispatches" class="tab-content hidden glass-card overflow-hidden flex flex-col">
                         <div class="px-6 py-4 bg-purple-50/30 border-b border-purple-100 flex justify-between items-center">
                             <h3 class="text-xs font-black text-purple-900 uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="truck" class="w-4 h-4"></i>
                                 <%= factory %> Factory : Dispatch Details
                             </h3>
-                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[9px] font-black uppercase tracking-tighter">Outward</span>
                         </div>
                         <div class="flex-grow">
-                            <table class="w-full text-left">
+                            <table class="w-full text-left border-collapse">
                                 <thead class="bg-gray-50/50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Receiver / Customer</th>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Products & Quantities</th>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Total Boxes</th>
+                                    <tr class="border-t border-b border-dashed border-gray-300">
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest border-r border-dashed border-gray-300 border-l">Customer</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest border-r border-dashed border-gray-300">Products & Quantities</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right border-r border-dashed border-gray-300">Total Boxes</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-r border-dashed border-gray-300">DC</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-50">
+                                <tbody class="">
                                     <% if (data.dispatches.length === 0) { %>
-                                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No dispatches recorded for today</td></tr>
+                                        <tr><td colspan="4" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No dispatches recorded for today</td></tr>
                                     <% } else { %>
                                         <% data.dispatches.forEach(group => { %>
-                                            <tr class="hover:bg-gray-50/30 transition-colors">
-                                                <td class="px-6 py-4 align-top">
+                                            <tr class="hover:bg-gray-50/30 transition-colors border-b border-dashed border-gray-300">
+                                                <td class="px-6 py-4 align-top border-r border-dashed border-gray-300 border-l">
                                                     <div class="text-sm font-black text-gray-800 uppercase leading-tight"><%= group.receiverName %></div>
                                                 </td>
-                                                <td class="px-6 py-4">
+                                                <td class="px-6 py-4 border-r border-dashed border-gray-300">
                                                     <div class="space-y-2">
                                                         <% if (group.products) { %>
                                                             <% group.products.forEach(p => { %>
@@ -132,20 +132,24 @@
                                                                     </div>
                                                                     <div class="flex items-center gap-3">
                                                                         <span class="text-[11px] font-black text-purple-600 tabular-nums"><%= p.quantity.toLocaleString() %> Boxes</span>
-                                                                        <% if (p.id) { %>
-                                                                            <a href="/headoffice/challan/<%= p.id %>" target="_blank" class="p-1.5 bg-white border border-gray-200 rounded-md text-gray-400 hover:text-emerald-600 hover:border-emerald-200 transition-all group/print" title="Print Challan">
-                                                                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                                                                            </a>
-                                                                        <% } %>
                                                                     </div>
                                                                 </div>
                                                             <% }) %>
                                                         <% } %>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4 text-right align-top">
+                                                <td class="px-6 py-4 text-right align-top border-r border-dashed border-gray-300">
                                                     <div class="text-lg font-black text-purple-700 tabular-nums"><%= group.totalBoxes.toLocaleString() %></div>
-                                                    <div class="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Net Boxes</div>
+                                                    <div class="text-[8px] font-black text-gray-400 uppercase tracking-tighter mb-3">Net Boxes</div>
+                                                </td>
+                                                <td class="px-6 py-4 text-center align-top border-r border-dashed border-gray-300">
+                                                    <a href="/headoffice/challan/customer?receiverName=<%= encodeURIComponent(group.receiverName) %>&date=<%= isoDate %>&factory=<%= factory %>" 
+                                                       target="_blank" 
+                                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg transition-all group/print text-xs font-bold shadow-sm"
+                                                       title="Print Full Customer DC">
+                                                        <i data-lucide="printer" class="w-3.5 h-3.5 group-hover/print:scale-110 transition-transform"></i>
+                                                        Print DC
+                                                    </a>
                                                 </td>
                                             </tr>
                                         <% }) %>
@@ -156,7 +160,7 @@
                     </section>
 
                     <!-- Material Inwards -->
-                    <section data-tab-content="inwards" class="tab-content hidden glass-card overflow-hidden flex flex-col print:!flex">
+                    <section data-tab-content="inwards" class="tab-content hidden glass-card overflow-hidden flex flex-col">
                         <div class="px-6 py-4 bg-emerald-50/30 border-b border-emerald-100 flex justify-between items-center">
                             <h3 class="text-xs font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2">
                                 <i data-lucide="download" class="w-4 h-4"></i>
@@ -165,34 +169,34 @@
                             <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-black uppercase tracking-tighter">Inward</span>
                         </div>
                         <div class="flex-grow">
-                            <table class="w-full text-left">
+                            <table class="w-full text-left border-collapse">
                                 <thead class="bg-gray-50/50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Material / Product</th>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Supplier</th>
-                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Quantity</th>
+                                    <tr class="border-t border-b border-dashed border-gray-300">
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest border-r border-dashed border-gray-300 border-l">Material / Product</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-r border-dashed border-gray-300">Supplier</th>
+                                        <th class="px-6 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right border-r border-dashed border-gray-300">Quantity</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-50">
+                                <tbody class="divide-y-0">
                                     <% if (data.inwards.length === 0) { %>
-                                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs">No inwards recorded for today</td></tr>
+                                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 font-bold italic text-xs border-x border-b border-dashed border-gray-300">No inwards recorded for today</td></tr>
                                     <% } else { %>
                                         <% const categories = Object.keys(data.inwardsByCategory || {}); %>
                                         <% categories.forEach(category => { %>
                                             <tr>
-                                                <td colspan="3" class="px-6 py-2 bg-emerald-50/60 border-y border-emerald-100">
+                                                <td colspan="3" class="px-6 py-2 bg-emerald-50/60 border-y border-dashed border-emerald-200 border-x">
                                                     <span class="text-[9px] font-black text-emerald-700 uppercase tracking-[0.2em]"><%= category %></span>
                                                 </td>
                                             </tr>
                                             <% data.inwardsByCategory[category].forEach(inw => { %>
-                                                <tr class="hover:bg-gray-50/30 transition-colors">
-                                                    <td class="px-6 py-3">
+                                                <tr class="hover:bg-gray-50/30 transition-colors border-b border-dashed border-gray-300">
+                                                    <td class="px-6 py-3 border-r border-dashed border-gray-300 border-l">
                                                         <div class="text-sm font-black text-gray-800 uppercase leading-tight"><%= inw.productName %></div>
                                                     </td>
-                                                    <td class="px-6 py-3 text-center">
+                                                    <td class="px-6 py-3 text-center border-r border-dashed border-gray-300">
                                                         <div class="text-[10px] font-bold text-gray-500 uppercase truncate max-w-[150px] mx-auto"><%= inw.supplierName %></div>
                                                     </td>
-                                                    <td class="px-6 py-3 text-sm font-black text-emerald-600 text-right tabular-nums">
+                                                    <td class="px-6 py-3 text-sm font-black text-emerald-600 text-right tabular-nums border-r border-dashed border-gray-300">
                                                         <% 
                                                             const isPreform = inw.productName.toLowerCase().includes('preform');
                                                             let displayQty = inw.quantity;

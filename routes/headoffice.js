@@ -20,6 +20,7 @@ router.post('/suppliers/create', headofficeController.createSupplier);
 router.post('/customers/create', headofficeController.createCustomer);
 router.post('/mrp/calculate', headofficeController.calculateMRP);
 router.post('/mrp/assign', headofficeController.assignProductionPlan);
+router.get('/challan/customer', headofficeController.renderCustomerChallan);
 router.get('/challan/:dispatchId', headofficeController.renderChallan);
 
 module.exports = router;

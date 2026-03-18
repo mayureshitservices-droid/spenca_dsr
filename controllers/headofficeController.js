@@ -692,6 +692,80 @@ const renderChallan = async (req, res) => {
     }
 };
 
+const renderCustomerChallan = async (req, res) => {
+    try {
+        const { receiverName, date, factory } = req.query;
+        const Dispatch = require('../models/Dispatch');
+        const Customer = require('../models/Customer');
+
+        if (!receiverName || !date) {
+            return res.status(400).send('Receiver Name and Date are required');
+        }
+
+        // Parse local date boundaries matching reportService.js logic
+        const [yyyy, mm, dd] = date.split('-').map(Number);
+        const targetDate = new Date(yyyy, mm - 1, dd);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        const endTarget = new Date(targetDate);
+        endTarget.setHours(23, 59, 59, 999);
+
+        // Fetch all dispatches for this receiver on this date and factory
+        const query = {
+            receiverName,
+            dispatchDate: { $gte: targetDate, $lte: endTarget }
+        };
+        // Just in case factory isn't passed for some reason, we default to the query
+        if (factory) {
+            query.factory = factory;
+        }
+
+        const dispatches = await Dispatch.find(query).populate('productId');
+
+        if (!dispatches || dispatches.length === 0) {
+            return res.status(404).send('No dispatches found for this customer on the selected date');
+        }
+
+        // Fetch customer details
+        const customer = await Customer.findOne({ customerName: { $regex: new RegExp(`^${receiverName}$`, 'i') } });
+
+        // Aggregate data for the template
+        // We'll take top-level header fields from the first dispatch (DC No, Date, Vehicle, Driver)
+        const firstDispatch = dispatches[0];
+
+        const aggregatedProducts = dispatches.map(d => ({
+            productName: d.productName,
+            batchNo: d.batchNo || '---',
+            quantity: d.quantity,
+            dcNo: d.dcNo // Keep DC No at item level too if they differ
+        }));
+
+        const totalQuantity = dispatches.reduce((sum, d) => sum + d.quantity, 0);
+
+        const dispatchData = {
+            receiverName: receiverName,
+            receiverAddress: customer ? customer.address : '---',
+            receiverGSTIN: customer ? customer.gstNo : '---',
+            dcNo: firstDispatch.dcNo, // Using first DC No for header
+            dispatchDate: firstDispatch.dispatchDate,
+            driverName: firstDispatch.driverName,
+            driverMobileNo: firstDispatch.driverMobileNo,
+            vehicleNo: firstDispatch.vehicleNo,
+            products: aggregatedProducts,
+            totalQuantity: totalQuantity
+        };
+
+        res.render('factoryIncharge/delivery-challan', {
+            dispatch: dispatchData,
+            user: { name: req.session.userName },
+            userRole: req.session.userRole
+        });
+    } catch (error) {
+        console.error('Render Customer Challan error:', error);
+        res.status(500).send('Server error');
+    }
+};
+
 module.exports = {
     getDashboard,
     getIMS,
@@ -707,5 +781,6 @@ module.exports = {
     getProductionHistory,
     calculateMRP,
     assignProductionPlan,
-    renderChallan
+    renderChallan,
+    renderCustomerChallan
 };
