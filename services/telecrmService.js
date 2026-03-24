@@ -188,56 +188,6 @@ const fetchDevicesWithStats = async () => {
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60000);
         const status = device.lastActive > fiveMinutesAgo ? 'online' : 'offline';
 
-        const logs = await CallLog.find({ deviceId: device.deviceId })
-            .sort({ timestamp: -1 })
-            .limit(50);
-
-        const history = await Promise.all(logs.map(async (log) => {
-            let customerName = log.customerName;
-            let outcome = log.outcome;
-            let reminder = log.followUpDate;
-            let totalBoxes = 0;
-            let orderDetails = log.productQuantities && Object.keys(log.productQuantities).length > 0
-                ? Object.entries(log.productQuantities).map(([p, q]) => {
-                    const qty = parseInt(q) || 0;
-                    totalBoxes += qty;
-                    return `${p} (x${qty})`;
-                }).join(', ')
-                : null;
-            let distributor = log.distributor;
-
-            if (!outcome || outcome === 'No Interaction') {
-                const latestOrder = await Order.findOne({ mobileNo: log.phoneNumber }).sort({ createdAt: -1 });
-                if (latestOrder) {
-                    customerName = customerName || latestOrder.customerName;
-                    outcome = outcome === 'No Interaction' ? latestOrder.orderStatus : outcome;
-                    reminder = reminder || latestOrder.tentativeRepeatDate;
-                    if (!orderDetails && latestOrder.products) {
-                        orderDetails = latestOrder.products.map(p => {
-                            const qty = parseInt(p.quantity) || 0;
-                            totalBoxes += qty;
-                            return `${p.productName} (x${qty})`;
-                        }).join(', ');
-                    }
-                }
-            }
-
-            return {
-                timestamp: log.timestamp || log.createdAt,
-                phoneNumber: log.phoneNumber || 'Unknown',
-                callStatus: log.callStatus || 'Unknown',
-                duration: formatDuration(log.duration),
-                customerName: customerName || 'New Customer',
-                outcome: outcome || 'No Interaction',
-                totalBoxes,
-                reminder: reminder || null,
-                remarks: log.remarks || '',
-                orderDetails: orderDetails || 'N/A',
-                distributor: distributor || 'Main Branch',
-                recordingUrl: log.recordingUrl
-            };
-        }));
-
         return {
             id: device.deviceId,
             name: device.deviceName,
@@ -249,7 +199,7 @@ const fetchDevicesWithStats = async () => {
                 today: todayStats,
                 month: monthStats
             },
-            history
+            history: [] // History is now fetched dynamically on detail view
         };
     }));
 };
@@ -323,11 +273,65 @@ const createCampaign = async (data, fileBuffer) => {
     return campaign;
 };
 
+/**
+ * Enrich call logs with customer and order data
+ * @param {Array} logs - Array of CallLog documents
+ * @returns {Promise<Array>} - Array of enriched log objects
+ */
+const enrichCallLogs = async (logs) => {
+    return await Promise.all(logs.map(async (log) => {
+        let customerName = log.customerName;
+        let outcome = log.outcome;
+        let reminder = log.followUpDate;
+        let totalBoxes = 0;
+        let orderDetails = log.productQuantities && Object.keys(log.productQuantities).length > 0
+            ? Object.entries(log.productQuantities).map(([p, q]) => {
+                const qty = parseInt(q) || 0;
+                totalBoxes += qty;
+                return `${p} (x${qty})`;
+            }).join(', ')
+            : null;
+        let distributor = log.distributor;
+
+        if (!outcome || outcome === 'No Interaction') {
+            const latestOrder = await Order.findOne({ mobileNo: log.phoneNumber }).sort({ createdAt: -1 });
+            if (latestOrder) {
+                customerName = customerName || latestOrder.customerName;
+                outcome = outcome === 'No Interaction' ? latestOrder.orderStatus : outcome;
+                reminder = reminder || latestOrder.tentativeRepeatDate;
+                if (!orderDetails && latestOrder.products) {
+                    orderDetails = latestOrder.products.map(p => {
+                        const qty = parseInt(p.quantity) || 0;
+                        totalBoxes += qty;
+                        return `${p.productName} (x${qty})`;
+                    }).join(', ');
+                }
+            }
+        }
+
+        return {
+            timestamp: log.timestamp || log.createdAt,
+            phoneNumber: log.phoneNumber || 'Unknown',
+            callStatus: log.callStatus || 'Unknown',
+            duration: formatDuration(log.duration),
+            customerName: customerName || '-',
+            outcome: outcome || 'No Interaction',
+            totalBoxes,
+            reminder: reminder || null,
+            remarks: log.remarks || '',
+            orderDetails: orderDetails || 'N/A',
+            distributor: distributor || '-',
+            recordingUrl: log.recordingUrl
+        };
+    }));
+};
+
 module.exports = {
     formatDuration,
     fetchDevicesWithStats,
     syncCallLog,
     syncCallOutcome,
     getCampaignsForDevice,
-    createCampaign
+    createCampaign,
+    enrichCallLogs
 };

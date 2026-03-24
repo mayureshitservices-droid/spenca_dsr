@@ -46,4 +46,7 @@ router.patch('/device/:deviceId', isHeadOffice, telecrmController.updateTelecall
 // Get all devices with stats (for Head Office dashboard)
 router.get('/devices', isHeadOffice, telecrmController.getDevices);
 
+// Get paginated logs for a specific device (for Head Office dashboard)
+router.get('/device/:deviceId/logs', isHeadOffice, telecrmController.getDeviceLogs);
+
 module.exports = router;

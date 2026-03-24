@@ -290,8 +290,50 @@
 
                     let currentDeviceId = null;
                     let currentPage = 1;
-                    const itemsPerPage = 10;
-                    let filteredHistory = [];
+                    let totalPages = 1;
+                    const itemsPerPage = 20;
+                    let isFetching = false;
+
+                    async function fetchLogs(page = 1) {
+                        if (!currentDeviceId || isFetching) return;
+                        
+                        isFetching = true;
+                        currentPage = page;
+                        
+                        const tbody = document.getElementById('callHistoryTableBody');
+                        if (tbody) {
+                            tbody.innerHTML = '<tr><td colspan="11" class="px-6 py-12 text-center text-gray-400 small-caps tracking-widest font-black uppercase text-[10px]"><div class="flex flex-col items-center justify-center gap-3"><i data-lucide="loader-2" class="w-6 h-6 animate-spin text-primary-500"></i> Fetching Records...</div></td></tr>';
+                            if (typeof lucide !== 'undefined') lucide.createIcons();
+                        }
+
+                        const search = document.getElementById('tableSearch').value;
+                        const startDate = document.getElementById('rangeStartDate').value;
+                        const endDate = document.getElementById('rangeEndDate').value;
+
+                        const url = new URL(`/api/telecrm/device/${currentDeviceId}/logs`, window.location.origin);
+                        url.searchParams.append('page', page);
+                        url.searchParams.append('limit', itemsPerPage);
+                        if (search) url.searchParams.append('search', search);
+                        if (startDate) url.searchParams.append('startDate', startDate);
+                        if (endDate) url.searchParams.append('endDate', endDate);
+
+                        try {
+                            const response = await fetch(url);
+                            const data = await response.json();
+                            
+                            if (data.success) {
+                                totalPages = data.pagination.totalPages;
+                                renderCallHistoryTable(data.logs, data.pagination);
+                            } else {
+                                throw new Error(data.error || 'Failed to fetch logs');
+                            }
+                        } catch (err) {
+                            console.error('Fetch logs error:', err);
+                            showClientError('Error loading logs: ' + err.message);
+                        } finally {
+                            isFetching = false;
+                        }
+                    }
 
                     function showDeviceDetails(deviceId) {
                         currentDeviceId = deviceId;
@@ -304,13 +346,11 @@
                         const detailContent = document.getElementById('detailContent');
 
                         detailTitle.innerText = device.name;
-                        currentPage = 1;
-                        filteredHistory = [...device.history];
-
+                        
                         detailContent.innerHTML = `
                             <!-- Pagination Controls (Top) -->
                             <div id="paginationControls_Top" class="mb-6 flex items-center justify-between border-b border-gray-100 pb-6">
-                                <p id="paginationInfo_Top" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"></p>
+                                <p id="paginationInfo_Top" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Loading...</p>
                                 <div class="flex items-center gap-2">
                                     <button id="prevPageBtn_Top" 
                                         class="p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:group-hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all relative z-[10002]">
@@ -324,20 +364,20 @@
                             </div>
 
                             <div class="overflow-x-auto overflow-y-auto -mx-8 max-h-[500px] border-b border-gray-100 mb-6 relative">
-                                <table class="w-full text-left border-collapse min-w-[1400px]">
+                                <table class="w-full text-left border-collapse min-w-[1600px]">
                                     <thead class="sticky top-0 z-10">
                                         <tr class="bg-gray-50 border-y border-gray-100 shadow-sm">
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Time & Duration</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Mobile Number</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Call Status</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Outcome</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Boxes</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Reminder Date</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer Name</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Details</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Distributor</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Notes & Remarks</th>
-                                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Recording</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Time & Duration</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Mobile Number</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Call Status</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Outcome</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Boxes</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Reminder Date</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer Name</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order Details</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Distributor</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Notes & Remarks</th>
+                                            <th class="px-3 py-3 text-[10px] font-black text-gray-400 uppercase tracking-widest">Recording</th>
                                         </tr>
                                     </thead>
                                     <tbody id="callHistoryTableBody" class="divide-y divide-gray-50">
@@ -349,7 +389,7 @@
                             <!-- STICKY BOTTOM BAR (Polished) -->
                             <div id="paginationControls_Bottom" 
                                 class="sticky bottom-[-24px] left-0 right-0 z-[10001] p-4 bg-white/95 backdrop-blur-sm border-t border-gray-100 flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.05)] rounded-t-2xl">
-                                <p id="paginationInfo_Bottom" class="text-[10px] font-black text-gray-400 uppercase tracking-widest"></p>
+                                <p id="paginationInfo_Bottom" class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Loading...</p>
                                 <div class="flex items-center gap-3">
                                     <button id="prevPageBtn_Bottom" 
                                         class="p-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-20 flex items-center justify-center">
@@ -368,27 +408,19 @@
                         detailView.classList.remove('hidden');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                        // Initial render of the table
-                        renderCallHistoryTable();
+                        // Initial fetch of logs
+                        fetchLogs(1);
 
                         // Refresh icons
                         if (typeof lucide !== 'undefined') lucide.createIcons();
                     }
 
-                    function renderCallHistoryTable() {
+                    function renderCallHistoryTable(logs, pagination) {
                         const tbody = document.getElementById('callHistoryTableBody');
                         if (!tbody) return;
 
-                        const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
-                        if (currentPage < 1) currentPage = 1;
-                        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-
-                        const start = (currentPage - 1) * itemsPerPage;
-                        const end = start + itemsPerPage;
-                        const pageData = filteredHistory.slice(start, end);
-
-                        if (pageData.length === 0) {
-                            tbody.innerHTML = '<tr><td colspan="11" class="px-6 py-12 text-center text-gray-400">No data</td></tr>';
+                        if (!logs || logs.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="11" class="px-6 py-12 text-center text-gray-400">No data found matching your filters</td></tr>';
                             const pcTop = document.getElementById('paginationControls_Top');
                             const pcBot = document.getElementById('paginationControls_Bottom');
                             if (pcTop) pcTop.classList.add('hidden');
@@ -396,19 +428,13 @@
                             return;
                         }
 
-                        // Update standard controls
+                        // Update standard controls visibility
                         const pagContTop = document.getElementById('paginationControls_Top');
                         const pagContBot = document.getElementById('paginationControls_Bottom');
-                        if (pagContTop) {
-                            if (totalPages <= 1) pagContTop.classList.add('hidden');
-                            else pagContTop.classList.remove('hidden');
-                        }
-                        if (pagContBot) {
-                            if (totalPages <= 1) pagContBot.classList.add('hidden');
-                            else pagContBot.classList.remove('hidden');
-                        }
+                        if (pagContTop) pagContTop.classList.remove('hidden');
+                        if (pagContBot) pagContBot.classList.remove('hidden');
 
-                        tbody.innerHTML = pageData.map(log => {
+                        tbody.innerHTML = logs.map(log => {
                             try {
                                 const outcome = log.outcome || 'No Interaction';
                                 const displayOutcome = (outcome === 'No Interaction' || !outcome) ? '-' : outcome;
@@ -431,46 +457,46 @@
 
                                 return `
                                 <tr class="hover:bg-gray-50/50 transition-colors">
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-3">
                                         <div class="flex flex-col">
                                             <p class="text-[11px] text-gray-400 font-bold mb-0.5 uppercase tracking-tighter">${displayDate}</p>
                                             <p class="text-sm text-gray-900">${displayTime}</p>
-                                            <p class="text-[10px] text-gray-500 font-mono tracking-tighter">${log.duration || 0}s</p>
+                                            <p class="text-[10px] text-gray-500 font-mono tracking-tighter">${log.duration || '0s'}</p>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 font-mono text-xs text-gray-600 font-bold">${log.phoneNumber || 'N/A'}</td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-3 font-mono text-xs text-gray-600 font-bold">${log.phoneNumber || 'N/A'}</td>
+                                    <td class="px-3 py-3">
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest 
                                             ${log.callStatus === 'answered' || log.callStatus === 'outgoing' ? 'bg-emerald-100 text-emerald-700' :
                                         log.callStatus === 'missed' || log.callStatus === 'rejected' || log.callStatus === 'incoming' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">
                                             ${log.callStatus || 'Unknown'}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-3">
                                         <p class="text-xs font-bold ${outcome === 'Ordered' ? 'text-emerald-600' : outcome === 'Visited' ? 'text-amber-600' : 'text-gray-400'}">
                                             ${displayOutcome}
                                         </p>
                                     </td>
-                                    <td class="px-6 py-4 font-mono text-xs font-bold text-gray-900">${log.totalBoxes || 0}</td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-3 font-mono text-xs font-bold text-gray-900">${log.totalBoxes || 0}</td>
+                                    <td class="px-3 py-3">
                                         ${reminderDate !== '-' ? `<p class="text-xs text-indigo-600 font-bold flex items-center gap-1">
                                             <i data-lucide="calendar" class="w-3 h-3"></i>
                                             ${reminderDate}
                                         </p>` : '-'}
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-bold text-gray-900">${log.customerName || 'New Customer'}</td>
-                                    <td class="px-6 py-4 max-w-[220px]">
-                                        <p class="text-[10px] text-gray-600 leading-tight font-medium line-clamp-2" title="${String(log.orderDetails || '').replace(/"/g, '&quot;')}">
+                                    <td class="px-3 py-3 text-sm font-bold text-gray-900">${log.customerName || '-'}</td>
+                                    <td class="px-3 py-3 max-w-[600px]">
+                                        <p class="text-[10px] text-gray-600 leading-tight font-medium" title="${String(log.orderDetails || '').replace(/"/g, '&quot;')}">
                                             ${log.orderDetails && log.orderDetails !== 'N/A' ? log.orderDetails : '-'}
                                         </p>
                                     </td>
-                                    <td class="px-6 py-4 text-xs font-bold text-indigo-600">${log.distributor || '-'}</td>
-                                    <td class="px-6 py-4 max-w-[200px]">
-                                        <p class="text-[10px] text-gray-500 leading-tight italic line-clamp-2" title="${String(log.remarks || '').replace(/"/g, '&quot;')}">
+                                    <td class="px-3 py-3 text-xs font-bold text-indigo-600">${log.distributor || '-'}</td>
+                                    <td class="px-3 py-3 max-w-[400px]">
+                                        <p class="text-[10px] text-gray-500 leading-tight italic" title="${String(log.remarks || '').replace(/"/g, '&quot;')}">
                                             ${log.remarks || '-'}
                                         </p>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-3">
                                         ${log.recordingUrl ? `
                                             <a href="${log.recordingUrl}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-wider hover:bg-indigo-100 transition-all">
                                                 Play
@@ -490,12 +516,19 @@
                             const pPrev = document.getElementById(`prevPageBtn_${suffix}`);
                             const pNext = document.getElementById(`nextPageBtn_${suffix}`);
 
-                            if (pInfo) pInfo.innerText = `Showing ${start + 1}-${Math.min(end, filteredHistory.length)} of ${filteredHistory.length}`;
-                            // FORCE ENABLE FOR TEST
-                            if (pPrev) pPrev.disabled = false;
-                            if (pNext) pNext.disabled = false;
-                            if (pPrev) pPrev.style.opacity = (currentPage === 1) ? '0.3' : '1';
-                            if (pNext) pNext.style.opacity = (currentPage === totalPages) ? '0.3' : '1';
+                            const start = (pagination.currentPage - 1) * pagination.limit + 1;
+                            const end = Math.min(pagination.currentPage * pagination.limit, pagination.totalCount);
+                            
+                            if (pInfo) pInfo.innerText = `Showing ${start}-${end} of ${pagination.totalCount}`;
+                            
+                            if (pPrev) {
+                                pPrev.disabled = (currentPage === 1);
+                                pPrev.style.opacity = (currentPage === 1) ? '0.3' : '1';
+                            }
+                            if (pNext) {
+                                pNext.disabled = (currentPage === totalPages);
+                                pNext.style.opacity = (currentPage === totalPages) ? '0.3' : '1';
+                            }
                         };
 
                         updatePagSet('Top');
@@ -505,23 +538,22 @@
                     }
 
                     window.telecrmChangePage = function(direction) {
-                        const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
-                        let newPage = currentPage;
+                        if (isFetching) return;
 
+                        let newPage = currentPage;
                         if (direction === 'next') newPage++;
                         else if (direction === 'prev') newPage--;
                         else newPage = parseInt(direction);
 
                         if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
                         
-                        currentPage = newPage;
-                        renderCallHistoryTable();
+                        fetchLogs(newPage);
                         
                         const detailView = document.getElementById('deviceDetails');
-                        if (detailView) detailView.scrollIntoView({ block: 'start' });
+                        if (detailView) detailView.scrollIntoView({ block: 'start', behavior: 'smooth' });
                     };
 
-                    // NUCLEAR OPTION: Global delegated event listener
+                    // Global delegated event listener for pagination buttons
                     document.addEventListener('click', function(e) {
                         const target = e.target;
                         const btn = target.closest('#prevPageBtn_Top') || target.closest('#nextPageBtn_Top') || 
@@ -536,34 +568,7 @@
                     });
 
                     function applyFilters() {
-                        const search = document.getElementById('tableSearch').value.toLowerCase();
-                        const startDate = document.getElementById('rangeStartDate').value;
-                        const endDate = document.getElementById('rangeEndDate').value;
-
-                        const device = devices.find(d => d.id === currentDeviceId);
-                        if (!device) return;
-
-                        filteredHistory = device.history.filter(log => {
-                            const matchesSearch = !search ||
-                                (log.customerName && log.customerName.toLowerCase().includes(search)) ||
-                                (log.phoneNumber && log.phoneNumber.includes(search)) ||
-                                (log.outcome && log.outcome.toLowerCase().includes(search)) ||
-                                (log.callStatus && log.callStatus.toLowerCase().includes(search)) ||
-                                (log.distributor && log.distributor.toLowerCase().includes(search)) ||
-                                (log.remarks && log.remarks.toLowerCase().includes(search)) ||
-                                (log.orderDetails && log.orderDetails.toLowerCase().includes(search));
-
-                            let matchesDate = true;
-                            if (startDate && endDate) {
-                                const logDate = new Date(log.timestamp).toISOString().split('T')[0];
-                                matchesDate = logDate >= startDate && logDate <= endDate;
-                            }
-
-                            return matchesSearch && matchesDate;
-                        });
-
-                        currentPage = 1; // Reset to page 1 on filter
-                        renderCallHistoryTable();
+                        fetchLogs(1); // Reset to page 1 on filter
                     };
 
                     window.clearFilters = function() {
@@ -655,4 +660,4 @@
                         if (startEl) startEl.value = today;
                         if (endEl) endEl.value = today;
                     });
-                </script>
+                </script>

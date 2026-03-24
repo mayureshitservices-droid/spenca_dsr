@@ -331,6 +331,65 @@ const syncCampaignStats = async (req, res) => {
     }
 };
 
+// GET /api/telecrm/device/:deviceId/logs
+const getDeviceLogs = async (req, res) => {
+    try {
+        const { deviceId } = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const search = req.query.search || '';
+        const startDate = req.query.startDate;
+        const endDate = req.query.endDate;
+
+        const query = { deviceId };
+
+        // Search Filter
+        if (search) {
+            query.$or = [
+                { customerName: { $regex: search, $options: 'i' } },
+                { phoneNumber: { $regex: search, $options: 'i' } },
+                { outcome: { $regex: search, $options: 'i' } },
+                { callStatus: { $regex: search, $options: 'i' } },
+                { distributor: { $regex: search, $options: 'i' } },
+                { remarks: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        // Date Range Filter
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            query.timestamp = { $gte: start, $lte: end };
+        }
+
+        const skip = (page - 1) * limit;
+
+        const totalRecords = await CallLog.countDocuments(query);
+        const logs = await CallLog.find(query)
+            .sort({ timestamp: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const enrichedLogs = await telecrmService.enrichCallLogs(logs);
+
+        res.json({
+            success: true,
+            logs: enrichedLogs,
+            pagination: {
+                totalCount: totalRecords,
+                currentPage: page,
+                totalPages: Math.ceil(totalRecords / limit),
+                limit
+            }
+        });
+    } catch (error) {
+        console.error('Get device logs error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch logs' });
+    }
+};
+
 module.exports = {
     registerDevice,
     heartbeat,
@@ -342,5 +401,6 @@ module.exports = {
     createCampaign,
     getCampaignsForAdmin,
     getCampaigns,
-    syncCampaignStats
+    syncCampaignStats,
+    getDeviceLogs
 };
