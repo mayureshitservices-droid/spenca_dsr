@@ -16,8 +16,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Submit call log (requires deviceId + token)
 router.post('/call-log', authenticateDevice, telecrmController.submitCallLog);
 
-// Upload call recording file (requires deviceId + token)
-router.post('/upload-recording', authenticateDevice, upload.single('file'), telecrmController.uploadRecording);
+// Upload call recording file (requires deviceId + token in multipart body or query/headers)
+router.post('/upload-recording', upload.single('recording'), authenticateDevice, telecrmController.uploadRecording);
 
 // Submit call outcome/form (requires deviceId + token)
 router.post('/call-outcome', authenticateDevice, telecrmController.submitCallOutcome);
