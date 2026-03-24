@@ -400,8 +400,10 @@
                                     const match = item.productName.match(/(\d+\.?\d*)\s*gm/i);
                                     if (match) input.dataset.weight = match[1];
                                     input.dataset.type = 'preform';
+                                } else if (isCap) {
+                                    if (badge) badge.classList.remove('hidden');
                                     input.dataset.type = 'cap';
-                                    toggleUnit(id, 'boxes'); 
+                                    toggleUnit(id, 'boxes');
                                 } else {
                                     if (badge) badge.classList.add('hidden');
                                     toggleUnit(id, 'nos');
