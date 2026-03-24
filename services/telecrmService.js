@@ -142,6 +142,18 @@ const fetchDevicesWithStats = async () => {
                     }
                 },
                 {
+                    $addFields: {
+                        // Sum up all values in the productQuantities object
+                        callBoxes: {
+                            $reduce: {
+                                input: { $objectToArray: { $ifNull: ['$productQuantities', {}] } },
+                                initialValue: 0,
+                                in: { $add: ['$$value', { $convert: { input: '$$this.v', to: 'int', onError: 0, onNull: 0 } }] }
+                            }
+                        }
+                    }
+                },
+                {
                     $group: {
                         _id: null,
                         total: { $sum: 1 },
@@ -151,17 +163,19 @@ const fetchDevicesWithStats = async () => {
                         missed: {
                             $sum: { $cond: [{ $in: ['$callStatus', ['missed', 'rejected', 'incoming', 'blocked']] }, 1, 0] }
                         },
-                        duration: { $sum: { $ifNull: ['$duration', 0] } }
+                        duration: { $sum: { $ifNull: ['$duration', 0] } },
+                        boxes: { $sum: '$callBoxes' }
                     }
                 }
             ]);
 
-            const stats = result[0] || { total: 0, answered: 0, missed: 0, duration: 0 };
+            const stats = result[0] || { total: 0, answered: 0, missed: 0, duration: 0, boxes: 0 };
             return {
                 total: stats.total,
                 answered: stats.answered,
                 missed: stats.missed,
-                duration: formatDuration(stats.duration)
+                duration: formatDuration(stats.duration),
+                boxes: stats.boxes || 0
             };
         };
 
@@ -182,8 +196,13 @@ const fetchDevicesWithStats = async () => {
             let customerName = log.customerName;
             let outcome = log.outcome;
             let reminder = log.followUpDate;
+            let totalBoxes = 0;
             let orderDetails = log.productQuantities && Object.keys(log.productQuantities).length > 0
-                ? Object.entries(log.productQuantities).map(([p, q]) => `${p} (x${q})`).join(', ')
+                ? Object.entries(log.productQuantities).map(([p, q]) => {
+                    const qty = parseInt(q) || 0;
+                    totalBoxes += qty;
+                    return `${p} (x${qty})`;
+                }).join(', ')
                 : null;
             let distributor = log.distributor;
 
@@ -193,7 +212,13 @@ const fetchDevicesWithStats = async () => {
                     customerName = customerName || latestOrder.customerName;
                     outcome = outcome === 'No Interaction' ? latestOrder.orderStatus : outcome;
                     reminder = reminder || latestOrder.tentativeRepeatDate;
-                    orderDetails = orderDetails || (latestOrder.products ? latestOrder.products.map(p => `${p.productName} (x${p.quantity})`).join(', ') : 'N/A');
+                    if (!orderDetails && latestOrder.products) {
+                        orderDetails = latestOrder.products.map(p => {
+                            const qty = parseInt(p.quantity) || 0;
+                            totalBoxes += qty;
+                            return `${p.productName} (x${qty})`;
+                        }).join(', ');
+                    }
                 }
             }
 
@@ -204,6 +229,7 @@ const fetchDevicesWithStats = async () => {
                 duration: formatDuration(log.duration),
                 customerName: customerName || 'New Customer',
                 outcome: outcome || 'No Interaction',
+                totalBoxes,
                 reminder: reminder || null,
                 remarks: log.remarks || '',
                 orderDetails: orderDetails || 'N/A',

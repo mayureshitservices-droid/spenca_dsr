@@ -247,6 +247,7 @@ const exportTeleCRM = async (req, res) => {
             { header: 'Call Status', key: 'callStatus', width: 15 },
             { header: 'Outcome', key: 'outcome', width: 15 },
             { header: 'Reminder Date', key: 'reminder', width: 15 },
+            { header: 'Total Boxes', key: 'totalBoxes', width: 12 },
             { header: 'Order Details', key: 'orderDetails', width: 30 },
             { header: 'Notes & Remarks', key: 'remarks', width: 40 }
         ];
@@ -276,8 +277,13 @@ const exportTeleCRM = async (req, res) => {
             let customerName = log.customerName;
             let outcome = log.outcome;
             let reminder = log.followUpDate;
+            let totalBoxes = 0;
             let orderDetails = log.productQuantities && Object.keys(log.productQuantities).length > 0
-                ? Object.entries(log.productQuantities).map(([p, q]) => `${p} (x${q})`).join(', ')
+                ? Object.entries(log.productQuantities).map(([p, q]) => {
+                    const qty = parseInt(q) || 0;
+                    totalBoxes += qty;
+                    return `${p} (x${qty})`;
+                }).join(', ')
                 : null;
             let distributor = log.distributor;
 
@@ -289,7 +295,13 @@ const exportTeleCRM = async (req, res) => {
                     customerName = customerName || latestOrder.customerName;
                     outcome = outcome === 'No Interaction' ? latestOrder.orderStatus : outcome;
                     reminder = reminder || latestOrder.tentativeRepeatDate;
-                    orderDetails = orderDetails || (latestOrder.products ? latestOrder.products.map(p => `${p.productName} (x${p.quantity})`).join(', ') : 'N/A');
+                    if (!orderDetails && latestOrder.products) {
+                        orderDetails = latestOrder.products.map(p => {
+                            const qty = parseInt(p.quantity) || 0;
+                            totalBoxes += qty;
+                            return `${p.productName} (x${qty})`;
+                        }).join(', ');
+                    }
                 }
             }
 
@@ -302,6 +314,7 @@ const exportTeleCRM = async (req, res) => {
                 callStatus: log.callStatus || 'N/A',
                 outcome: outcome || 'No Interaction',
                 reminder: reminder ? new Date(reminder).toLocaleDateString('en-IN') : 'None',
+                totalBoxes: totalBoxes || 0,
                 orderDetails: orderDetails || 'None',
                 remarks: log.remarks || 'No notes'
             });
